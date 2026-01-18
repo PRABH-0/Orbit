@@ -1,0 +1,28 @@
+# ===============================
+# Angular / Node
+# ===============================
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+npm-debug.log*
+
+# ===============================
+# .NET
+# ===============================
+Backend/bin/
+Backend/obj/
+Backend/.vs/
+*.user
+*.suo
+
+# ===============================
+# Environment
+# ===============================
+.env
+.env.local
+
+# ===============================
+# OS
+# ===============================
+.DS_Store
+Thumbs.db
