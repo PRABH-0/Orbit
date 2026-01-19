@@ -1,6 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, Renderer2 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Renderer2, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -8,32 +7,86 @@ import { Renderer2, OnInit } from '@angular/core';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-    constructor(private renderer: Renderer2) {}
-    ngOnInit() {
-    // Add orbit-mode class to body
-    this.renderer.addClass(document.body, 'orbit-mode');
+export class App implements AfterViewInit {
+
+  @ViewChild('grid', { static: true }) grid!: ElementRef<HTMLDivElement>;
+  @ViewChild('viewport', { static: true }) viewport!: ElementRef<HTMLDivElement>;
+
+  private isDragging = false;
+  private startX = 0;
+  private startY = 0;
+  private x = -2500;
+  private y = -2500;
+
+  constructor(private renderer: Renderer2) {}
+
+  ngAfterViewInit() {
+    this.update();
+  }
+
+  @HostListener('mousedown', ['$event'])
+  onMouseDown(e: MouseEvent) {
+    // Only start dragging on the viewport/grid area
+    this.isDragging = true;
+    this.startX = e.clientX - this.x;
+    this.startY = e.clientY - this.y;
     
-    // Create and append background elements
-    const background = this.renderer.createElement('div');
-    this.renderer.addClass(background, 'orbit-background');
-    
-    const gridCanvas = this.renderer.createElement('div');
-    this.renderer.addClass(gridCanvas, 'orbit-grid-canvas');
-    
-    const centerGravity = this.renderer.createElement('div');
-    this.renderer.addClass(centerGravity, 'orbit-center-gravity');
-    
-    const centerGrid = this.renderer.createElement('div');
-    this.renderer.addClass(centerGrid, 'orbit-center-grid');
-    
-    const edgeFade = this.renderer.createElement('div');
-    this.renderer.addClass(edgeFade, 'orbit-edge-fade');
-    
-    this.renderer.appendChild(background, gridCanvas);
-    this.renderer.appendChild(background, centerGravity);
-    this.renderer.appendChild(background, centerGrid);
-    this.renderer.appendChild(background, edgeFade);
-    this.renderer.appendChild(document.body, background);
+    // Add dragging class to viewport
+    this.renderer.addClass(this.viewport.nativeElement, 'dragging');
+  }
+
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(e: MouseEvent) {
+    if (!this.isDragging) return;
+    this.x = e.clientX - this.startX;
+    this.y = e.clientY - this.startY;
+    this.update();
+  }
+
+  @HostListener('mouseup')
+  onMouseUp() {
+    if (this.isDragging) {
+      this.isDragging = false;
+      // Remove dragging class from viewport
+      this.renderer.removeClass(this.viewport.nativeElement, 'dragging');
+    }
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave() {
+    // If mouse leaves the viewport while dragging, stop dragging
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.renderer.removeClass(this.viewport.nativeElement, 'dragging');
+    }
+  }
+
+  /* Touch support */
+  @HostListener('touchstart', ['$event'])
+  onTouchStart(e: TouchEvent) {
+    this.isDragging = true;
+    this.startX = e.touches[0].clientX - this.x;
+    this.startY = e.touches[0].clientY - this.y;
+    this.renderer.addClass(this.viewport.nativeElement, 'dragging');
+  }
+
+  @HostListener('touchmove', ['$event'])
+  onTouchMove(e: TouchEvent) {
+    if (!this.isDragging) return;
+    e.preventDefault(); // Prevent scrolling on mobile
+    this.x = e.touches[0].clientX - this.startX;
+    this.y = e.touches[0].clientY - this.startY;
+    this.update();
+  }
+
+  @HostListener('touchend')
+  onTouchEnd() {
+    this.isDragging = false;
+    this.renderer.removeClass(this.viewport.nativeElement, 'dragging');
+  }
+
+  private update() {
+    this.grid.nativeElement.style.transform =
+      `translate(${this.x}px, ${this.y}px)`;
   }
 }
