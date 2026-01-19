@@ -1,0 +1,17 @@
+.header {
+  height: 50px;
+  width: 100%;
+  background-color: #17181b; /* dark theme */
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.747);
+}
+
+.username {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 500;
+    font-family: 'Open Sans', sans-serif;
+  font-weight: 700; /* Bold */
+}
