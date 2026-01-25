@@ -1,0 +1,23 @@
+<div
+  class="data-node"
+  [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
+>
+
+  <div class="data-header">
+    Wallpapers
+  </div>
+
+  <div class="data-grid">
+    <div
+      class="data-item"
+      *ngFor="let file of items">
+
+      <img
+        [src]="getImagePath(file)"
+        alt="wallpaper"
+      />
+
+    </div>
+  </div>
+
+</div>

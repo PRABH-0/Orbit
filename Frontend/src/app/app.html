@@ -1,39 +1,46 @@
-<app-header/>
+<app-header />
+
 <div class="grid" #grid>
 
-<svg class="edges" width="5000" height="5000">
-  <line
-    *ngFor="let e of getVisibleEdges()"
-    appEdge
-    [x1]="e.x1"
-    [y1]="e.y1"
-    [x2]="e.x2"
-    [y2]="e.y2"
-  ></line>
-</svg>
+  <!-- EDGES -->
+  <svg class="edges" width="5000" height="5000">
+    <line
+      *ngFor="let e of getVisibleEdges()"
+      appEdge
+      [x1]="e.x1"
+      [y1]="e.y1"
+      [x2]="e.x2"
+      [y2]="e.y2">
+    </line>
+  </svg>
 
-  <!-- USER -->
+  <!-- USER NODE -->
   <div
-  class="center-circle"
-  #centerCircle
-  (click)="toggleRoot()"
->
-  <img src="user_c.png" />
-</div>
+    class="center-circle"
+    #centerCircle
+    (click)="toggleRoot()">
+    <img src="user_c.png" />
+  </div>
 
-  <!-- DIRECTORIES -->
+  <!-- DIRECTORY NODES -->
   <ng-container *ngFor="let dir of directories">
     <app-directory
       *ngIf="shouldShow(dir)"
       [name]="dir.name"
       [x]="dir.x"
       [y]="dir.y"
-      [isClickable]="hasChildren(dir)"
-
-      (clicked)="toggleFolder(dir.id)"
-    >
+      (clicked)="onFolderClick(dir)">
     </app-directory>
   </ng-container>
 
+  <!-- DATA NODE (WALLPAPERS) -->
+  <app-model-data
+  *ngIf="selectedFolderId === 'wallpapers' && wallpaperDataNode"
+  [x]="wallpaperDataNode.x"
+  [y]="wallpaperDataNode.y">
+</app-model-data>
+
+
 </div>
-<router-outlet/>
+
+<router-outlet />

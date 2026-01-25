@@ -13,10 +13,8 @@ export class Directory {
   @Input() isClickable = false;
 
   @Output() clicked = new EventEmitter<void>();
-  onClick(){
-    if(this.isClickable){
-      this.clicked.emit();
-    }
-  }
+  onClick() {
+  this.clicked.emit();
+}
 
 }
