@@ -68,9 +68,17 @@ export class App implements AfterViewInit {
   }
 
   toggleFolder(id: string) {
-    const folder = this.directories.find(d => d.id === id);
-    if (folder) folder.isOpen = !folder.isOpen;
+  const folder = this.directories.find(d => d.id === id);
+  if (!folder) return;
+
+  folder.isOpen = !folder.isOpen;
+
+  // 🔒 if closing → close all descendants
+  if (!folder.isOpen) {
+    this.closeAllChildren(folder.id);
   }
+}
+
 
   shouldShow(dir: any): boolean {
   if (dir.parentId === 'root') {
@@ -83,7 +91,14 @@ export class App implements AfterViewInit {
 
 toggleRoot() {
   this.rootOpen = !this.rootOpen;
+
+  if (!this.rootOpen) {
+    for (const d of this.directories) {
+      d.isOpen = false;
+    }
+  }
 }
+
 
   getVisibleEdges() {
     const edges: any[] = [];
@@ -167,7 +182,15 @@ if (parentId === 'root') {
     return edges;
   }
 
-  /* ---------------- DRAG ---------------- */
+  closeAllChildren(parentId: string) {
+  const children = this.directories.filter(d => d.parentId === parentId);
+
+  for (const child of children) {
+    child.isOpen = false;               // close child
+    this.closeAllChildren(child.id);    // close grand-children
+  }
+}
+
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(e: MouseEvent) {
