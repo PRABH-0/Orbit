@@ -58,8 +58,10 @@ export class App implements AfterViewInit {
   { id: 'screenshots', parentId: 'images', name: 'Screenshots', x: 2300, y: 2600, isOpen: false },
 
   // ===== MUSIC CHILDREN =====
-  { id: 'rock', parentId: 'music', name: 'Rock', x: 2500, y: 2300, isOpen: false },
+  { id: 'classic', parentId: 'music', name: 'Classic', x: 2700, y: 2200, isOpen: false },
+  { id: 'rock', parentId: 'music', name: 'Rock', x: 2700, y: 2300, isOpen: false },
   { id: 'classical', parentId: 'music', name: 'Classical', x: 2300, y: 2400, isOpen: false },
+  { id: 'jass', parentId: 'music', name: 'Jass', x: 2300, y: 2300, isOpen: false },
 ];
 
 
@@ -98,89 +100,60 @@ toggleRoot() {
     }
   }
 }
+getVisibleEdges() {
+  const edges: any[] = [];
 
+  const ROOT_X = 2500;
+  const ROOT_Y = 2500;
 
-  getVisibleEdges() {
-    const edges: any[] = [];
+  for (const dir of this.directories) {
 
-    const ROOT_CENTER_X = 2500 ;
-    const ROOT_CENTER_Y = 2500;
+    // ---------- ROOT CHILD ----------
+    if (dir.parentId === 'root') {
+      if (!this.rootOpen) continue;
 
-    // group children by parent
-    const childrenMap = new Map<string, any[]>();
-    for (const d of this.directories) {
-      if (!childrenMap.has(d.parentId)) {
-        childrenMap.set(d.parentId, []);
-      }
-      childrenMap.get(d.parentId)!.push(d);
+      // vertical from root to child
+      edges.push({
+        x1: ROOT_X,
+        y1: ROOT_Y,
+        x2: ROOT_X,
+        y2: dir.y
+      });
+
+      // horizontal to child
+      edges.push({
+        x1: ROOT_X,
+        y1: dir.y,
+        x2: dir.x,
+        y2: dir.y
+      });
+
+      continue;
     }
 
-    for (const [parentId, children] of childrenMap.entries()) {
+    // ---------- NORMAL CHILD ----------
+    const parent = this.directories.find(d => d.id === dir.parentId);
+    if (!parent || !parent.isOpen) continue;
 
-      // ----- ROOT -----
-if (parentId === 'root') {
-
-  // 🔒 DO NOT DRAW ROOT EDGES IF ROOT IS CLOSED
-  if (!this.rootOpen) continue;
-
-  const ys = children.map(c => c.y );
-  const minY = Math.min(...ys);
-  const maxY = Math.max(...ys);
-
-  // root spine
-  edges.push({
-    x1: ROOT_CENTER_X,
-    y1: minY,
-    x2: ROOT_CENTER_X,
-    y2: maxY
-  });
-
-  // branches
-  for (const child of children) {
+    // vertical from parent to child
     edges.push({
-      x1: ROOT_CENTER_X,
-      y1: child.y ,
-      x2: child.x,
-      y2: child.y 
+      x1: parent.x,
+      y1: parent.y,
+      x2: parent.x,
+      y2: dir.y
+    });
+
+    // horizontal to child
+    edges.push({
+      x1: parent.x,
+      y1: dir.y,
+      x2: dir.x,
+      y2: dir.y
     });
   }
 
-  continue;
+  return edges;
 }
-
-
-      // ----- FOLDER -----
-      const parent = this.directories.find(d => d.id === parentId);
-      if (!parent || !parent.isOpen) continue;
-
-      const parentX = parent.x ;
-      const parentY = parent.y ;
-
-      const ys = children.map(c => c.y );
-      const minY = Math.min(...ys);
-      const maxY = Math.max(...ys);
-
-      // folder spine
-      edges.push({
-        x1: parentX,
-        y1: minY,
-        x2: parentX,
-        y2: maxY
-      });
-
-      // branches
-      for (const child of children) {
-        edges.push({
-          x1: parentX,
-          y1: child.y ,
-          x2: child.x,
-          y2: child.y 
-        });
-      }
-    }
-
-    return edges;
-  }
 
   closeAllChildren(parentId: string) {
   const children = this.directories.filter(d => d.parentId === parentId);
