@@ -54,12 +54,12 @@ export class App implements AfterViewInit {
   { id: 'project-docs', parentId: 'projects', name: 'Docs', x: 3000, y: 2500, isOpen: false },
 
   // ===== IMAGES CHILDREN =====
-  { id: 'wallpapers', parentId: 'images', name: 'Wallpapers', x: 2700, y: 2700, isOpen: false },
-  { id: 'screenshots', parentId: 'images', name: 'Screenshots', x: 2700, y: 2600, isOpen: false },
+  { id: 'wallpapers', parentId: 'images', name: 'Wallpapers', x: 2500, y: 2700, isOpen: false },
+  { id: 'screenshots', parentId: 'images', name: 'Screenshots', x: 2300, y: 2600, isOpen: false },
 
   // ===== MUSIC CHILDREN =====
-  { id: 'rock', parentId: 'music', name: 'Rock', x: 2700, y: 2300, isOpen: false },
-  { id: 'classical', parentId: 'music', name: 'Classical', x: 2700, y: 2400, isOpen: false },
+  { id: 'rock', parentId: 'music', name: 'Rock', x: 2500, y: 2300, isOpen: false },
+  { id: 'classical', parentId: 'music', name: 'Classical', x: 2300, y: 2400, isOpen: false },
 ];
 
 
