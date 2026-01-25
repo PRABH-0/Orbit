@@ -31,16 +31,16 @@ directories = [
     id: 'documents',
     parentId: 'root',
     name: 'Documents',
-    x: 2600,
-    y: 2500,
+    x: 2560,
+    y: 2485,
     isOpen: false
   },
   {
     id: 'images',
     parentId: 'root',
     name: 'Images',
-    x: 2500,
-    y: 2600,
+    x: 2460,
+    y: 2590,
     isOpen: false
   },
 
@@ -49,16 +49,16 @@ directories = [
     id: 'doc-1',
     parentId: 'documents',
     name: 'Projects',
-    x: 2800,
-    y: 2400,
+    x: 2760,
+    y: 2380,
     isOpen: false
   },
   {
     id: 'doc-2',
     parentId: 'documents',
     name: 'Invoices',
-    x: 2800,
-    y: 2600,
+    x: 2760,
+    y: 2590,
     isOpen: false
   }
 ];

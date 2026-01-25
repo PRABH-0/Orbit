@@ -8,8 +8,6 @@
 .viewport.dragging {
   cursor: grabbing;
 }
-
-/* ===== GRID ===== */
 .grid {
   position: absolute;
   top: 50%;
@@ -22,8 +20,10 @@
     linear-gradient(90deg, rgba(120, 140, 170, 0.15) 1px, transparent 1px);
   background-size: 20px 20px;
 
+  transform-origin: center;
   will-change: transform;
-   z-index: 10;
+
+  z-index: 1;   /* base layer */
 }
 
 .center-circle {
@@ -42,8 +42,11 @@
   align-items: center;
   justify-content: center;
 
-  overflow: hidden; /* 👈 VERY IMPORTANT */
+  overflow: hidden;
+
+  z-index: 20;  /* TOP MOST */
 }
+
 
 .center-circle img {
   width: 100%;
@@ -54,6 +57,6 @@
   position: absolute;
   top: 0;
   left: 0;
-  pointer-events: none; /* edges should not block clicks */
+  pointer-events: none;
   z-index: 5;
 }

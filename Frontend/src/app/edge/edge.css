@@ -1,4 +1,11 @@
+svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
 line {
-  stroke: rgba(140, 180, 240, 0.7);
+  stroke: rgba(73, 74, 75, 0.9);
   stroke-width: 2;
 }

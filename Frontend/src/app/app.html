@@ -1,15 +1,15 @@
+<app-header/>
 <div class="grid" #grid>
 
- <svg class="edges" width="5000" height="5000">
-  <g
+<svg class="edges" width="5000" height="5000">
+  <line
     *ngFor="let e of edges"
-    app-edge
+    appEdge
     [x1]="e.x1"
     [y1]="e.y1"
     [x2]="e.x2"
     [y2]="e.y2"
-  >
-  </g>
+  ></line>
 </svg>
 
 
@@ -32,3 +32,4 @@
   </ng-container>
 
 </div>
+<router-outlet/>
