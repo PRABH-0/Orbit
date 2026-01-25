@@ -3,7 +3,7 @@
 
 <svg class="edges" width="5000" height="5000">
   <line
-    *ngFor="let e of edges"
+    *ngFor="let e of getVisibleEdges()"
     appEdge
     [x1]="e.x1"
     [y1]="e.y1"
@@ -12,11 +12,14 @@
   ></line>
 </svg>
 
-
   <!-- USER -->
-  <div class="center-circle" #centerCircle>
-    <img src="user_c.png" />
-  </div>
+  <div
+  class="center-circle"
+  #centerCircle
+  (click)="toggleRoot()"
+>
+  <img src="user_c.png" />
+</div>
 
   <!-- DIRECTORIES -->
   <ng-container *ngFor="let dir of directories">
@@ -25,7 +28,8 @@
       [name]="dir.name"
       [x]="dir.x"
       [y]="dir.y"
-      [isClickable]="dir.id === 'documents'"
+      [isClickable]="hasChildren(dir)"
+
       (clicked)="toggleFolder(dir.id)"
     >
     </app-directory>

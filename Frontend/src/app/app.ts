@@ -1,13 +1,22 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  ViewChild
+} from '@angular/core';
+
 import { RouterOutlet } from '@angular/router';
-import { Header } from "./header/header";
-import { Directory } from './directory/directory';
 import { NgFor, NgIf } from '@angular/common';
+
+import { Header } from './header/header';
+import { Directory } from './directory/directory';
 import { Edge } from './edge/edge';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Directory, NgFor, NgIf , Edge],
+  standalone: true,
+  imports: [RouterOutlet, Header, Directory, NgFor, NgIf, Edge],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -17,95 +26,159 @@ export class App implements AfterViewInit {
   @ViewChild('viewport', { static: true }) viewport!: ElementRef<HTMLDivElement>;
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
 
+
   private isDragging = false;
   private startX = 0;
   private startY = 0;
   private x = -2500;
   private y = -2500;
+  rootOpen:boolean = false;
 
   ngAfterViewInit() {
     this.update();
   }
-directories = [
-  {
-    id: 'documents',
-    parentId: 'root',
-    name: 'Documents',
-    x: 2560,
-    y: 2485,
-    isOpen: false
-  },
-  {
-    id: 'images',
-    parentId: 'root',
-    name: 'Images',
-    x: 2460,
-    y: 2590,
-    isOpen: false
-  },
 
-  // 👇 CHILDREN OF DOCUMENTS (hidden initially)
-  {
-    id: 'doc-1',
-    parentId: 'documents',
-    name: 'Projects',
-    x: 2760,
-    y: 2380,
-    isOpen: false
-  },
-  {
-    id: 'doc-2',
-    parentId: 'documents',
-    name: 'Invoices',
-    x: 2760,
-    y: 2590,
-    isOpen: false
-  }
+
+  directories = [
+  // ===== ROOT LEVEL =====
+  { id: 'documents', parentId: 'root', name: 'Documents', x: 2600, y: 2500, isOpen: false },
+  { id: 'images', parentId: 'root', name: 'Images', x: 2500, y: 2600, isOpen: false },
+  { id: 'music', parentId: 'root', name: 'Music', x: 2500, y: 2400, isOpen: false },
+
+  // ===== DOCUMENTS CHILDREN =====
+  { id: 'projects', parentId: 'documents', name: 'Projects', x: 2800, y: 2400, isOpen: false },
+  { id: 'invoices', parentId: 'documents', name: 'Invoices', x: 2800, y: 2600, isOpen: false },
+
+  // ===== PROJECTS CHILDREN =====
+  { id: 'project-src', parentId: 'projects', name: 'SourceCode', x: 3000, y: 2400, isOpen: false },
+  { id: 'project-docs', parentId: 'projects', name: 'Docs', x: 3000, y: 2500, isOpen: false },
+
+  // ===== IMAGES CHILDREN =====
+  { id: 'wallpapers', parentId: 'images', name: 'Wallpapers', x: 2700, y: 2700, isOpen: false },
+  { id: 'screenshots', parentId: 'images', name: 'Screenshots', x: 2700, y: 2600, isOpen: false },
+
+  // ===== MUSIC CHILDREN =====
+  { id: 'rock', parentId: 'music', name: 'Rock', x: 2700, y: 2300, isOpen: false },
+  { id: 'classical', parentId: 'music', name: 'Classical', x: 2700, y: 2400, isOpen: false },
 ];
 
-toggleFolder(folderId:string){
-  const folder = this.directories.find(d=>d.id===folderId);
-  if(folder){
-    folder.isOpen = !folder.isOpen
+
+  hasChildren(dir: any): boolean {
+    return this.directories.some(d => d.parentId === dir.id);
   }
-}
-shouldShow(dir: any): boolean {
+
+  toggleFolder(id: string) {
+    const folder = this.directories.find(d => d.id === id);
+    if (folder) folder.isOpen = !folder.isOpen;
+  }
+
+  shouldShow(dir: any): boolean {
   if (dir.parentId === 'root') {
-    return true;
+    return this.rootOpen;
   }
 
   const parent = this.directories.find(d => d.id === dir.parentId);
   return !!parent?.isOpen;
 }
-edges = [
-  // User → Documents
-  { x1: 2500, y1: 2500, x2: 2600, y2: 2500 },
 
-  // User → Images
-  { x1: 2500, y1: 2500, x2: 2500, y2: 2600 },
+toggleRoot() {
+  this.rootOpen = !this.rootOpen;
+}
 
-  // Documents → Projects
-  { x1: 2600, y1: 2500, x2: 2800, y2: 2400 },
+  getVisibleEdges() {
+    const edges: any[] = [];
 
-  // Documents → Invoices
-  { x1: 2600, y1: 2500, x2: 2800, y2: 2600 }
-];
+    const ROOT_CENTER_X = 2500 ;
+    const ROOT_CENTER_Y = 2500;
+
+    // group children by parent
+    const childrenMap = new Map<string, any[]>();
+    for (const d of this.directories) {
+      if (!childrenMap.has(d.parentId)) {
+        childrenMap.set(d.parentId, []);
+      }
+      childrenMap.get(d.parentId)!.push(d);
+    }
+
+    for (const [parentId, children] of childrenMap.entries()) {
+
+      // ----- ROOT -----
+if (parentId === 'root') {
+
+  // 🔒 DO NOT DRAW ROOT EDGES IF ROOT IS CLOSED
+  if (!this.rootOpen) continue;
+
+  const ys = children.map(c => c.y );
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+
+  // root spine
+  edges.push({
+    x1: ROOT_CENTER_X,
+    y1: minY,
+    x2: ROOT_CENTER_X,
+    y2: maxY
+  });
+
+  // branches
+  for (const child of children) {
+    edges.push({
+      x1: ROOT_CENTER_X,
+      y1: child.y ,
+      x2: child.x,
+      y2: child.y 
+    });
+  }
+
+  continue;
+}
+
+
+      // ----- FOLDER -----
+      const parent = this.directories.find(d => d.id === parentId);
+      if (!parent || !parent.isOpen) continue;
+
+      const parentX = parent.x ;
+      const parentY = parent.y ;
+
+      const ys = children.map(c => c.y );
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      // folder spine
+      edges.push({
+        x1: parentX,
+        y1: minY,
+        x2: parentX,
+        y2: maxY
+      });
+
+      // branches
+      for (const child of children) {
+        edges.push({
+          x1: parentX,
+          y1: child.y ,
+          x2: child.x,
+          y2: child.y 
+        });
+      }
+    }
+
+    return edges;
+  }
+
+  /* ---------------- DRAG ---------------- */
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(e: MouseEvent) {
-    // Check if click is inside the center circle
-    const centerCircleElement = this.centerCircle.nativeElement;
-    const rect = centerCircleElement.getBoundingClientRect();
-    
-    // Calculate if click is within the center circle bounds
-    const isClickInCenterCircle = 
-      e.clientX >= rect.left && 
-      e.clientX <= rect.right && 
-      e.clientY >= rect.top && 
+    const rect = this.centerCircle.nativeElement.getBoundingClientRect();
+    const inside =
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
       e.clientY <= rect.bottom;
-    
-    // Only start dragging if NOT clicking on center circle
-    if (!isClickInCenterCircle) {
+
+    if (!inside) {
       this.isDragging = true;
       this.startX = e.clientX - this.x;
       this.startY = e.clientY - this.y;
@@ -123,54 +196,6 @@ edges = [
 
   @HostListener('mouseup')
   onMouseUp() {
-    this.isDragging = false;
-    this.viewport.nativeElement.classList.remove('dragging');
-  }
-
-  @HostListener('mouseleave')
-  onMouseLeave() {
-    if (this.isDragging) {
-      this.isDragging = false;
-      this.viewport.nativeElement.classList.remove('dragging');
-    }
-  }
-
-  /* Touch support with same center circle check */
-  @HostListener('touchstart', ['$event'])
-  onTouchStart(e: TouchEvent) {
-    if (e.touches.length === 0) return;
-    
-    const touch = e.touches[0];
-    const centerCircleElement = this.centerCircle.nativeElement;
-    const rect = centerCircleElement.getBoundingClientRect();
-    
-    // Check if touch is inside the center circle
-    const isTouchInCenterCircle = 
-      touch.clientX >= rect.left && 
-      touch.clientX <= rect.right && 
-      touch.clientY >= rect.top && 
-      touch.clientY <= rect.bottom;
-    
-    if (!isTouchInCenterCircle) {
-      this.isDragging = true;
-      this.startX = touch.clientX - this.x;
-      this.startY = touch.clientY - this.y;
-      this.viewport.nativeElement.classList.add('dragging');
-    }
-  }
-
-  @HostListener('touchmove', ['$event'])
-  onTouchMove(e: TouchEvent) {
-    if (!this.isDragging || e.touches.length === 0) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    this.x = touch.clientX - this.startX;
-    this.y = touch.clientY - this.startY;
-    this.update();
-  }
-
-  @HostListener('touchend')
-  onTouchEnd() {
     this.isDragging = false;
     this.viewport.nativeElement.classList.remove('dragging');
   }

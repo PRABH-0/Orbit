@@ -20,5 +20,6 @@ export class Edge implements OnChanges {
     line.setAttribute('y2', String(this.y2));
     line.setAttribute('stroke', 'rgba(121, 136, 158, 0.9)');
     line.setAttribute('stroke-width', '2');
+    line.setAttribute('marker-end', 'url(#arrowhead)');
   }
 }
