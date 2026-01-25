@@ -50,3 +50,10 @@
   height: 100%;
   object-fit: cover; /* keeps image centered */
 }
+.edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none; /* edges should not block clicks */
+  z-index: 5;
+}

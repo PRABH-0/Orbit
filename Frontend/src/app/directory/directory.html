@@ -1,1 +1,8 @@
-<p>directory works!</p>
+<div class="folder-directory"  [style.transform]="'translate('+x+'px,'+y+'px)'" (click)="onClick()">
+      <img src="folder_icon.png" alt="Folder" height="30px" width="30px"/>
+      <div class="label">
+        {{name}}
+        <br>
+        x:{{x}},y:{{y}}
+      </div>
+</div>

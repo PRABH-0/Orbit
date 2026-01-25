@@ -1,10 +1,13 @@
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Header } from "./header/header";
+import { Directory } from './directory/directory';
+import { NgFor, NgIf } from '@angular/common';
+import { Edge } from './edge/edge';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header ],
+  imports: [RouterOutlet, Header, Directory, NgFor, NgIf , Edge],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -23,6 +26,70 @@ export class App implements AfterViewInit {
   ngAfterViewInit() {
     this.update();
   }
+directories = [
+  {
+    id: 'documents',
+    parentId: 'root',
+    name: 'Documents',
+    x: 2600,
+    y: 2500,
+    isOpen: false
+  },
+  {
+    id: 'images',
+    parentId: 'root',
+    name: 'Images',
+    x: 2500,
+    y: 2600,
+    isOpen: false
+  },
+
+  // 👇 CHILDREN OF DOCUMENTS (hidden initially)
+  {
+    id: 'doc-1',
+    parentId: 'documents',
+    name: 'Projects',
+    x: 2800,
+    y: 2400,
+    isOpen: false
+  },
+  {
+    id: 'doc-2',
+    parentId: 'documents',
+    name: 'Invoices',
+    x: 2800,
+    y: 2600,
+    isOpen: false
+  }
+];
+
+toggleFolder(folderId:string){
+  const folder = this.directories.find(d=>d.id===folderId);
+  if(folder){
+    folder.isOpen = !folder.isOpen
+  }
+}
+shouldShow(dir: any): boolean {
+  if (dir.parentId === 'root') {
+    return true;
+  }
+
+  const parent = this.directories.find(d => d.id === dir.parentId);
+  return !!parent?.isOpen;
+}
+edges = [
+  // User → Documents
+  { x1: 2500, y1: 2500, x2: 2600, y2: 2500 },
+
+  // User → Images
+  { x1: 2500, y1: 2500, x2: 2500, y2: 2600 },
+
+  // Documents → Projects
+  { x1: 2600, y1: 2500, x2: 2800, y2: 2400 },
+
+  // Documents → Invoices
+  { x1: 2600, y1: 2500, x2: 2800, y2: 2600 }
+];
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(e: MouseEvent) {

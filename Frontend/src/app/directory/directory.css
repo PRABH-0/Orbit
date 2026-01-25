@@ -1,0 +1,11 @@
+.folder-directory {
+  position: absolute;
+  width: 80px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.label {
+  font-size: 12px;
+  color: white;
+}
