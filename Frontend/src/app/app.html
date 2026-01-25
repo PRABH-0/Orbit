@@ -33,14 +33,26 @@
     </app-directory>
   </ng-container>
 
-  <!-- DATA NODE (WALLPAPERS) -->
+  <!-- DATA NODE -->
   <app-model-data
-  *ngIf="selectedFolderId === 'wallpapers' && wallpaperDataNode"
-  [x]="wallpaperDataNode.x"
-  [y]="wallpaperDataNode.y">
-</app-model-data>
-
+    *ngIf="selectedFolderId === 'wallpapers' && wallpaperDataNode"
+    [x]="wallpaperDataNode.x"
+    [y]="wallpaperDataNode.y"
+    (imageOpen)="openImage($event)">
+  </app-model-data>
 
 </div>
+
+<div
+  class="image-viewer"
+  *ngIf="selectedImage as image"
+  (click)="closeImage()"
+>
+  <img
+    [src]="'/imagesData/' + image"
+    (click)="$event.stopPropagation()"
+  />
+</div>
+
 
 <router-outlet />

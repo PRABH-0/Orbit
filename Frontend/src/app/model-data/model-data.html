@@ -10,13 +10,13 @@
   <div class="data-grid">
     <div
       class="data-item"
-      *ngFor="let file of items">
-
+      *ngFor="let file of items"
+      (click)="openImage(file)"
+    >
       <img
         [src]="getImagePath(file)"
         alt="wallpaper"
       />
-
     </div>
   </div>
 

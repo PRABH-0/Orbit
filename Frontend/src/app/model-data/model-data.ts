@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgFor } from '@angular/common';
 
 @Component({
@@ -13,7 +13,8 @@ export class ModelData {
   @Input() x!: number;
   @Input() y!: number;
 
-  // TEMP: list images manually (later this comes from API)
+  @Output() imageOpen = new EventEmitter<string>();
+
   items = [
     'image1.webp',
     'image2.webp',
@@ -30,5 +31,9 @@ export class ModelData {
 
   getImagePath(file: string) {
     return `/imagesData/${file}`;
+  }
+
+  openImage(file: string) {
+    this.imageOpen.emit(file);
   }
 }

@@ -66,3 +66,42 @@ img {
   pointer-events: none;
   user-select: none;
 }
+.image-viewer img {
+  max-width: 85vw;
+  max-height: 85vh;
+
+  border-radius: 12px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85);
+
+  background: #000;
+}
+
+.image-viewer {
+  position: fixed;
+  inset: 0;
+
+  /* 🔥 blur + dim background */
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  z-index: 999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-viewer img {
+  animation: zoomIn 0.25s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

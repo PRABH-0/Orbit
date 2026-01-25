@@ -2,7 +2,9 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   HostListener,
+  Output,
   ViewChild
 } from '@angular/core';
 
@@ -33,7 +35,8 @@ export class App implements AfterViewInit {
 
   @ViewChild('grid', { static: true }) grid!: ElementRef<HTMLDivElement>;
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
-
+  
+  @Output() imageOpen = new EventEmitter<string>();
   // ================= CANVAS DRAG =================
   private isDragging = false;
   private startX = 0;
@@ -46,12 +49,25 @@ export class App implements AfterViewInit {
 
   // DATA NODE POSITION
   wallpaperDataNode: { x: number; y: number } | null = null;
+  selectedImage: string | null = null;
 
   ngAfterViewInit() {
     this.update();
   }
 
-  // ================= DIRECTORIES =================
+  
+openImage(file: string) {
+  this.selectedImage = file;
+}
+
+closeImage() {
+  this.selectedImage = null;
+}
+@HostListener('document:keydown.escape')
+onEsc() {
+  this.closeImage();
+}
+
   directories = [
     { id: 'documents', parentId: 'root', name: 'Documents', x: 2600, y: 2500, isOpen: false },
     { id: 'images', parentId: 'root', name: 'Images', x: 2500, y: 2600, isOpen: false },
