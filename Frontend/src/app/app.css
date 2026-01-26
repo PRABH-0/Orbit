@@ -39,7 +39,7 @@
 
   border: 1px solid rgba(140, 180, 240, 0.35);
   box-shadow: 0 0 6px rgba(140, 180, 240, 0.25);
-
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -2,7 +2,7 @@
   position: absolute;
   width: 80px;
   text-align: center;
-  cursor: grab;
+  cursor: default;
   z-index: 10;
 
   margin-top: -20px;

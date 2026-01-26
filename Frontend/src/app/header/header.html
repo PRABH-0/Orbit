@@ -4,7 +4,7 @@
   </div>
 
   <div class="right" *ngIf="currentFolder">
-    <div class="folder-name">{{ currentFolder }}</div>
+    <div class="folder-name">[ {{ currentFolder }} ]</div>
 
     <button class="add-folder-btn" (click)="addFolder.emit()">
       ＋ Add Folder

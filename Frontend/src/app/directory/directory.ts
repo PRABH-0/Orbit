@@ -19,16 +19,20 @@ export class Directory {
   private offsetX = 0;
   private offsetY = 0;
 
-  onClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.clicked.emit();
-  }
+  private startX = 0;
+  private startY = 0;
+  private hasMoved = false;
 
   onMouseDown(event: MouseEvent) {
     event.stopPropagation();
     event.preventDefault();
 
     this.dragging = true;
+    this.hasMoved = false;
+
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+
     this.offsetX = event.clientX - this.x;
     this.offsetY = event.clientY - this.y;
   }
@@ -36,14 +40,29 @@ export class Directory {
   onMouseMove(event: MouseEvent) {
     if (!this.dragging) return;
 
-    // 🔥 CALCULATE but DO NOT STORE locally
-    const newX = event.clientX - this.offsetX;
-    const newY = event.clientY - this.offsetY;
+    const dx = Math.abs(event.clientX - this.startX);
+    const dy = Math.abs(event.clientY - this.startY);
 
-    this.moved.emit({ x: newX, y: newY });
+    // 🔥 drag threshold
+    if (dx > 4 || dy > 4) {
+      this.hasMoved = true;
+    }
+
+    if (this.hasMoved) {
+      const newX = event.clientX - this.offsetX;
+      const newY = event.clientY - this.offsetY;
+      this.moved.emit({ x: newX, y: newY });
+    }
   }
 
-  onMouseUp() {
+  onMouseUp(event: MouseEvent) {
+    event.stopPropagation();
+
+    // ✅ Only emit click if NO drag happened
+    if (!this.hasMoved) {
+      this.clicked.emit();
+    }
+
     this.dragging = false;
   }
 }

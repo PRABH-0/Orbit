@@ -44,7 +44,6 @@
 }
 
 .folder-name::before {
-  content: "📁 ";
   opacity: 0.8;
 }
 
