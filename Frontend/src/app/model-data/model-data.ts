@@ -4,69 +4,65 @@ import { NgFor, NgIf } from '@angular/common';
 @Component({
   selector: 'app-model-data',
   standalone: true,
-  imports: [NgFor,NgIf],
+  imports: [NgFor, NgIf],
   templateUrl: './model-data.html',
   styleUrl: './model-data.css',
 })
 export class ModelData {
-
   @Input() x!: number;
   @Input() y!: number;
-
-  // 🔥 NEW
   @Input() title = '';
   @Input() items: string[] = [];
   @Input() basePath = '';
-@Output() closeNode = new EventEmitter<void>();
-
-close() {
-  this.closeNode.emit();
-}
-@Output() addImage = new EventEmitter<File>();
-
-triggerFileInput() {
-  const input = document.querySelector<HTMLInputElement>(
-    'input[type="file"]'
-  );
-  input?.click();
-}
-
-onFileSelected(event: Event) {
-  const input = event.target as HTMLInputElement;
-  if (!input.files || !input.files.length) return;
-
-  const file = input.files[0];
-  this.addImage.emit(file);
-
-  // reset input so same file can be selected again
-  input.value = '';
-}
-
+  @Output() closeNode = new EventEmitter<void>();
+  @Output() addImage = new EventEmitter<File>();
   @Output() imageOpen = new EventEmitter<string>();
-pageSize = 70;
-currentPage = 0;
-get totalPages(): number {
-  return Math.ceil(this.items.length / this.pageSize);
-}
+  pageSize = 70;
+  currentPage = 0;
 
-get visibleItems(): string[] {
-  const start = this.currentPage * this.pageSize;
-  return this.items.slice(start, start + this.pageSize);
-}
-nextPage() {
-  if (this.currentPage < this.totalPages - 1) {
-    this.currentPage++;
+  close() {
+    this.closeNode.emit();
   }
-}
 
-prevPage() {
-  if (this.currentPage > 0) {
-    this.currentPage--;
+  triggerFileInput() {
+    const input = document.querySelector<HTMLInputElement>(
+      'input[type="file"]'
+    );
+    input?.click();
   }
-}
-ngOnChanges() {
-  this.currentPage = 0;
-}
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || !input.files.length) return;
+    const file = input.files[0];
+    this.addImage.emit(file);
+    input.value = '';
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.items.length / this.pageSize);
+  }
+
+  get visibleItems(): string[] {
+    const start = this.currentPage * this.pageSize;
+    return this.items.slice(start, start + this.pageSize);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+    }
+  }
+
+  ngOnChanges() {
+    this.currentPage = 0;
+  }
 
   getImagePath(file: string): string {
     return `${this.basePath}/${file}`;
