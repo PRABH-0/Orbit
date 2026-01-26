@@ -3,13 +3,28 @@
   [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
 >
   <div class="data-header">
-    {{ title }}
+  <span>{{ title }}</span>
+
+  <div class="pager" *ngIf="totalPages > 1">
+    <button
+      (click)="prevPage()"
+      [disabled]="currentPage === 0">
+      ◀
+    </button>
+
+    <button
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages - 1">
+      ▶
+    </button>
   </div>
+</div>
+
 
   <div class="data-grid">
     <div
       class="data-item"
-      *ngFor="let file of items"
+      *ngFor="let file of visibleItems"
       (click)="openImage(file)"
     >
       <img [src]="getImagePath(file)" />
