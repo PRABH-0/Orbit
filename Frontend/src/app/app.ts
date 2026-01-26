@@ -35,9 +35,9 @@ export class App implements AfterViewInit {
 
   @ViewChild('grid', { static: true }) grid!: ElementRef<HTMLDivElement>;
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
-  
+
   @Output() imageOpen = new EventEmitter<string>();
-  // ================= CANVAS DRAG =================
+
   private isDragging = false;
   private startX = 0;
   private startY = 0;
@@ -47,26 +47,49 @@ export class App implements AfterViewInit {
   rootOpen = false;
   selectedFolderId: string | null = null;
 
-  // DATA NODE POSITION
-  wallpaperDataNode: { x: number; y: number } | null = null;
+  dataNodePosition: { x: number; y: number } | null = null;
   selectedImage: string | null = null;
 
-  ngAfterViewInit() {
-    this.update();
-  }
+  wallpapers = [
+    'image1.webp',
+    'image2.webp',
+    'image3.webp',
+    'image4.webp',
+    'image5.webp',
+    'image6.webp',
+    'image7.webp',
+    'image8.webp',
+    'image9.webp',
+    'image11.webp',
+    'image10.webp'
+  ];
 
-  
-openImage(file: string) {
-  this.selectedImage = file;
-}
-
-closeImage() {
-  this.selectedImage = null;
-}
-@HostListener('document:keydown.escape')
-onEsc() {
-  this.closeImage();
-}
+  screenshots = [
+    'ss1.jfif',
+    'ss2.jfif',
+    'ss3.jfif',
+    'ss4.jfif',
+    'ss5.jfif',
+    'ss6.jfif',
+    'ss7.jfif',
+    'ss8.jfif',
+    'ss9.jfif',
+    'ss11.jfif',
+    'ss10.jfif'
+  ];
+  classicalImages = [
+  'ss1.jfif',
+  'ss2.jfif',
+  'ss3.jfif',
+  'ss4.jfif',
+  'ss5.jfif',
+  'ss6.jfif',
+  'ss7.jfif',
+  'ss8.jfif',
+  'ss9.jfif',
+  'ss10.jfif',
+  'ss11.jfif'
+];
 
   directories = [
     { id: 'documents', parentId: 'root', name: 'Documents', x: 2600, y: 2500, isOpen: false },
@@ -82,29 +105,50 @@ onEsc() {
     { id: 'wallpapers', parentId: 'images', name: 'Wallpapers', x: 2500, y: 2700, isOpen: false },
     { id: 'screenshots', parentId: 'images', name: 'Screenshots', x: 2300, y: 2600, isOpen: false },
 
-    { id: 'classic', parentId: 'music', name: 'Classic', x: 2700, y: 2200, isOpen: false },
     { id: 'rock', parentId: 'music', name: 'Rock', x: 2700, y: 2300, isOpen: false },
     { id: 'classical', parentId: 'music', name: 'Classical', x: 2300, y: 2400, isOpen: false },
-    { id: 'jass', parentId: 'music', name: 'Jass', x: 2300, y: 2300, isOpen: false },
+    { id: 'jass', parentId: 'music', name: 'Jass', x: 2300, y: 2300, isOpen: false }
   ];
 
-  // ================= CLICK HANDLING =================
-  onFolderClick(dir: any) {
-
-    // Expand / collapse children
-    if (this.hasChildren(dir)) {
-      this.toggleFolder(dir.id);
-    }
-
-    // Open DATA NODE
-    if (dir.id === 'wallpapers') {
-      this.selectedFolderId = dir.id;
-      this.setWallpaperDataNodePosition(dir);
-    } else {
-      this.selectedFolderId = null;
-      this.wallpaperDataNode = null;
-    }
+  ngAfterViewInit() {
+    this.update();
   }
+
+  openImage(file: string) {
+    this.selectedImage = file;
+  }
+
+  closeImage() {
+    this.selectedImage = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc() {
+    this.closeImage();
+  }
+
+ onFolderClick(dir: any) {
+
+  if (this.hasChildren(dir)) {
+    this.toggleFolder(dir.id);
+  }
+
+  if (dir.id === 'wallpapers' || dir.id === 'screenshots' || dir.id === 'classical') {
+
+    if (this.selectedFolderId === dir.id) {
+      this.selectedFolderId = null;
+      this.dataNodePosition = null;
+    } else {
+      this.selectedFolderId = dir.id;
+      this.setDataNodePosition(dir);
+    }
+
+  } else {
+    this.selectedFolderId = null;
+    this.dataNodePosition = null;
+  }
+}
+
 
   hasChildren(dir: any): boolean {
     return this.directories.some(d => d.parentId === dir.id);
@@ -143,37 +187,40 @@ onEsc() {
     if (!this.rootOpen) {
       this.directories.forEach(d => d.isOpen = false);
       this.selectedFolderId = null;
-      this.wallpaperDataNode = null;
+      this.dataNodePosition = null;
     }
   }
 
-  // ================= SMART DATA NODE POSITION =================
-  setWallpaperDataNodePosition(dir: any) {
+  setDataNodePosition(dir: any) {
+  const ROOT_X = 2500;
+  const ROOT_Y = 2500;
 
-    const ROOT_X = 2500;
-    const ROOT_Y = 2500;
+  const CONTAINER_WIDTH = 800;
+  const CONTAINER_HEIGHT = 580;
+  const GAP = 60;
 
-    let x = dir.x;
-    let y = dir.y;
+  let x = dir.x;
+  let y = dir.y;
 
-    // Vertical positioning
-    if (dir.y > ROOT_Y) {
-      y = dir.y + 220;     // below
-    } else {
-      y = dir.y - 540;     // above
-    }
+  const dx = dir.x - ROOT_X;
+  const dy = dir.y - ROOT_Y;
 
-    // Horizontal positioning
-    if (dir.x >= ROOT_X) {
-      x = dir.x + 200;     // right
-    } else {
-      x = dir.x - 550;     // left
-    }
-
-    this.wallpaperDataNode = { x, y };
+  if (Math.abs(dx) > Math.abs(dy)) {
+    x = dx > 0
+      ? dir.x + GAP
+      : dir.x - CONTAINER_WIDTH - GAP;
+    y = dir.y - CONTAINER_HEIGHT / 2;
+  } else {
+    y = dy > 0
+      ? dir.y + GAP
+      : dir.y - CONTAINER_HEIGHT - GAP;
+    x = dir.x - CONTAINER_WIDTH / 2;
   }
 
-  // ================= EDGES =================
+  this.dataNodePosition = { x, y };
+}
+
+
   getVisibleEdges() {
     const edges: any[] = [];
     const ROOT_X = 2500;
@@ -181,7 +228,6 @@ onEsc() {
 
     for (const dir of this.directories) {
 
-      // ROOT → CHILD
       if (dir.parentId === 'root') {
         if (!this.rootOpen) continue;
 
@@ -190,7 +236,6 @@ onEsc() {
         continue;
       }
 
-      // NORMAL CHILD
       const parent = this.directories.find(d => d.id === dir.parentId);
       if (!parent || !parent.isOpen) continue;
 
@@ -198,15 +243,14 @@ onEsc() {
       edges.push({ x1: parent.x, y1: dir.y, x2: dir.x, y2: dir.y });
     }
 
-    // WALLPAPERS → DATA NODE EDGE
-    if (this.selectedFolderId === 'wallpapers' && this.wallpaperDataNode) {
-      const folder = this.directories.find(d => d.id === 'wallpapers');
+    if (this.selectedFolderId && this.dataNodePosition) {
+      const folder = this.directories.find(d => d.id === this.selectedFolderId);
       if (folder) {
         edges.push({
           x1: folder.x,
           y1: folder.y,
-          x2: this.wallpaperDataNode.x,
-          y2: this.wallpaperDataNode.y + 40
+          x2: this.dataNodePosition.x,
+          y2: this.dataNodePosition.y + 40
         });
       }
     }
@@ -214,58 +258,51 @@ onEsc() {
     return edges;
   }
 
-  // ================= DRAG =================
- @HostListener('mousedown', ['$event'])
-onMouseDown(e: MouseEvent) {
+  @HostListener('mousedown', ['$event'])
+  onMouseDown(e: MouseEvent) {
 
-  // ONLY left mouse button
-  if (e.button !== 0) return;
+    if (e.button !== 0) return;
 
-  // Prevent browser drag / selection
-  e.preventDefault();
+    e.preventDefault();
 
-  const rect = this.centerCircle.nativeElement.getBoundingClientRect();
-  const insideCenter =
-    e.clientX >= rect.left &&
-    e.clientX <= rect.right &&
-    e.clientY >= rect.top &&
-    e.clientY <= rect.bottom;
+    const rect = this.centerCircle.nativeElement.getBoundingClientRect();
+    const insideCenter =
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom;
 
-  // Do NOT drag if clicking center user
-  if (insideCenter) return;
+    if (insideCenter) return;
 
-  this.isDragging = true;
-  this.startX = e.clientX - this.x;
-  this.startY = e.clientY - this.y;
+    this.isDragging = true;
+    this.startX = e.clientX - this.x;
+    this.startY = e.clientY - this.y;
 
-  // 🔥 IMPORTANT
-  document.body.style.userSelect = 'none';
-}
+    document.body.style.userSelect = 'none';
+  }
 
-@HostListener('mousemove', ['$event'])
-onMouseMove(e: MouseEvent) {
-  if (!this.isDragging) return;
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(e: MouseEvent) {
+    if (!this.isDragging) return;
 
-  e.preventDefault();
+    e.preventDefault();
 
-  this.x = e.clientX - this.startX;
-  this.y = e.clientY - this.startY;
-  this.update();
-}
-
+    this.x = e.clientX - this.startX;
+    this.y = e.clientY - this.startY;
+    this.update();
+  }
 
   @HostListener('mouseup')
-onMouseUp() {
-  this.isDragging = false;
+  onMouseUp() {
+    this.isDragging = false;
+    document.body.style.userSelect = '';
+  }
 
-  // restore selection
-  document.body.style.userSelect = '';
-}
-@HostListener('mouseleave')
-onMouseLeave() {
-  this.isDragging = false;
-  document.body.style.userSelect = '';
-}
+  @HostListener('mouseleave')
+  onMouseLeave() {
+    this.isDragging = false;
+    document.body.style.userSelect = '';
+  }
 
   private update() {
     this.grid.nativeElement.style.transform =

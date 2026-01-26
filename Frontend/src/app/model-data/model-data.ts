@@ -13,27 +13,18 @@ export class ModelData {
   @Input() x!: number;
   @Input() y!: number;
 
+  // 🔥 NEW
+  @Input() title = '';
+  @Input() items: string[] = [];
+  @Input() basePath = '';
+
   @Output() imageOpen = new EventEmitter<string>();
 
-  items = [
-    'image1.webp',
-    'image2.webp',
-    'image3.webp',
-    'image4.webp',
-    'image5.webp',
-    'image6.webp',
-    'image7.webp',
-    'image8.webp',
-    'image9.webp',
-    'image10.webp',
-    'image11.webp',
-  ];
-
-  getImagePath(file: string) {
-    return `/imagesData/${file}`;
+  getImagePath(file: string): string {
+    return `${this.basePath}/${file}`;
   }
 
-  openImage(file: string) {
+  openImage(file: string): void {
     this.imageOpen.emit(file);
   }
 }

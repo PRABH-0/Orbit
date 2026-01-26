@@ -2,9 +2,8 @@
   class="data-node"
   [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
 >
-
   <div class="data-header">
-    Wallpapers
+    {{ title }}
   </div>
 
   <div class="data-grid">
@@ -13,11 +12,11 @@
       *ngFor="let file of items"
       (click)="openImage(file)"
     >
-      <img
-        [src]="getImagePath(file)"
-        alt="wallpaper"
-      />
+      <img [src]="getImagePath(file)" />
+
+      <div class="file-tooltip">
+        {{ file }}
+      </div>
     </div>
   </div>
-
 </div>
