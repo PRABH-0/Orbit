@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-directory',
@@ -43,7 +43,6 @@ export class Directory {
     const dx = Math.abs(event.clientX - this.startX);
     const dy = Math.abs(event.clientY - this.startY);
 
-    // 🔥 drag threshold
     if (dx > 4 || dy > 4) {
       this.hasMoved = true;
     }
@@ -56,13 +55,17 @@ export class Directory {
   }
 
   onMouseUp(event: MouseEvent) {
-    event.stopPropagation();
+  event.stopPropagation();
 
-    // ✅ Only emit click if NO drag happened
-    if (!this.hasMoved) {
-      this.clicked.emit();
-    }
-
-    this.dragging = false;
+  if (this.dragging && !this.hasMoved) {
+    this.clicked.emit();
   }
+
+  this.dragging = false;
+}
+@HostListener('document:mouseup')
+onDocumentMouseUp() {
+  this.dragging = false;
+}
+
 }
