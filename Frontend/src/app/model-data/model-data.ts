@@ -17,6 +17,11 @@ export class ModelData {
   @Input() title = '';
   @Input() items: string[] = [];
   @Input() basePath = '';
+@Output() closeNode = new EventEmitter<void>();
+
+close() {
+  this.closeNode.emit();
+}
 
   @Output() imageOpen = new EventEmitter<string>();
 pageSize = 70;

@@ -5,8 +5,10 @@ import {
   EventEmitter,
   HostListener,
   Output,
-  ViewChild
+  ViewChild,
+  OnInit
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { RouterOutlet } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
@@ -15,6 +17,9 @@ import { Header } from './header/header';
 import { Directory } from './directory/directory';
 import { Edge } from './edge/edge';
 import { ModelData } from './model-data/model-data';
+
+// ✅ TEMP DATA (later replace with API)
+import dummyData from './dummydata.json';
 
 @Component({
   selector: 'app-root',
@@ -26,193 +31,146 @@ import { ModelData } from './model-data/model-data';
     NgFor,
     NgIf,
     Edge,
-    ModelData
+    ModelData,
+FormsModule
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements AfterViewInit {
+export class App implements OnInit, AfterViewInit {
 
+  /* ================== VIEW REFERENCES ================== */
   @ViewChild('grid', { static: true }) grid!: ElementRef<HTMLDivElement>;
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
 
   @Output() imageOpen = new EventEmitter<string>();
+selectedParentFolderId: string | null = null;
 
   private isDragging = false;
   private startX = 0;
   private startY = 0;
   private x = -2500;
   private y = -2500;
+isAddFolderOpen = false;
+draftFolder: any = null;
 
+  /* ================== UI STATE ================== */
   rootOpen = false;
   selectedFolderId: string | null = null;
+  currentFolderName: string | null = null;
 
   dataNodePosition: { x: number; y: number } | null = null;
   selectedImage: string | null = null;
 
-  wallpapers = [
-    'image1.webp',
-    'image2.webp',
-    'image3.webp',
-    'image4.webp',
-    'image5.webp',
-    'image6.webp',
-    'image7.webp',
-    'image8.webp',
-    'image9.webp',
-    'image11.webp',
-    'image10.webp'
-  ];
+  /* ================== DATA ================== */
+  apiData: any;
+  directories: any[] = [];
 
-  screenshots = [
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss11.jfif',
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss11.jfif',
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss11.jfif',
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss11.jfif',
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss11.jfif',
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss11.jfif',
-    'ss1.jfif',
-    'ss2.jfif',
-    'ss3.jfif',
-    'ss4.jfif',
-    'ss5.jfif',
-    'ss6.jfif',
-    'ss7.jfif',
-    'ss8.jfif',
-    'ss9.jfif',
-    'ss11.jfif',
-    'ss11.jfif',
-    'ss10.jfif'
-  ];
-  classicalImages = [
-  'ss1.jfif',
-  'ss2.jfif',
-  'ss3.jfif',
-  'ss4.jfif',
-  'ss5.jfif',
-  'ss6.jfif',
-  'ss7.jfif',
-  'ss8.jfif',
-  'ss9.jfif',
-  'ss10.jfif',
-  'ss11.jfif'
-];
+  /* ================== INIT ================== */
+  ngOnInit() {
+    // ✅ load dummy JSON as API
+    this.apiData = dummyData;
 
-  directories = [
-    { id: 'documents', parentId: 'root', name: 'Documents', x: 2600, y: 2500, isOpen: false },
-    { id: 'images', parentId: 'root', name: 'Images', x: 2500, y: 2600, isOpen: false },
-    { id: 'music', parentId: 'root', name: 'Music', x: 2500, y: 2400, isOpen: false },
-
-    { id: 'projects', parentId: 'documents', name: 'Projects', x: 2800, y: 2400, isOpen: false },
-    { id: 'invoices', parentId: 'documents', name: 'Invoices', x: 2800, y: 2600, isOpen: false },
-
-    { id: 'project-src', parentId: 'projects', name: 'SourceCode', x: 3000, y: 2400, isOpen: false },
-    { id: 'project-docs', parentId: 'projects', name: 'Docs', x: 3000, y: 2500, isOpen: false },
-
-    { id: 'wallpapers', parentId: 'images', name: 'Wallpapers', x: 2500, y: 2700, isOpen: false },
-    { id: 'screenshots', parentId: 'images', name: 'Screenshots', x: 2300, y: 2600, isOpen: false },
-
-    { id: 'rock', parentId: 'music', name: 'Rock', x: 2700, y: 2300, isOpen: false },
-    { id: 'classical', parentId: 'music', name: 'Classical', x: 2300, y: 2400, isOpen: false },
-    { id: 'jass', parentId: 'music', name: 'Jass', x: 2300, y: 2300, isOpen: false }
-  ];
+    // add runtime properties
+    this.directories = this.apiData.directories.map((d: any) => ({
+      ...d,
+      isOpen: false
+    }));
+  }
 
   ngAfterViewInit() {
     this.update();
   }
+onAddFolder() {
 
-  openImage(file: string) {
-    this.selectedImage = file;
+  const parentId = this.selectedParentFolderId ?? 'root';
+
+  const parent =
+    parentId === 'root'
+      ? { id: 'root', x: 2500, y: 2500 }
+      : this.directories.find(d => d.id === parentId);
+
+  if (!parent) return;
+
+  // 🔥 IMPORTANT: force parent open
+  if (parentId !== 'root') {
+    parent.isOpen = true;
+  } else {
+    this.rootOpen = true;
   }
 
-  closeImage() {
-    this.selectedImage = null;
+  const draft = {
+    id: this.generateId(),
+    parentId: parent.id,
+    name: 'New Folder',
+    x: parent.x + 120,
+    y: parent.y + 120,
+    isOpen: false,
+    isDraft: true
+  };
+
+  this.directories.push(draft);
+  this.draftFolder = draft;
+  this.isAddFolderOpen = true;
+}
+
+
+  get selectedFolderData() {
+    if (!this.selectedFolderId) return null;
+    return this.directories.find(
+      d => d.id === this.selectedFolderId && d.items
+    );
+  }
+saveAddFolder() {
+  if (!this.draftFolder) return;
+
+  delete this.draftFolder.isDraft;
+  this.draftFolder = null;
+  this.isAddFolderOpen = false;
+}
+
+cancelAddFolder() {
+  if (!this.draftFolder) return;
+
+  this.directories = this.directories.filter(
+    d => d.id !== this.draftFolder.id
+  );
+
+  this.draftFolder = null;
+  this.isAddFolderOpen = false;
+}
+
+  hasChildren(dir: any): boolean {
+    return this.directories.some(d => d.parentId === dir.id);
   }
 
-  @HostListener('document:keydown.escape')
-  onEsc() {
-    this.closeImage();
-  }
+ 
+generateId(): string {
+  return 'folder_' + Math.random().toString(36).substring(2, 9);
+}
 
- onFolderClick(dir: any) {
+onFolderClick(dir: any) {
 
+  // 🔑 ALWAYS set parent selection first
+  this.selectedParentFolderId = dir.id;
+  this.currentFolderName = dir.name;
+
+  // toggle tree
   if (this.hasChildren(dir)) {
     this.toggleFolder(dir.id);
   }
 
-  if (dir.id === 'wallpapers' || dir.id === 'screenshots' || dir.id === 'classical') {
+  // toggle same folder (deselect)
+  if (this.selectedFolderId === dir.id) {
+    this.selectedFolderId = null;
+    this.dataNodePosition = null;
+    return;
+  }
 
-    if (this.selectedFolderId === dir.id) {
-      this.selectedFolderId = null;
-      this.dataNodePosition = null;
-    } else {
-      this.selectedFolderId = dir.id;
-      this.setDataNodePosition(dir);
-    }
-
+  // open model-data only if folder has items
+  if (dir.items) {
+    this.selectedFolderId = dir.id;
+    this.setDataNodePosition(dir);
   } else {
     this.selectedFolderId = null;
     this.dataNodePosition = null;
@@ -220,9 +178,6 @@ export class App implements AfterViewInit {
 }
 
 
-  hasChildren(dir: any): boolean {
-    return this.directories.some(d => d.parentId === dir.id);
-  }
 
   toggleFolder(id: string) {
     const folder = this.directories.find(d => d.id === id);
@@ -250,46 +205,54 @@ export class App implements AfterViewInit {
     const parent = this.directories.find(d => d.id === dir.parentId);
     return !!parent?.isOpen;
   }
+toggleRoot() {
+  this.rootOpen = !this.rootOpen;
 
-  toggleRoot() {
-    this.rootOpen = !this.rootOpen;
-
-    if (!this.rootOpen) {
-      this.directories.forEach(d => d.isOpen = false);
-      this.selectedFolderId = null;
-      this.dataNodePosition = null;
-    }
-  }
-
-  setDataNodePosition(dir: any) {
-  const ROOT_X = 2500;
-  const ROOT_Y = 2500;
-
-  const CONTAINER_WIDTH = 800;
-  const CONTAINER_HEIGHT = 580;
-  const GAP = 60;
-
-  let x = dir.x;
-  let y = dir.y;
-
-  const dx = dir.x - ROOT_X;
-  const dy = dir.y - ROOT_Y;
-
-  if (Math.abs(dx) > Math.abs(dy)) {
-    x = dx > 0
-      ? dir.x + GAP
-      : dir.x - CONTAINER_WIDTH - GAP;
-    y = dir.y - CONTAINER_HEIGHT / 2;
+  if (this.rootOpen) {
+    this.selectedParentFolderId = 'root';   // ✅ allow root as parent
+    this.currentFolderName = 'Root';
   } else {
-    y = dy > 0
-      ? dir.y + GAP
-      : dir.y - CONTAINER_HEIGHT - GAP;
-    x = dir.x - CONTAINER_WIDTH / 2;
-  }
+    this.currentFolderName = null;
 
-  this.dataNodePosition = { x, y };
+    this.directories.forEach(d => d.isOpen = false);
+    this.selectedFolderId = null;
+    this.dataNodePosition = null;
+  }
 }
 
+
+  /* ================== POSITION LOGIC ================== */
+
+  setDataNodePosition(dir: any) {
+    const ROOT_X = 2500;
+    const ROOT_Y = 2500;
+
+    const CONTAINER_WIDTH = 800;
+    const CONTAINER_HEIGHT = 580;
+    const GAP = 60;
+
+    let x = dir.x;
+    let y = dir.y;
+
+    const dx = dir.x - ROOT_X;
+    const dy = dir.y - ROOT_Y;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      x = dx > 0
+        ? dir.x + GAP
+        : dir.x - CONTAINER_WIDTH - GAP;
+      y = dir.y - CONTAINER_HEIGHT / 2;
+    } else {
+      y = dy > 0
+        ? dir.y + GAP
+        : dir.y - CONTAINER_HEIGHT - GAP;
+      x = dir.x - CONTAINER_WIDTH / 2;
+    }
+
+    this.dataNodePosition = { x, y };
+  }
+
+  /* ================== EDGE LOGIC ================== */
 
   getVisibleEdges() {
     const edges: any[] = [];
@@ -313,7 +276,7 @@ export class App implements AfterViewInit {
       edges.push({ x1: parent.x, y1: dir.y, x2: dir.x, y2: dir.y });
     }
 
-    if (this.selectedFolderId && this.dataNodePosition) {
+    if (this.selectedFolderData && this.dataNodePosition) {
       const folder = this.directories.find(d => d.id === this.selectedFolderId);
       if (folder) {
         edges.push({
@@ -328,35 +291,64 @@ export class App implements AfterViewInit {
     return edges;
   }
 
-  @HostListener('mousedown', ['$event'])
-  onMouseDown(e: MouseEvent) {
+  /* ================== IMAGE VIEWER ================== */
 
-    if (e.button !== 0) return;
-
-    e.preventDefault();
-
-    const rect = this.centerCircle.nativeElement.getBoundingClientRect();
-    const insideCenter =
-      e.clientX >= rect.left &&
-      e.clientX <= rect.right &&
-      e.clientY >= rect.top &&
-      e.clientY <= rect.bottom;
-
-    if (insideCenter) return;
-
-    this.isDragging = true;
-    this.startX = e.clientX - this.x;
-    this.startY = e.clientY - this.y;
-
-    document.body.style.userSelect = 'none';
+  openImage(file: string) {
+    this.selectedImage = file;
   }
+
+  closeImage() {
+    this.selectedImage = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc() {
+    this.closeImage();
+  }
+@HostListener('mousedown', ['$event'])
+onMouseDown(e: MouseEvent) {
+
+  const target = e.target as HTMLElement;
+
+  // ✅ DO NOT drag when clicking UI elements
+  if (
+    target.closest('.add-folder-modal') ||
+    target.closest('.data-node')
+  ) {
+    return;
+  }
+
+  if (e.button !== 0) return;
+
+  e.preventDefault();
+
+  const rect = this.centerCircle.nativeElement.getBoundingClientRect();
+  const insideCenter =
+    e.clientX >= rect.left &&
+    e.clientX <= rect.right &&
+    e.clientY >= rect.top &&
+    e.clientY <= rect.bottom;
+
+  if (insideCenter) return;
+
+  this.isDragging = true;
+  this.startX = e.clientX - this.x;
+  this.startY = e.clientY - this.y;
+
+  document.body.style.userSelect = 'none';
+}
+closeModelData() {
+  this.selectedFolderId = null;
+  this.dataNodePosition = null;
+}
+
+
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(e: MouseEvent) {
     if (!this.isDragging) return;
 
     e.preventDefault();
-
     this.x = e.clientX - this.startX;
     this.y = e.clientY - this.startY;
     this.update();

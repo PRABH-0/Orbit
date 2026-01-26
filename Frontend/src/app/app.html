@@ -1,3 +1,8 @@
+<app-header
+  [currentFolder]="currentFolderName"
+  (addFolder)="onAddFolder()">
+</app-header>
+
 <div class="grid" #grid>
 
   <svg class="edges" width="5000" height="5000">
@@ -29,27 +34,51 @@
   </ng-container>
 
   <app-model-data
-  *ngIf="selectedFolderId && dataNodePosition"
+  *ngIf="selectedFolderData && dataNodePosition"
   [x]="dataNodePosition.x"
   [y]="dataNodePosition.y"
-  [title]="
-    selectedFolderId === 'wallpapers' ? 'Wallpapers' :
-    selectedFolderId === 'screenshots' ? 'Screenshots' :
-    'Classical'
-  "
-  [items]="
-    selectedFolderId === 'wallpapers' ? wallpapers :
-    selectedFolderId === 'screenshots' ? screenshots :
-    classicalImages
-  "
-  [basePath]="
-    selectedFolderId === 'wallpapers' ? '/imagesData' :
-    selectedFolderId === 'screenshots' ? '/screenshot' :
-    '/classical'
-  "
-  (imageOpen)="openImage($event)">
+  [title]="selectedFolderData.name"
+  [items]="selectedFolderData.items.files"
+  [basePath]="selectedFolderData.items.basePath"
+  (imageOpen)="openImage($event)"
+  (closeNode)="closeModelData()">
 </app-model-data>
 
+
+
+</div>
+<div class="add-folder-modal" *ngIf="isAddFolderOpen">
+
+  <h3>Add Folder</h3>
+
+  <label>
+    Folder Name
+    <input
+      type="text"
+      [(ngModel)]="draftFolder.name"
+    />
+  </label>
+
+  <label>
+    X Position
+    <input
+      type="number"
+      [(ngModel)]="draftFolder.x"
+    />
+  </label>
+
+  <label>
+    Y Position
+    <input
+      type="number"
+      [(ngModel)]="draftFolder.y"
+    />
+  </label>
+
+  <div class="actions">
+    <button class="cancel" (click)="cancelAddFolder()">Cancel</button>
+    <button class="save" (click)="saveAddFolder()">Save</button>
+  </div>
 
 </div>
 

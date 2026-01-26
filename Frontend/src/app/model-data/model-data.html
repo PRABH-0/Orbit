@@ -3,23 +3,26 @@
   [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
 >
   <div class="data-header">
-  <span>{{ title }}</span>
+    <span>{{ title }}</span>
 
-  <div class="pager" *ngIf="totalPages > 1">
-    <button
-      (click)="prevPage()"
-      [disabled]="currentPage === 0">
-      ◀
-    </button>
+    <div class="header-actions">
+      <div class="pager" *ngIf="totalPages > 1">
+        <button
+          (click)="prevPage()"
+          [disabled]="currentPage === 0">
+          ◀
+        </button>
 
-    <button
-      (click)="nextPage()"
-      [disabled]="currentPage === totalPages - 1">
-      ▶
-    </button>
+        <button
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages - 1">
+          ▶
+        </button>
+      </div>
+<button class="close-btn" (click)="close()">✕</button>
+
+    </div>
   </div>
-</div>
-
 
   <div class="data-grid">
     <div
@@ -28,10 +31,7 @@
       (click)="openImage(file)"
     >
       <img [src]="getImagePath(file)" />
-
-      <div class="file-tooltip">
-        {{ file }}
-      </div>
+      <div class="file-tooltip">{{ file }}</div>
     </div>
   </div>
 </div>

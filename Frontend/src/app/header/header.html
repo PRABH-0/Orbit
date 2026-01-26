@@ -1,3 +1,13 @@
 <header class="header">
-  <span class="username">{{ userName }}</span>
+  <div class="left">
+    <span class="username">{{ userName }}</span>
+  </div>
+
+  <div class="right" *ngIf="currentFolder">
+    <div class="folder-name">{{ currentFolder }}</div>
+
+    <button class="add-folder-btn" (click)="addFolder.emit()">
+      ＋ Add Folder
+    </button>
+  </div>
 </header>
