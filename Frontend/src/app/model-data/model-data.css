@@ -136,4 +136,33 @@
   border-radius: 6px;
 
   cursor: pointer;
+}.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-btn {
+  width: 26px;
+  height: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+  font-weight: 600;
+  padding-bottom: 6px;
+
+background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: rgba(37, 99, 235, 0.4);
 }

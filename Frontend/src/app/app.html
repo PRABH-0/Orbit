@@ -25,15 +25,17 @@
 
   <ng-container *ngFor="let dir of directories">
     <app-directory
-      *ngIf="shouldShow(dir)"
-      [name]="dir.name"
-      [x]="dir.x"
-      [y]="dir.y"
-      (clicked)="onFolderClick(dir)">
-    </app-directory>
+  *ngIf="shouldShow(dir)"
+  [name]="dir.name"
+  [x]="dir.x"
+  [y]="dir.y"
+  (clicked)="onFolderClick(dir)"
+  (moved)="onFolderMoved(dir, $event)">
+</app-directory>
+
   </ng-container>
 
-  <app-model-data
+ <app-model-data
   *ngIf="selectedFolderData && dataNodePosition"
   [x]="dataNodePosition.x"
   [y]="dataNodePosition.y"
@@ -41,9 +43,9 @@
   [items]="selectedFolderData.items.files"
   [basePath]="selectedFolderData.items.basePath"
   (imageOpen)="openImage($event)"
-  (closeNode)="closeModelData()">
+  (closeNode)="closeModelData()"
+  (addImage)="onAddImage($event)">
 </app-model-data>
-
 
 
 </div>

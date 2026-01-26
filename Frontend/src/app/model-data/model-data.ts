@@ -22,6 +22,25 @@ export class ModelData {
 close() {
   this.closeNode.emit();
 }
+@Output() addImage = new EventEmitter<File>();
+
+triggerFileInput() {
+  const input = document.querySelector<HTMLInputElement>(
+    'input[type="file"]'
+  );
+  input?.click();
+}
+
+onFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || !input.files.length) return;
+
+  const file = input.files[0];
+  this.addImage.emit(file);
+
+  // reset input so same file can be selected again
+  input.value = '';
+}
 
   @Output() imageOpen = new EventEmitter<string>();
 pageSize = 70;

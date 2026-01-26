@@ -3,26 +3,32 @@
   [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
 >
   <div class="data-header">
-    <span>{{ title }}</span>
+  <span>{{ title }}</span>
 
-    <div class="header-actions">
-      <div class="pager" *ngIf="totalPages > 1">
-        <button
-          (click)="prevPage()"
-          [disabled]="currentPage === 0">
-          ◀
-        </button>
+  <div class="header-actions">
 
-        <button
-          (click)="nextPage()"
-          [disabled]="currentPage === totalPages - 1">
-          ▶
-        </button>
-      </div>
-<button class="close-btn" (click)="close()">✕</button>
-
+    <div class="pager" *ngIf="totalPages > 1">
+      <button (click)="prevPage()" [disabled]="currentPage === 0">◀</button>
+      <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1">▶</button>
     </div>
+
+    <!-- ➕ Add Image -->
+    <button class="add-btn" (click)="triggerFileInput()">＋</button>
+
+    <!-- ❌ Close -->
+    <button class="close-btn" (click)="close()">✕</button>
   </div>
+</div>
+
+<!-- hidden file input -->
+<input
+  type="file"
+  accept="image/*"
+  hidden
+  #fileInput
+  (change)="onFileSelected($event)"
+/>
+
 
   <div class="data-grid">
     <div

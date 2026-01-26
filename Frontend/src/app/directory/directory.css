@@ -2,13 +2,25 @@
   position: absolute;
   width: 80px;
   text-align: center;
-  cursor: pointer;
+  cursor: grab;
   z-index: 10;
+
   margin-top: -20px;
-  margin-left: -40px;   
+  margin-left: -40px;
+
+  user-select: none;
+}
+
+.folder-directory:active {
+  cursor: grabbing;
+}
+
+.folder-icon {
+  pointer-events: none;
 }
 
 .label {
   font-size: 12px;
   color: white;
+  pointer-events: none;
 }

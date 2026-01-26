@@ -128,6 +128,22 @@ saveAddFolder() {
   this.draftFolder = null;
   this.isAddFolderOpen = false;
 }
+onFolderMoved(dir: any, pos: { x: number; y: number }) {
+  dir.x = pos.x;
+  dir.y = pos.y;
+
+  // 🔥 keep draft form in sync
+  if (this.draftFolder && this.draftFolder.id === dir.id) {
+    this.draftFolder.x = pos.x;
+    this.draftFolder.y = pos.y;
+  }
+
+  // 🔥 keep model-data + edges synced
+  if (this.selectedFolderId === dir.id && dir.items) {
+    this.setDataNodePosition(dir);
+  }
+}
+
 
 cancelAddFolder() {
   if (!this.draftFolder) return;
@@ -177,6 +193,13 @@ onFolderClick(dir: any) {
   }
 }
 
+onAddImage(file: File) {
+  if (!this.selectedFolderData) return;
+
+  // TEMP: just use file name
+  // Later → upload to server
+  this.selectedFolderData.items.files.unshift(file.name);
+}
 
 
   toggleFolder(id: string) {
@@ -310,10 +333,11 @@ onMouseDown(e: MouseEvent) {
 
   const target = e.target as HTMLElement;
 
-  // ✅ DO NOT drag when clicking UI elements
+  // ✅ DO NOT drag grid when clicking UI elements or folders
   if (
     target.closest('.add-folder-modal') ||
-    target.closest('.data-node')
+    target.closest('.data-node') ||
+    target.closest('.folder-directory')   // 🔥 REQUIRED
   ) {
     return;
   }
@@ -337,6 +361,7 @@ onMouseDown(e: MouseEvent) {
 
   document.body.style.userSelect = 'none';
 }
+
 closeModelData() {
   this.selectedFolderId = null;
   this.dataNodePosition = null;
