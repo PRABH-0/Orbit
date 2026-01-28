@@ -12,39 +12,68 @@ import { Router } from '@angular/router';
 })
 export class Signin {
 
-  email = '';
+  isRegister = false;
+
+  username = '';
   password = '';
+  confirmPassword = '';
+  showPassword = false;
   error = '';
-maskedPassword = '';
-showPassword = false;
 
   constructor(private router: Router) {}
 
-onPasswordInput(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const realValue = input.value.replace(/\*/g, '');
-
-  this.password += realValue;
-  this.maskedPassword = '*'.repeat(this.password.length);
-}
-
-  signIn() {
-  this.error = '';
-
-  if (!this.email || !this.password) {
-    this.error = 'Please fill all fields';
-    return;
+  toggleMode() {
+    this.isRegister = !this.isRegister;
+    this.error = '';
+    this.password = '';
+    this.confirmPassword = '';
   }
 
-  if (this.email === 'p@test.com' && this.password === '123456') {
+  submit() {
+    this.error = '';
 
-    localStorage.setItem('token', 'logged-in');
+    if (!this.username || !this.password) {
+      this.error = 'Please fill all fields';
+      return;
+    }
 
-    this.router.navigate(['/']);
-
-  } else {
-    this.error = 'Invalid credentials';
+    if (this.isRegister) {
+      this.register();
+    } else {
+      this.login();
+    }
   }
-}
 
+  register() {
+    if (this.password !== this.confirmPassword) {
+      this.error = 'Passwords do not match';
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+    if (users[this.username]) {
+      this.error = 'User already exists';
+      return;
+    }
+
+    users[this.username] = this.password;
+    localStorage.setItem('users', JSON.stringify(users));
+
+    this.isRegister = false;
+    this.password = '';
+    this.confirmPassword = '';
+  }
+
+  login() {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+    if (users[this.username] === this.password) {
+      localStorage.setItem('token', 'logged-in');
+      localStorage.setItem('user', this.username);
+      this.router.navigate(['/']);
+    } else {
+      this.error = 'Invalid username or password';
+    }
+  }
 }

@@ -157,3 +157,7 @@ button:hover {
   cursor: pointer;
   padding-bottom: 12px;
 }
+.footer:hover {
+  color: #e5e7eb;
+  text-decoration: underline;
+}
