@@ -12,15 +12,12 @@
       <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1">▶</button>
     </div>
 
-    <!-- ➕ Add Image -->
     <button class="add-btn" (click)="triggerFileInput()">＋</button>
 
-    <!-- ❌ Close -->
     <button class="close-btn" (click)="close()">✕</button>
   </div>
 </div>
 
-<!-- hidden file input -->
 <input
   type="file"
   accept="image/*"

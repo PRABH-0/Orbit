@@ -1,0 +1,35 @@
+<h2 class="orbit-title">[ Orbit ]</h2>
+
+<div class="signin-container">
+  <!-- GRID BACKGROUND -->
+  <div class="grid-bg"></div>
+
+  <!-- LOGIN CARD -->
+  <div class="login-card">
+    <h2 class="title">Sign in</h2>
+
+    <div class="input-group">
+      <input
+        type="email"
+        [(ngModel)]="email"
+        placeholder="Email"
+      />
+    </div>
+
+    <div class="input-group password-group">
+  <input
+    [type]="showPassword ? 'text' : 'password'"
+    [(ngModel)]="password"
+    placeholder="Password"
+  />
+  <span class="toggle" (click)="showPassword = !showPassword">
+    {{ showPassword ? 'Hide' : 'Show' }}
+  </span>
+</div>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button (click)="signIn()">Sign In</button>
+
+  </div>
+</div>

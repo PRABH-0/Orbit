@@ -1,0 +1,101 @@
+<app-header
+  [currentFolder]="currentFolderName"
+  (addFolder)="onAddFolder()">
+</app-header>
+
+<div class="grid" #grid>
+
+  <svg class="edges" width="5000" height="5000">
+    <line
+      *ngFor="let e of getVisibleEdges()"
+      appEdge
+      [x1]="e.x1"
+      [y1]="e.y1"
+      [x2]="e.x2"
+      [y2]="e.y2">
+    </line>
+  </svg>
+
+  <div
+    class="center-circle"
+    #centerCircle
+    (click)="toggleRoot()">
+    <img src="user_c.png" />
+  </div>
+
+  <ng-container *ngFor="let dir of directories">
+    <app-directory
+  *ngIf="shouldShow(dir)"
+  [name]="dir.name"
+  [x]="dir.x"
+  [y]="dir.y"
+  (clicked)="onFolderClick(dir)"
+  (moved)="onFolderMoved(dir, $event)">
+</app-directory>
+
+  </ng-container>
+
+ <app-model-data
+  *ngIf="selectedFolderData && dataNodePosition"
+  [x]="dataNodePosition.x"
+  [y]="dataNodePosition.y"
+  [title]="selectedFolderData.name"
+  [items]="selectedFolderData.items.files"
+  [basePath]="selectedFolderData.items.basePath"
+  (imageOpen)="openImage($event)"
+  (closeNode)="closeModelData()"
+  (addImage)="onAddImage($event)">
+</app-model-data>
+
+
+</div>
+<div class="add-folder-modal" *ngIf="isAddFolderOpen">
+
+  <h3>Add Folder</h3>
+
+  <label>
+    Folder Name
+    <input
+      type="text"
+      [(ngModel)]="draftFolder.name"
+    />
+  </label>
+
+  <label>
+    X Position
+    <input
+      type="number"
+      [(ngModel)]="draftFolder.x"
+    />
+  </label>
+
+  <label>
+    Y Position
+    <input
+      type="number"
+      [(ngModel)]="draftFolder.y"
+    />
+  </label>
+
+  <div class="actions">
+    <button class="cancel" (click)="cancelAddFolder()">Cancel</button>
+    <button class="save" (click)="saveAddFolder()">Save</button>
+  </div>
+
+</div>
+
+<div
+  class="image-viewer"
+  *ngIf="selectedImage as image"
+  (click)="closeImage()"
+>
+  <img
+  [src]="
+    selectedFolderId === 'wallpapers' ? '/imagesData/' + image :
+    selectedFolderId === 'screenshots' ? '/screenshot/' + image :
+    '/classical/' + image
+  "
+  (click)="$event.stopPropagation()"
+/>
+
+</div>

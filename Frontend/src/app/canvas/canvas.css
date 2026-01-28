@@ -1,0 +1,250 @@
+/* ===== VIEWPORT ===== */
+.viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.viewport.dragging {
+  cursor: grabbing;
+}
+
+/* ===== GRID ===== */
+.grid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5000px;
+  height: 5000px;
+
+  background-image:
+    linear-gradient(rgba(120, 140, 170, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 140, 170, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
+
+  transform-origin: center;
+  will-change: transform;
+
+  z-index: 1;
+}
+
+.grid:active {
+  cursor: grabbing;
+}
+
+/* ===== CENTER NODE ===== */
+.center-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+
+  border: 1px solid rgba(140, 180, 240, 0.35);
+  box-shadow: 0 0 6px rgba(140, 180, 240, 0.25);
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+  z-index: 20;
+}
+
+.center-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== EDGES ===== */
+.edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ===== GLOBAL IMAGE BEHAVIOR ===== */
+img {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ===== IMAGE VIEWER ===== */
+.image-viewer {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  z-index: 999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-viewer img {
+  max-width: 85vw;
+  max-height: 85vh;
+
+  border-radius: 12px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85);
+
+  background: #000;
+  animation: zoomIn 0.25s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ================= ADD FOLDER MODAL ================= */
+
+.add-folder-modal {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+
+  width: 280px;
+  padding: 14px;
+
+  background: rgba(10, 15, 25, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 10px;
+  border: 1px solid rgba(120, 140, 170, 0.25);
+
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+
+  color: #e5e7eb;
+  z-index: 1200;
+
+  font-family: 'IBM Plex Mono', monospace;
+
+  animation: slideInRight 0.25s ease-out;
+}
+
+/* ---------- TITLE ---------- */
+.add-folder-modal h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #f9fafb;
+}
+
+/* ---------- LABELS ---------- */
+.add-folder-modal label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #cbd5f5;
+}
+
+/* ---------- INPUTS ---------- */
+.add-folder-modal input {
+  width: 94%;
+  margin-top: 4px;
+  padding: 7px 8px;
+
+  font-size: 13px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #f8fafc;
+
+  background: rgba(2, 6, 23, 0.85);
+  border: 1px solid rgba(100, 116, 139, 0.45);
+  border-radius: 6px;
+
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.add-folder-modal input:focus {
+  border-color: rgba(147, 197, 253, 0.8);
+  box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.4);
+}
+
+/* ---------- ACTIONS ---------- */
+.add-folder-modal .actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* Cancel button */
+.add-folder-modal .cancel {
+  flex: 1;
+  padding: 6px 0;
+
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #cbd5f5;
+
+  background: transparent;
+  border: 1px solid rgba(100, 116, 139, 0.6);
+  border-radius: 6px;
+
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.add-folder-modal .cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(148, 163, 184, 0.8);
+}
+
+/* Save button */
+.add-folder-modal .save {
+  flex: 1;
+  padding: 6px 0;
+
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  color: #ffffff;
+
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.add-folder-modal .save:hover {
+  background-color: #1c356b;
+}
+
+/* ---------- ANIMATION ---------- */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
