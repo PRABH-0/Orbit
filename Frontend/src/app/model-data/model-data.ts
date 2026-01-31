@@ -17,7 +17,7 @@ export class ModelData implements OnChanges {
   @Input() items: any[] = [];
 
   @Output() closeNode = new EventEmitter<void>();
-  @Output() imageOpen = new EventEmitter<string>();
+  @Output() imageOpen = new EventEmitter<any>();
 @Input() nodeId!: string | null; // 🔥 important
 @Output() fileUploaded = new EventEmitter<void>();
 
@@ -70,8 +70,12 @@ export class ModelData implements OnChanges {
   }
 
   openImage(file: any) {
-    this.imageOpen.emit(this.getImageUrl(file.id)!);
-  }
+  this.imageOpen.emit({
+    id: file.id,
+    url: this.getImageUrl(file.id)
+  });
+}
+
 triggerFileInput(event: MouseEvent) {
   event.stopPropagation();
   this.fileInput.nativeElement.click();

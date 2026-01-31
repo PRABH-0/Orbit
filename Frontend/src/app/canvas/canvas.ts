@@ -60,7 +60,7 @@ lastMovedFolder: any = null;
   draftFolder: any = null;
 
   rootOpen = false;
-
+selectedFileId: string | null = null;
   private isDragging = false;
   private startX = 0;
   private startY = 0;
@@ -219,7 +219,26 @@ onHeaderFileSelected(event: Event) {
       this.setDataNodePosition(dir);
     }
   }
-  
+  downloadImage() {
+  if (!this.selectedImage) return;
+
+  const a = document.createElement('a');
+  a.href = this.selectedImage;
+  a.download = 'file';
+  a.click();
+}
+deleteImage() {
+  if (!this.selectedFileId) return;
+
+  this.fileService.deleteFile(this.selectedFileId).subscribe({
+    next: () => {
+      this.closeImage();
+      this.reloadFiles();
+    },
+    error: err => console.error('Delete failed', err)
+  });
+}
+
   getModelDataAnchor() {
   if (!this.dataNodePosition) return null;
 
@@ -357,16 +376,17 @@ getVisibleEdges() {
   return edges;
 }
 
-  // =========================
-  // IMAGE VIEW
-  // =========================
-  openImage(file: string) {
-    this.selectedImage = file;
-  }
+  openImage(file: any) {
+  this.selectedImage = file.url ?? file; // depending on what you emit
+  this.selectedFileId = file.id;
+}
 
-  closeImage() {
-    this.selectedImage = null;
-  }
+
+ closeImage() {
+  this.selectedImage = null;
+  this.selectedFileId = null;
+}
+
 reloadFiles() {
   if (!this.selectedFolderId) return;
 

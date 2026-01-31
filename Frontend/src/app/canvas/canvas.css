@@ -261,3 +261,55 @@ img {
   pointer-events: none;
   z-index: 1;
 }
+/* FULLSCREEN OVERLAY */
+.image-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.568);
+  z-index: 9999;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* IMAGE */
+.image-preview {
+  max-width: 90%;
+  max-height: 85%;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+/* TOP CENTER TOOLBAR */
+.image-toolbar {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 10px;
+
+  background: rgba(20, 20, 25, 0.9);
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.image-toolbar button {
+  width: 34px;
+  height: 34px;
+
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.image-toolbar button:hover {
+  background: rgba(37, 99, 235, 0.5);
+}
