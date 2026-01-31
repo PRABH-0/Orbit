@@ -9,6 +9,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class Header {
   @Input() currentFolder: string | null = null;
+  @Input() username: string | null = null;
   @Output() addFolder = new EventEmitter<void>();
- userName = 'Prabhjot Singh';
 }

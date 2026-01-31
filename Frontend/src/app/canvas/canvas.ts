@@ -16,7 +16,7 @@ import { Header } from '../header/header';
 import { Directory } from '../directory/directory';
 import { Edge } from '../edge/edge';
 import { ModelData } from '../model-data/model-data';
-import dummyData from '../dummydata.json';
+import { DirectoryService } from '../services/directory.service';
 
 @Component({
   selector: 'app-canvas',
@@ -28,196 +28,219 @@ import dummyData from '../dummydata.json';
     ModelData,
     FormsModule,
     NgFor,
-    NgIf,CommonModule
+    NgIf,
+    CommonModule
   ],
   templateUrl: './canvas.html',
   styleUrl: './canvas.css'
 })
 export class Canvas implements OnInit, AfterViewInit {
+
   @ViewChild('grid', { static: true }) grid!: ElementRef<HTMLDivElement>;
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
   @Output() imageOpen = new EventEmitter<string>();
+
+  directories: any[] = [];
+  username: string | null = null;
+
   selectedParentFolderId: string | null = null;
+  selectedFolderId: string | null = null;
+  currentFolderName: string | null = null;
+selectedFolderItems: any[] = [];
+
+  dataNodePosition: { x: number; y: number } | null = null;
+  selectedImage: string | null = null;
+
+  isAddFolderOpen = false;
+  draftFolder: any = null;
+
+  rootOpen = false;
+
   private isDragging = false;
   private startX = 0;
   private startY = 0;
   private x = -2500;
   private y = -2500;
-  isAddFolderOpen = false;
-  draftFolder: any = null;
-  rootOpen = false;
-  selectedFolderId: string | null = null;
-  currentFolderName: string | null = null;
-  dataNodePosition: { x: number; y: number } | null = null;
-  selectedImage: string | null = null;
-  apiData: any;
-  directories: any[] = [];
 
+  constructor(private directoryService: DirectoryService) {}
+
+  // =========================
+  // INIT
+  // =========================
   ngOnInit() {
-    this.apiData = dummyData;
-    this.directories = this.apiData.directories.map((d: any) => ({
-      ...d,
-      isOpen: false
-    }));
+     this.username = localStorage.getItem('username');
+    this.loadDirectories();
   }
 
   ngAfterViewInit() {
     this.update();
   }
 
+  // =========================
+  // LOAD FROM API
+  // =========================
+  loadDirectories() {
+    this.directoryService.getDirectories().subscribe({
+      next: data => {
+        this.directories = data.map(d => ({
+          ...d,
+          isOpen: false
+        }));
+      },
+      error: err => {
+        console.error('Failed to load directories', err);
+      }
+    });
+  }
+
+  // =========================
+  // ADD FOLDER
+  // =========================
   onAddFolder() {
-    const parentId = this.selectedParentFolderId ?? 'root';
+    const parentId = this.selectedParentFolderId;
+
     const parent =
-      parentId === 'root'
-        ? { id: 'root', x: 2500, y: 2500 }
+      !parentId
+        ? { id: null, x: 2500, y: 2500 }
         : this.directories.find(d => d.id === parentId);
+
     if (!parent) return;
-    if (parentId !== 'root') {
-      parent.isOpen = true;
-    } else {
-      this.rootOpen = true;
-    }
-    const draft = {
-      id: this.generateId(),
-      parentId: parent.id,
+
+    if (parentId) parent.isOpen = true;
+    else this.rootOpen = true;
+
+    this.draftFolder = {
       name: 'New Folder',
+      parentId: parent.id,
       x: parent.x + 120,
       y: parent.y + 120,
       isOpen: false,
       isDraft: true
     };
-    this.directories.push(draft);
-    this.draftFolder = draft;
-    this.isAddFolderOpen = true;
-  }
 
-  get selectedFolderData() {
-    if (!this.selectedFolderId) return null;
-    return this.directories.find(
-      d => d.id === this.selectedFolderId && d.items
-    );
+    this.directories.push(this.draftFolder);
+    this.isAddFolderOpen = true;
   }
 
   saveAddFolder() {
     if (!this.draftFolder) return;
-    delete this.draftFolder.isDraft;
-    this.draftFolder = null;
-    this.isAddFolderOpen = false;
-  }
 
-  onFolderMoved(dir: any, pos: { x: number; y: number }) {
-    dir.x = pos.x;
-    dir.y = pos.y;
-    if (this.draftFolder && this.draftFolder.id === dir.id) {
-      this.draftFolder.x = pos.x;
-      this.draftFolder.y = pos.y;
-    }
-    if (this.selectedFolderId === dir.id && dir.items) {
-      this.setDataNodePosition(dir);
-    }
+    const payload = {
+      name: this.draftFolder.name,
+      x: this.draftFolder.x,
+      y: this.draftFolder.y,
+      parentId: this.draftFolder.parentId,
+      basePath: null
+    };
+
+    this.directoryService.createDirectory(payload).subscribe({
+      next: created => {
+        Object.assign(this.draftFolder, created);
+        delete this.draftFolder.isDraft;
+        this.draftFolder = null;
+        this.isAddFolderOpen = false;
+      },
+      error: err => {
+        console.error('Create folder failed', err);
+      }
+    });
   }
 
   cancelAddFolder() {
     if (!this.draftFolder) return;
-    this.directories = this.directories.filter(
-      d => d.id !== this.draftFolder.id
-    );
+    this.directories = this.directories.filter(d => d !== this.draftFolder);
     this.draftFolder = null;
     this.isAddFolderOpen = false;
   }
 
-  hasChildren(dir: any): boolean {
-    return this.directories.some(d => d.parentId === dir.id);
-  }
+  // =========================
+  // MOVE FOLDER
+  // =========================
+  onFolderMoved(dir: any, pos: { x: number; y: number }) {
+    dir.x = pos.x;
+    dir.y = pos.y;
 
-  generateId(): string {
-    return 'folder_' + Math.random().toString(36).substring(2, 9);
+    if (dir.id) {
+      this.directoryService
+        .updatePosition(dir.id, pos.x, pos.y)
+        .subscribe();
+    }
+
+    if (this.selectedFolderId === dir.id && this.dataNodePosition) {
+      this.setDataNodePosition(dir);
+    }
   }
 
   onFolderClick(dir: any) {
-    this.selectedParentFolderId = dir.id;
-    this.currentFolderName = dir.name;
-    if (this.hasChildren(dir)) {
-      this.toggleFolder(dir.id);
-    }
-    if (this.selectedFolderId === dir.id) {
-      this.selectedFolderId = null;
-      this.dataNodePosition = null;
-      return;
-    }
-    if (dir.items) {
-      this.selectedFolderId = dir.id;
-      this.setDataNodePosition(dir);
-    } else {
-      this.selectedFolderId = null;
-      this.dataNodePosition = null;
-    }
+  this.selectedParentFolderId = dir.id;
+  this.currentFolderName = dir.name;
+
+  if (this.hasChildren(dir)) {
+    this.toggleFolder(dir.id);
   }
 
-  onAddImage(file: File) {
-    if (!this.selectedFolderData) return;
-    this.selectedFolderData.items.files.unshift(file.name);
+  if (this.selectedFolderId === dir.id) {
+    this.closeModelData();
+    return;
+  }
+
+  this.selectedFolderId = dir.id;
+
+  // ✅ SET ITEMS (empty for now)
+  this.selectedFolderItems = dir.items ?? [];
+
+  this.setDataNodePosition(dir);
+}
+
+
+  // =========================
+  // TREE HELPERS
+  // =========================
+  hasChildren(dir: any): boolean {
+    return this.directories.some(d => d.parentId === dir.id);
   }
 
   toggleFolder(id: string) {
     const folder = this.directories.find(d => d.id === id);
     if (!folder) return;
     folder.isOpen = !folder.isOpen;
-    if (!folder.isOpen) {
-      this.closeAllChildren(folder.id);
-    }
+    if (!folder.isOpen) this.closeAllChildren(folder.id);
   }
 
   closeAllChildren(parentId: string) {
-    const children = this.directories.filter(d => d.parentId === parentId);
-    for (const child of children) {
+    for (const child of this.directories.filter(d => d.parentId === parentId)) {
       child.isOpen = false;
       this.closeAllChildren(child.id);
     }
   }
 
   shouldShow(dir: any): boolean {
-    if (dir.parentId === 'root') {
-      return this.rootOpen;
-    }
+    if (!dir.parentId) return this.rootOpen;
     const parent = this.directories.find(d => d.id === dir.parentId);
     return !!parent?.isOpen;
   }
 
   toggleRoot() {
     this.rootOpen = !this.rootOpen;
-    if (this.rootOpen) {
-      this.selectedParentFolderId = 'root';
-      this.currentFolderName = 'Root';
-    } else {
-      this.currentFolderName = null;
+    if (!this.rootOpen) {
       this.directories.forEach(d => d.isOpen = false);
-      this.selectedFolderId = null;
-      this.dataNodePosition = null;
+      this.closeModelData();
+    } else {
+      this.currentFolderName = 'Root';
     }
   }
 
+  // =========================
+  // DATA NODE
+  // =========================
   setDataNodePosition(dir: any) {
-    const ROOT_X = 2500;
-    const ROOT_Y = 2500;
-    const CONTAINER_WIDTH = 800;
-    const CONTAINER_HEIGHT = 580;
     const GAP = 160;
-    let x = dir.x;
-    let y = dir.y;
-    const dx = dir.x - ROOT_X;
-    const dy = dir.y - ROOT_Y;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      x = dx > 0
-        ? dir.x + GAP
-        : dir.x - CONTAINER_WIDTH - GAP;
-      y = dir.y - CONTAINER_HEIGHT / 2;
-    } else {
-      y = dy > 0
-        ? dir.y + GAP
-        : dir.y - CONTAINER_HEIGHT - GAP;
-      x = dir.x - CONTAINER_WIDTH / 2;
-    }
+    const WIDTH = 800;
+    const HEIGHT = 580;
+
+    let x = dir.x + GAP;
+    let y = dir.y - HEIGHT / 2;
+
     this.dataNodePosition = { x, y };
   }
 
@@ -225,32 +248,25 @@ export class Canvas implements OnInit, AfterViewInit {
     const edges: any[] = [];
     const ROOT_X = 2500;
     const ROOT_Y = 2500;
+
     for (const dir of this.directories) {
-      if (dir.parentId === 'root') {
-        if (!this.rootOpen) continue;
-        edges.push({ x1: ROOT_X, y1: ROOT_Y, x2: ROOT_X, y2: dir.y });
-        edges.push({ x1: ROOT_X, y1: dir.y, x2: dir.x, y2: dir.y });
+      if (!dir.parentId && this.rootOpen) {
+        edges.push({ x1: ROOT_X, y1: ROOT_Y, x2: dir.x, y2: dir.y });
         continue;
       }
+
       const parent = this.directories.find(d => d.id === dir.parentId);
       if (!parent || !parent.isOpen) continue;
-      edges.push({ x1: parent.x, y1: parent.y, x2: parent.x, y2: dir.y });
-      edges.push({ x1: parent.x, y1: dir.y, x2: dir.x, y2: dir.y });
+
+      edges.push({ x1: parent.x, y1: parent.y, x2: dir.x, y2: dir.y });
     }
-    if (this.selectedFolderData && this.dataNodePosition) {
-      const folder = this.directories.find(d => d.id === this.selectedFolderId);
-      if (folder) {
-        edges.push({
-          x1: folder.x,
-          y1: folder.y,
-          x2: this.dataNodePosition.x,
-          y2: this.dataNodePosition.y + 40
-        });
-      }
-    }
+
     return edges;
   }
 
+  // =========================
+  // IMAGE VIEW
+  // =========================
   openImage(file: string) {
     this.selectedImage = file;
   }
@@ -259,45 +275,25 @@ export class Canvas implements OnInit, AfterViewInit {
     this.selectedImage = null;
   }
 
-  @HostListener('document:keydown.escape')
-  onEsc() {
-    this.closeImage();
-  }
-
-  @HostListener('mousedown', ['$event'])
-  onMouseDown(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (
-      target.closest('.add-folder-modal') ||
-      target.closest('.data-node') ||
-      target.closest('.folder-directory')
-    ) {
-      return;
-    }
-    if (e.button !== 0) return;
-    e.preventDefault();
-    const rect = this.centerCircle.nativeElement.getBoundingClientRect();
-    const insideCenter =
-      e.clientX >= rect.left &&
-      e.clientX <= rect.right &&
-      e.clientY >= rect.top &&
-      e.clientY <= rect.bottom;
-    if (insideCenter) return;
-    this.isDragging = true;
-    this.startX = e.clientX - this.x;
-    this.startY = e.clientY - this.y;
-    document.body.style.userSelect = 'none';
-  }
-
   closeModelData() {
     this.selectedFolderId = null;
     this.dataNodePosition = null;
   }
 
+  // =========================
+  // CANVAS DRAG
+  // =========================
+  @HostListener('mousedown', ['$event'])
+  onMouseDown(e: MouseEvent) {
+    if ((e.target as HTMLElement).closest('.folder-directory')) return;
+    this.isDragging = true;
+    this.startX = e.clientX - this.x;
+    this.startY = e.clientY - this.y;
+  }
+
   @HostListener('mousemove', ['$event'])
   onMouseMove(e: MouseEvent) {
     if (!this.isDragging) return;
-    e.preventDefault();
     this.x = e.clientX - this.startX;
     this.y = e.clientY - this.startY;
     this.update();
@@ -306,13 +302,6 @@ export class Canvas implements OnInit, AfterViewInit {
   @HostListener('mouseup')
   onMouseUp() {
     this.isDragging = false;
-    document.body.style.userSelect = '';
-  }
-
-  @HostListener('mouseleave')
-  onMouseLeave() {
-    this.isDragging = false;
-    document.body.style.userSelect = '';
   }
 
   private update() {

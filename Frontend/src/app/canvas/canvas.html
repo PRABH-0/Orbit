@@ -1,10 +1,12 @@
 <app-header
+[username]="username"
   [currentFolder]="currentFolderName"
   (addFolder)="onAddFolder()">
 </app-header>
 
 <div class="grid" #grid>
 
+  <!-- EDGES -->
   <svg class="edges" width="5000" height="5000">
     <line
       *ngFor="let e of getVisibleEdges()"
@@ -16,6 +18,7 @@
     </line>
   </svg>
 
+  <!-- ROOT -->
   <div
     class="center-circle"
     #centerCircle
@@ -23,58 +26,51 @@
     <img src="user_c.png" />
   </div>
 
+  <!-- DIRECTORIES -->
   <ng-container *ngFor="let dir of directories">
     <app-directory
-  *ngIf="shouldShow(dir)"
-  [name]="dir.name"
-  [x]="dir.x"
-  [y]="dir.y"
-  (clicked)="onFolderClick(dir)"
-  (moved)="onFolderMoved(dir, $event)">
-</app-directory>
-
+      *ngIf="shouldShow(dir)"
+      [name]="dir.name"
+      [x]="dir.x"
+      [y]="dir.y"
+      (clicked)="onFolderClick(dir)"
+      (moved)="onFolderMoved(dir, $event)">
+    </app-directory>
   </ng-container>
 
- <app-model-data
-  *ngIf="selectedFolderData && dataNodePosition"
-  [x]="dataNodePosition.x"
-  [y]="dataNodePosition.y"
-  [title]="selectedFolderData.name"
-  [items]="selectedFolderData.items.files"
-  [basePath]="selectedFolderData.items.basePath"
-  (imageOpen)="openImage($event)"
-  (closeNode)="closeModelData()"
-  (addImage)="onAddImage($event)">
-</app-model-data>
-
+  <!-- DATA NODE (NO FILES YET) -->
+  <app-model-data
+    *ngIf="
+  selectedFolderId &&
+  dataNodePosition && selectedFolderItems.length > 0"
+    [x]="dataNodePosition.x"
+    [y]="dataNodePosition.y"
+    [title]="currentFolderName"
+    [items]="[]"
+    [basePath]="null"
+    (closeNode)="closeModelData()">
+  </app-model-data>
 
 </div>
+
+<!-- ADD FOLDER MODAL -->
 <div class="add-folder-modal" *ngIf="isAddFolderOpen">
 
   <h3>Add Folder</h3>
 
   <label>
     Folder Name
-    <input
-      type="text"
-      [(ngModel)]="draftFolder.name"
-    />
+    <input type="text" [(ngModel)]="draftFolder.name" />
   </label>
 
   <label>
     X Position
-    <input
-      type="number"
-      [(ngModel)]="draftFolder.x"
-    />
+    <input type="number" [(ngModel)]="draftFolder.x" />
   </label>
 
   <label>
     Y Position
-    <input
-      type="number"
-      [(ngModel)]="draftFolder.y"
-    />
+    <input type="number" [(ngModel)]="draftFolder.y" />
   </label>
 
   <div class="actions">
@@ -84,18 +80,14 @@
 
 </div>
 
+<!-- IMAGE VIEWER (DISABLED FOR NOW) -->
 <div
   class="image-viewer"
-  *ngIf="selectedImage as image"
+  *ngIf="selectedImage"
   (click)="closeImage()"
 >
   <img
-  [src]="
-    selectedFolderId === 'wallpapers' ? '/imagesData/' + image :
-    selectedFolderId === 'screenshots' ? '/screenshot/' + image :
-    '/classical/' + image
-  "
-  (click)="$event.stopPropagation()"
-/>
-
+    [src]="selectedImage"
+    (click)="$event.stopPropagation()"
+  />
 </div>

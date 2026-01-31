@@ -8,12 +8,21 @@
       {{ isRegister ? 'Register' : 'Sign in' }}
     </h2>
 
-    <!-- USERNAME -->
-    <div class="input-group">
+    <!-- USERNAME (REGISTER ONLY) -->
+    <div class="input-group" *ngIf="isRegister">
       <input
         type="text"
         [(ngModel)]="username"
         placeholder="Username"
+      />
+    </div>
+
+    <!-- EMAIL -->
+    <div class="input-group">
+      <input
+        type="email"
+        [(ngModel)]="email"
+        placeholder="Email"
       />
     </div>
 

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-signin',
@@ -15,12 +16,16 @@ export class Signin {
   isRegister = false;
 
   username = '';
+  email = '';
   password = '';
   confirmPassword = '';
   showPassword = false;
   error = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router
+  ) {}
 
   toggleMode() {
     this.isRegister = !this.isRegister;
@@ -32,16 +37,12 @@ export class Signin {
   submit() {
     this.error = '';
 
-    if (!this.username || !this.password) {
+    if (!this.email || !this.password || (this.isRegister && !this.username)) {
       this.error = 'Please fill all fields';
       return;
     }
 
-    if (this.isRegister) {
-      this.register();
-    } else {
-      this.login();
-    }
+    this.isRegister ? this.register() : this.login();
   }
 
   register() {
@@ -50,30 +51,40 @@ export class Signin {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-
-    if (users[this.username]) {
-      this.error = 'User already exists';
-      return;
-    }
-
-    users[this.username] = this.password;
-    localStorage.setItem('users', JSON.stringify(users));
-
-    this.isRegister = false;
-    this.password = '';
-    this.confirmPassword = '';
+    this.auth.register({
+      username: this.username,
+      email: this.email,
+      password: this.password
+    }).subscribe({
+      next: () => {
+        this.isRegister = false;
+        this.password = '';
+        this.confirmPassword = '';
+      },
+      error: err => {
+        this.error = err.error?.message || 'Registration failed';
+      }
+    });
   }
 
   login() {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+  this.auth.login({
+    email: this.email,
+    password: this.password
+  }).subscribe({
+    next: res => {
+      this.auth.saveToken(res.accessToken);
 
-    if (users[this.username] === this.password) {
-      localStorage.setItem('token', 'logged-in');
-      localStorage.setItem('user', this.username);
+      // ✅ SAVE USER INFO
+      localStorage.setItem('username', res.username);
+      localStorage.setItem('userId', res.userId);
+
       this.router.navigate(['/']);
-    } else {
-      this.error = 'Invalid username or password';
+    },
+    error: err => {
+      this.error = err.error?.message || 'Invalid email or password';
     }
-  }
+  });
+}
+
 }
