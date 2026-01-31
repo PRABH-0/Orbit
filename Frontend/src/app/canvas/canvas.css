@@ -92,6 +92,11 @@ img {
   align-items: center;
   justify-content: center;
 }
+.model-edge {
+  stroke-dasharray: 6 4;
+  stroke-width: 2;
+  opacity: 0.8;
+}
 
 .image-viewer img {
   max-width: 85vw;

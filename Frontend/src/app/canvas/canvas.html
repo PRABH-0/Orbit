@@ -40,16 +40,17 @@
 
   <!-- DATA NODE (NO FILES YET) -->
   <app-model-data
-    *ngIf="
-  selectedFolderId &&
-  dataNodePosition && selectedFolderItems.length > 0"
-    [x]="dataNodePosition.x"
-    [y]="dataNodePosition.y"
-    [title]="currentFolderName"
-    [items]="[]"
-    [basePath]="null"
-    (closeNode)="closeModelData()">
-  </app-model-data>
+  *ngIf="selectedFolderId && dataNodePosition"
+  [x]="dataNodePosition.x"
+  [y]="dataNodePosition.y"
+  [title]="currentFolderName"
+  [items]="selectedFolderItems"
+  [nodeId]="selectedFolderId"     
+  (fileUploaded)="reloadFiles()"  
+  (imageOpen)="openImage($event)" 
+  (closeNode)="closeModelData()">
+</app-model-data>
+
 
 </div>
 
@@ -81,13 +82,7 @@
 </div>
 
 <!-- IMAGE VIEWER (DISABLED FOR NOW) -->
-<div
-  class="image-viewer"
-  *ngIf="selectedImage"
-  (click)="closeImage()"
->
-  <img
-    [src]="selectedImage"
-    (click)="$event.stopPropagation()"
-  />
+<div class="image-viewer" *ngIf="selectedImage" (click)="closeImage()">
+  <img [src]="selectedImage" (click)="$event.stopPropagation()" />
 </div>
+

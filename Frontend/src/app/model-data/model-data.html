@@ -2,44 +2,47 @@
   class="data-node"
   [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
 >
-  <!-- HEADER -->
+
   <div class="data-header">
-    <span>{{ title }}</span>
+  <span class="title">{{ title }}</span>
 
-    <div class="header-actions">
+  <div class="header-actions">
+    <!-- ADD ITEM BUTTON -->
+   <button
+  class="add-btn"
+  title="Add file"
+  (click)="triggerFileInput($event)"
+>
+  ＋
+</button>
 
-      <!-- Pagination (hidden if no files) -->
-      <div class="pager" *ngIf="totalPages > 1">
-        <button (click)="prevPage()" [disabled]="currentPage === 0">◀</button>
-        <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1">▶</button>
-      </div>
 
-      <!-- Upload disabled for now -->
-      <button class="add-btn" disabled title="File upload coming soon">
-        ＋
-      </button>
-
-      <button class="close-btn" (click)="close()">✕</button>
-    </div>
+    <!-- CLOSE -->
+    <button class="close-btn" (click)="close()">✕</button>
   </div>
+</div>
+<!-- Hidden file input -->
+<input
+  type="file"
+  #fileInput
+  hidden
+  (change)="onFileSelected($event)"
+/>
+
 
   <!-- CONTENT -->
   <div class="data-grid">
 
-    <!-- No files state -->
-    <div class="empty-state" *ngIf="!items || items.length === 0">
-      <p>No files yet</p>
-      <small>File support will be added soon</small>
-    </div>
-
-    <!-- Files (future) -->
     <div
       class="data-item"
       *ngFor="let file of visibleItems"
       (click)="openImage(file)"
     >
-      <img [src]="getImagePath(file)" />
-      <div class="file-tooltip">{{ file }}</div>
+      <img
+        *ngIf="getImageUrl(file.id)"
+        [src]="getImageUrl(file.id)"
+      />
+      <div class="file-tooltip">{{ file.fileName }}</div>
     </div>
 
   </div>

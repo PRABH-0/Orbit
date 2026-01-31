@@ -17,6 +17,8 @@ import { Directory } from '../directory/directory';
 import { Edge } from '../edge/edge';
 import { ModelData } from '../model-data/model-data';
 import { DirectoryService } from '../services/directory.service';
+import { FileService } from '../services/file.service';
+
 
 @Component({
   selector: 'app-canvas',
@@ -61,8 +63,12 @@ selectedFolderItems: any[] = [];
   private startY = 0;
   private x = -2500;
   private y = -2500;
+showModelData = false;
 
-  constructor(private directoryService: DirectoryService) {}
+  constructor(
+    private directoryService: DirectoryService,
+    private fileService: FileService
+  ) {}
 
   // =========================
   // INIT
@@ -170,8 +176,19 @@ selectedFolderItems: any[] = [];
       this.setDataNodePosition(dir);
     }
   }
+  
+  getModelDataAnchor() {
+  if (!this.dataNodePosition) return null;
 
-  onFolderClick(dir: any) {
+  const WIDTH = 800;   // same as model-data width
+  const HEIGHT = 580;  // same as model-data height
+
+  return {
+    x: this.dataNodePosition.x,
+    y: this.dataNodePosition.y + HEIGHT / 2
+  };
+}
+onFolderClick(dir: any) {
   this.selectedParentFolderId = dir.id;
   this.currentFolderName = dir.name;
 
@@ -179,6 +196,7 @@ selectedFolderItems: any[] = [];
     this.toggleFolder(dir.id);
   }
 
+  // toggle close if same folder
   if (this.selectedFolderId === dir.id) {
     this.closeModelData();
     return;
@@ -186,12 +204,28 @@ selectedFolderItems: any[] = [];
 
   this.selectedFolderId = dir.id;
 
-  // ✅ SET ITEMS (empty for now)
-  this.selectedFolderItems = dir.items ?? [];
+  this.fileService.getFilesByNode(dir.id).subscribe({
+    next: files => {
+      this.selectedFolderItems = files;
 
-  this.setDataNodePosition(dir);
+      if (files.length > 0) {
+        // ✅ ONLY NOW show model-data
+        this.setDataNodePosition(dir);
+        this.showModelData = true;
+      } else {
+        // ❌ No files → no model-data
+        this.showModelData = false;
+        this.dataNodePosition = null;
+      }
+    },
+    error: err => {
+      console.error('Failed to load files', err);
+      this.selectedFolderItems = [];
+      this.showModelData = false;
+      this.dataNodePosition = null;
+    }
+  });
 }
-
 
   // =========================
   // TREE HELPERS
@@ -243,26 +277,42 @@ selectedFolderItems: any[] = [];
 
     this.dataNodePosition = { x, y };
   }
+getVisibleEdges() {
+  const edges: any[] = [];
+  const ROOT_X = 2500;
+  const ROOT_Y = 2500;
 
-  getVisibleEdges() {
-    const edges: any[] = [];
-    const ROOT_X = 2500;
-    const ROOT_Y = 2500;
-
-    for (const dir of this.directories) {
-      if (!dir.parentId && this.rootOpen) {
-        edges.push({ x1: ROOT_X, y1: ROOT_Y, x2: dir.x, y2: dir.y });
-        continue;
-      }
-
-      const parent = this.directories.find(d => d.id === dir.parentId);
-      if (!parent || !parent.isOpen) continue;
-
-      edges.push({ x1: parent.x, y1: parent.y, x2: dir.x, y2: dir.y });
+  // Folder → Folder edges (existing)
+  for (const dir of this.directories) {
+    if (!dir.parentId && this.rootOpen) {
+      edges.push({ x1: ROOT_X, y1: ROOT_Y, x2: dir.x, y2: dir.y });
+      continue;
     }
 
-    return edges;
+    const parent = this.directories.find(d => d.id === dir.parentId);
+    if (!parent || !parent.isOpen) continue;
+
+    edges.push({ x1: parent.x, y1: parent.y, x2: dir.x, y2: dir.y });
   }
+
+  // 🔥 NEW: Folder → ModelData edge
+  if (this.selectedFolderId && this.dataNodePosition) {
+    const folder = this.directories.find(d => d.id === this.selectedFolderId);
+    const modelAnchor = this.getModelDataAnchor();
+
+    if (folder && modelAnchor) {
+      edges.push({
+        x1: folder.x,
+        y1: folder.y,
+        x2: modelAnchor.x,
+        y2: modelAnchor.y,
+        isModelEdge: true
+      });
+    }
+  }
+
+  return edges;
+}
 
   // =========================
   // IMAGE VIEW
@@ -274,10 +324,31 @@ selectedFolderItems: any[] = [];
   closeImage() {
     this.selectedImage = null;
   }
+reloadFiles() {
+  if (!this.selectedFolderId) return;
+
+  const dir = this.directories.find(d => d.id === this.selectedFolderId);
+
+  this.fileService.getFilesByNode(this.selectedFolderId).subscribe({
+    next: files => {
+      this.selectedFolderItems = files;
+
+      // 🔥 re-sync position after data change
+      if (dir && this.dataNodePosition) {
+        this.setDataNodePosition(dir);
+      }
+    },
+    error: err => {
+      console.error('Failed to reload files', err);
+    }
+  });
+}
+
 
   closeModelData() {
     this.selectedFolderId = null;
     this.dataNodePosition = null;
+     this.showModelData = false;
   }
 
   // =========================

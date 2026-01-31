@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, ViewChild, ElementRef } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
+import { FileService } from '../services/file.service';
 
 @Component({
   selector: 'app-model-data',
@@ -12,74 +13,98 @@ export class ModelData implements OnChanges {
 
   @Input() x!: number;
   @Input() y!: number;
-
-  @Input() title : string|null = '';
-
-  // Files are NOT implemented yet → keep safe defaults
-  @Input() items: string[] = [];
-  @Input() basePath: string | null = null;
+  @Input() title: string | null = '';
+  @Input() items: any[] = [];
 
   @Output() closeNode = new EventEmitter<void>();
-  @Output() addImage = new EventEmitter<File>();
   @Output() imageOpen = new EventEmitter<string>();
+@Input() nodeId!: string | null; // 🔥 important
+@Output() fileUploaded = new EventEmitter<void>();
+
+@ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   pageSize = 70;
   currentPage = 0;
 
-  // =========================
-  // UI Actions
-  // =========================
-  close() {
-    this.closeNode.emit();
+  /** fileId → objectURL */
+  imageCache = new Map<string, string>();
+
+  constructor(private fileService: FileService) {}
+
+  ngOnChanges() {
+    this.currentPage = 0;
+    this.preloadVisibleImages();
   }
 
-  // Disabled for now (no file API yet)
-  triggerFileInput() {
-    console.warn('File upload not implemented yet');
-  }
-
-  onFileSelected(_: Event) {
-    // intentionally empty
-  }
-
-  // =========================
-  // Pagination
-  // =========================
-  get totalPages(): number {
-    return Math.ceil((this.items?.length ?? 0) / this.pageSize);
-  }
-
-  get visibleItems(): string[] {
-    if (!this.items || !this.items.length) return [];
+  get visibleItems(): any[] {
     const start = this.currentPage * this.pageSize;
     return this.items.slice(start, start + this.pageSize);
   }
 
-  nextPage() {
-    if (this.currentPage < this.totalPages - 1) {
-      this.currentPage++;
+  preloadVisibleImages() {
+    for (const file of this.visibleItems) {
+      if (!this.imageCache.has(file.id)) {
+        this.loadImage(file.id);
+      }
     }
   }
 
-  prevPage() {
-    if (this.currentPage > 0) {
-      this.currentPage--;
+  loadImage(fileId: string) {
+    this.fileService.downloadFile(fileId).subscribe({
+      next: res => {
+        const cache = res.headers.get('x-cache');
+        console.log(`FILE ${fileId} CACHE →`, cache); // HIT / MISS
+
+        const blob = res.body!;
+        const url = URL.createObjectURL(blob);
+        this.imageCache.set(fileId, url);
+      },
+      error: err => {
+        console.error('Image load failed', err);
+      }
+    });
+  }
+
+  getImageUrl(fileId: string): string | null {
+    return this.imageCache.get(fileId) ?? null;
+  }
+
+  openImage(file: any) {
+    this.imageOpen.emit(this.getImageUrl(file.id)!);
+  }
+triggerFileInput(event: MouseEvent) {
+  event.stopPropagation();
+  this.fileInput.nativeElement.click();
+}
+
+onFileSelected(event: Event) {
+  if (!this.nodeId) {
+    console.warn('Upload blocked: nodeId is null');
+    return;
+  }
+
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+
+  const file = input.files[0];
+
+  this.fileService.uploadFile(this.nodeId, file).subscribe({
+    next: () => {
+      console.log('File uploaded successfully');
+
+      // reset input (important)
+      input.value = '';
+
+      // tell parent to refresh files
+      this.fileUploaded.emit();
+    },
+    error: err => {
+      console.error('Upload failed', err);
     }
-  }
+  });
+}
 
-  ngOnChanges() {
-    this.currentPage = 0;
-  }
-
-  // =========================
-  // Image handling (future)
-  // =========================
-  getImagePath(file: string): string {
-    if (!this.basePath) return '';
-    return `${this.basePath}/${file}`;
-  }
-
-  openImage(file: string): void {
-    this.imageOpen.emit(file);
+  close() {
+    this.closeNode.emit();
   }
 }
