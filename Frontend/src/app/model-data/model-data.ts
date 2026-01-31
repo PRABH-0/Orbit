@@ -77,6 +77,33 @@ triggerFileInput(event: MouseEvent) {
   this.fileInput.nativeElement.click();
 }
 
+download(file: any) {
+  this.fileService.downloadFile(file.id).subscribe(res => {
+    const blob = res.body!;
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.fileName;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  });
+}
+delete(file: any) {
+  if (!confirm('Delete this file?')) return;
+
+  this.fileService.deleteFile(file.id).subscribe({
+    next: () => {
+      this.imageCache.delete(file.id);
+      this.fileUploaded.emit(); // refresh list
+    },
+    error: err => {
+      console.error('Delete failed', err);
+    }
+  });
+}
+
 onFileSelected(event: Event) {
   if (!this.nodeId) {
     console.warn('Upload blocked: nodeId is null');

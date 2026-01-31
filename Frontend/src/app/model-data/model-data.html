@@ -34,16 +34,38 @@
   <div class="data-grid">
 
     <div
-      class="data-item"
-      *ngFor="let file of visibleItems"
-      (click)="openImage(file)"
+  class="data-item"
+  *ngFor="let file of visibleItems"
+  (click)="openImage(file)"
+>
+
+  <img
+    *ngIf="getImageUrl(file.id)"
+    [src]="getImageUrl(file.id)"
+  />
+
+  <!-- ACTION ICONS -->
+  <div class="item-actions" (click)="$event.stopPropagation()">
+    <button
+      class="icon-btn"
+      title="Download"
+      (click)="download(file)"
     >
-      <img
-        *ngIf="getImageUrl(file.id)"
-        [src]="getImageUrl(file.id)"
-      />
-      <div class="file-tooltip">{{ file.fileName }}</div>
-    </div>
+      ⬇
+    </button>
+
+    <button
+      class="icon-btn danger"
+      title="Delete"
+      (click)="delete(file)"
+    >
+      🗑
+    </button>
+  </div>
+
+  <div class="file-tooltip">{{ file.fileName }}</div>
+</div>
+
 
   </div>
 </div>

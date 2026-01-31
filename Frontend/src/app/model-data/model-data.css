@@ -12,6 +12,50 @@
   flex-direction: column;
   z-index: 10;
 }
+/* ACTION ICON CONTAINER */
+.item-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* SHOW ON HOVER */
+.data-item:hover .item-actions {
+  opacity: 1;
+}
+
+/* ICON BUTTON */
+.icon-btn {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.6);
+  color: #e5e7eb;
+
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.icon-btn.danger:hover {
+  background: rgba(255, 0, 0, 0.6);
+}
+
 .data-header {
   display: flex;
   align-items: center;

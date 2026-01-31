@@ -26,6 +26,11 @@ export class Signin {
     private auth: AuthService,
     private router: Router
   ) {}
+ngOnInit() {
+  if (localStorage.getItem('token')) {
+    this.router.navigate(['/canvas']);
+  }
+}
 
   toggleMode() {
     this.isRegister = !this.isRegister;

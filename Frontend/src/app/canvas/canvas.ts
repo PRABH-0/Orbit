@@ -51,6 +51,7 @@ export class Canvas implements OnInit, AfterViewInit {
   selectedFolderId: string | null = null;
   currentFolderName: string | null = null;
 selectedFolderItems: any[] = [];
+lastMovedFolder: any = null;
 
   dataNodePosition: { x: number; y: number } | null = null;
   selectedImage: string | null = null;
@@ -76,9 +77,13 @@ showModelData = false;
   // INIT
   // =========================
   ngOnInit() {
-     this.username = localStorage.getItem('username');
-    this.loadDirectories();
-  }
+  const token = localStorage.getItem('token');
+  if (!token) return; // 🔥 do nothing if not logged in
+
+  this.username = localStorage.getItem('username');
+  this.loadDirectories();
+}
+
 
   ngAfterViewInit() {
     this.update();
@@ -207,12 +212,8 @@ onHeaderFileSelected(event: Event) {
   onFolderMoved(dir: any, pos: { x: number; y: number }) {
     dir.x = pos.x;
     dir.y = pos.y;
+    this.lastMovedFolder = dir;
 
-    if (dir.id) {
-      this.directoryService
-        .updatePosition(dir.id, pos.x, pos.y)
-        .subscribe();
-    }
 
     if (this.selectedFolderId === dir.id && this.dataNodePosition) {
       this.setDataNodePosition(dir);
@@ -413,9 +414,22 @@ reloadFiles() {
   }
 
   @HostListener('mouseup')
-  onMouseUp() {
-    this.isDragging = false;
+onMouseUp() {
+  this.isDragging = false;
+
+  if (this.lastMovedFolder?.id) {
+    const { id, x, y } = this.lastMovedFolder;
+
+    this.directoryService
+      .updatePosition(id, x, y)
+      .subscribe({
+        complete: () => {
+          this.lastMovedFolder = null;
+        }
+      });
   }
+}
+
 
   private update() {
     this.grid.nativeElement.style.transform =
