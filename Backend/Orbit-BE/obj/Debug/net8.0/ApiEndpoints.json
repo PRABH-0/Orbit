@@ -33,21 +33,89 @@
   },
   {
     "ContainingType": "Orbit_BE.Controllers.AuthController",
-    "Method": "UpdateStatus",
-    "RelativePath": "api/auth/status/{userId}",
+    "Method": "GetUserDetails",
+    "RelativePath": "api/auth/userDetails",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Orbit_BE.Controllers.NodeController",
+    "Method": "CreateNode",
+    "RelativePath": "api/Node",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "Orbit_BE.Models.NodeModels.CreateNodeDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Orbit_BE.Controllers.NodeController",
+    "Method": "GetUserNodes",
+    "RelativePath": "api/Node",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Orbit_BE.Controllers.NodeController",
+    "Method": "GetNodeById",
+    "RelativePath": "api/Node/{nodeId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "nodeId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Orbit_BE.Controllers.NodeController",
+    "Method": "DeleteNode",
+    "RelativePath": "api/Node/{nodeId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "nodeId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Orbit_BE.Controllers.NodeController",
+    "Method": "UpdateNodePosition",
+    "RelativePath": "api/Node/{nodeId}/position",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
+        "Name": "nodeId",
         "Type": "System.Guid",
         "IsRequired": true
       },
       {
-        "Name": "status",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "Orbit_BE.Models.NodeModels.UpdateNodePositionDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

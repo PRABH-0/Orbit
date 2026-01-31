@@ -2,31 +2,46 @@
 using Orbit_BE.Interfaces;
 using Orbit_BE.Models.Users;
 using Orbit_BE.UnitOfWork;
+using Snera_Core.Services;
 
 namespace Orbit_BE.Services
 {
     public class AuthService : IAuthService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly JwtService _jwtService;
 
-        public AuthService(IUnitOfWork unitOfWork)
+        public AuthService(IUnitOfWork unitOfWork, JwtService jwtService)
         {
             _unitOfWork = unitOfWork;
+            _jwtService = jwtService;
         }
 
+        // =========================
+        // REGISTER
+        // =========================
         public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.Username) ||
+                string.IsNullOrWhiteSpace(request.Email) ||
+                string.IsNullOrWhiteSpace(request.Password))
+            {
+                throw new ArgumentException("All fields are required");
+            }
+
             var existingUser = await _unitOfWork.Users
-                .FirstOrDefaultAsync(u => u.Username == request.Username
-                                       && u.RecordState == "Active");
+                .FirstOrDefaultAsync(u =>
+                    (u.Username == request.Username || u.Email == request.Email) &&
+                    u.RecordState == "Active");
 
             if (existingUser != null)
-                throw new Exception("User already exists");
+                throw new InvalidOperationException("User already exists");
 
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Username = request.Username,
+                Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 UserStatus = "Offline",
                 IsAdmin = false,
@@ -45,17 +60,27 @@ namespace Orbit_BE.Services
             };
         }
 
+        // =========================
+        // LOGIN
+        // =========================
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.Email) ||
+                string.IsNullOrWhiteSpace(request.Password))
+            {
+                throw new ArgumentException("Email and password are required");
+            }
+
             var user = await _unitOfWork.Users
-                .FirstOrDefaultAsync(u => u.Username == request.Username
-                                       && u.RecordState == "Active");
+                .FirstOrDefaultAsync(u =>
+                    u.Email == request.Email &&
+                    u.RecordState == "Active");
 
             if (user == null)
-                throw new Exception("Invalid credentials");
+                throw new UnauthorizedAccessException("Invalid email or password");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-                throw new Exception("Invalid credentials");
+                throw new UnauthorizedAccessException("Invalid email or password");
 
             user.UserStatus = "Online";
             user.LastEditedTimestamp = DateTime.UtcNow;
@@ -63,25 +88,41 @@ namespace Orbit_BE.Services
             _unitOfWork.Users.Update(user);
             await _unitOfWork.SaveChangesAsync();
 
+            var token = _jwtService.CreateToken(user);
+
             return new AuthResponseDto
             {
                 UserId = user.Id,
                 Username = user.Username,
-                UserStatus = user.UserStatus
+                UserStatus = user.UserStatus,
+                AccessToken = token
             };
         }
 
-        public async Task UpdateUserStatusAsync(Guid userId, string status)
+        // =========================
+        // USER DETAILS
+        // =========================
+        public async Task<UserDetilsResponseDto?> GetUserDetailsAsync(Guid userId)
         {
+            if (userId == Guid.Empty)
+                throw new ArgumentException("Invalid user id");
+
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null) return;
 
-            user.UserStatus = status;
-            user.LastEditedTimestamp = DateTime.UtcNow;
+            if (user == null || user.RecordState != "Active")
+                return null;
 
-            _unitOfWork.Users.Update(user);
-            await _unitOfWork.SaveChangesAsync();
+            return new UserDetilsResponseDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                IsAdmin = user.IsAdmin,
+                UserStatus = user.UserStatus,
+                CreatedAt = user.CreatedAt,
+                LastEditedTimestamp = user.LastEditedTimestamp
+            };
         }
-    }
 
+    }
 }

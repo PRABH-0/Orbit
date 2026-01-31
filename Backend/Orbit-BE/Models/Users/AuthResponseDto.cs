@@ -5,6 +5,8 @@
         public Guid UserId { get; set; }
         public string Username { get; set; }
         public string UserStatus { get; set; }
+
+        public string AccessToken { get; set; }
     }
 
 }

@@ -182,3 +182,4 @@ C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\obj\Debug\net8.0\Orbit-BE.pdb
 C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\obj\Debug\net8.0\Orbit-BE.genruntimeconfig.cache
 C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\obj\Debug\net8.0\ref\Orbit-BE.dll
 C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
