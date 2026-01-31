@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Orbit-BE")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6723f59c3ab76f7200d6bfe6e26fd7856a2796d3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac31dbba9dbf7a8751eb723ae20065f415fe3c5d")]
 [assembly: System.Reflection.AssemblyProductAttribute("Orbit-BE")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Orbit-BE")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

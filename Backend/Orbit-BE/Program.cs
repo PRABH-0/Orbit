@@ -111,14 +111,23 @@ builder.Services.AddCors(options =>
 // =======================
 // DI
 // =======================
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<INodeService, NodeService>();
+// File handling
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = 1024 * 1024 * 500;
+});
 
 var app = builder.Build();
+
 
 // =======================
 // Swagger UI
@@ -139,6 +148,7 @@ app.Use(async (context, next) =>
     }
     await next();
 });
+
 
 // =======================
 // Middleware Order (IMPORTANT)

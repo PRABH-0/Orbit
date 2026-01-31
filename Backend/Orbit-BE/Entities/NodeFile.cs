@@ -12,6 +12,8 @@ namespace Orbit_BE.Entities
         public string FileType { get; set; } = null!;
         public long FileSize { get; set; }
 
+        public string StoragePath { get; set; } = null!;
+
         // Active / Inactive / Deleted
         public string RecordState { get; set; } = "Active";
 

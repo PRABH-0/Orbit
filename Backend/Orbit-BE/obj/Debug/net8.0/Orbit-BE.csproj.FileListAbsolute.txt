@@ -183,3 +183,4 @@ C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\obj\Debug\net8.0\Orbit-BE.genruntimeconfig
 C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\obj\Debug\net8.0\ref\Orbit-BE.dll
 C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\PRABH\PRABH\Orbit\Backend\Orbit-BE\bin\Debug\net8.0\Orbit-BE.staticwebassets.runtime.json
