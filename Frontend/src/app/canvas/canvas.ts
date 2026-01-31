@@ -39,6 +39,8 @@ import { FileService } from '../services/file.service';
 export class Canvas implements OnInit, AfterViewInit {
 
   @ViewChild('grid', { static: true }) grid!: ElementRef<HTMLDivElement>;
+  @ViewChild('headerFileInput') headerFileInput!: ElementRef<HTMLInputElement>;
+
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
   @Output() imageOpen = new EventEmitter<string>();
 
@@ -151,6 +153,46 @@ showModelData = false;
       }
     });
   }
+onAddItem() {
+  if (!this.selectedFolderId) {
+    console.warn('No folder selected → cannot add item');
+    return;
+  }
+
+  this.headerFileInput.nativeElement.click();
+}
+
+onHeaderFileSelected(event: Event) {
+  if (!this.selectedFolderId) return;
+
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+
+  const file = input.files[0];
+
+  this.fileService.uploadFile(this.selectedFolderId, file).subscribe({
+    next: () => {
+      console.log('File uploaded from header');
+
+      input.value = '';
+
+      // reload files
+      this.reloadFiles();
+
+      // auto-open model-data if first file
+      if (!this.showModelData) {
+        const dir = this.directories.find(d => d.id === this.selectedFolderId);
+        if (dir) {
+          this.setDataNodePosition(dir);
+          this.showModelData = true;
+        }
+      }
+    },
+    error: err => {
+      console.error('Header upload failed', err);
+    }
+  });
+}
 
   cancelAddFolder() {
     if (!this.draftFolder) return;

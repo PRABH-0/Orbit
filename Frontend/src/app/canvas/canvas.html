@@ -1,20 +1,23 @@
 <app-header
-[username]="username"
+  [username]="username"
   [currentFolder]="currentFolderName"
-  (addFolder)="onAddFolder()">
+  (addFolder)="onAddFolder()"
+  (addItem)="onAddItem()">
 </app-header>
+
 
 <div class="grid" #grid>
 
   <!-- EDGES -->
-  <svg class="edges" width="5000" height="5000">
+  <svg class="edges">
     <line
       *ngFor="let e of getVisibleEdges()"
       appEdge
       [x1]="e.x1"
       [y1]="e.y1"
       [x2]="e.x2"
-      [y2]="e.y2">
+      [y2]="e.y2"
+      [class.model-edge]="e.isModelEdge">
     </line>
   </svg>
 
@@ -38,18 +41,18 @@
     </app-directory>
   </ng-container>
 
-  <!-- DATA NODE (NO FILES YET) -->
   <app-model-data
-  *ngIf="selectedFolderId && dataNodePosition"
+  *ngIf="showModelData && dataNodePosition"
   [x]="dataNodePosition.x"
   [y]="dataNodePosition.y"
   [title]="currentFolderName"
   [items]="selectedFolderItems"
-  [nodeId]="selectedFolderId"     
-  (fileUploaded)="reloadFiles()"  
-  (imageOpen)="openImage($event)" 
+  [nodeId]="selectedFolderId"
+  (fileUploaded)="reloadFiles()"
+  (imageOpen)="openImage($event)"
   (closeNode)="closeModelData()">
 </app-model-data>
+
 
 
 </div>
@@ -85,4 +88,10 @@
 <div class="image-viewer" *ngIf="selectedImage" (click)="closeImage()">
   <img [src]="selectedImage" (click)="$event.stopPropagation()" />
 </div>
+<input
+  type="file"
+  #headerFileInput
+  hidden
+  (change)="onHeaderFileSelected($event)"
+/>
 

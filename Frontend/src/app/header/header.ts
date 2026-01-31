@@ -11,4 +11,6 @@ export class Header {
   @Input() currentFolder: string | null = null;
   @Input() username: string | null = null;
   @Output() addFolder = new EventEmitter<void>();
+  @Output() addItem = new EventEmitter<void>();
+
 }

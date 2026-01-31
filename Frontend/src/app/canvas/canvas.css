@@ -253,3 +253,11 @@ img {
     transform: translateX(0);
   }
 }
+.edges {
+  position: absolute;
+  inset: 0;
+  width: 5000px;
+  height: 5000px;
+  pointer-events: none;
+  z-index: 1;
+}

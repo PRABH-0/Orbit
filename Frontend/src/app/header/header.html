@@ -6,8 +6,17 @@
   <div class="right" *ngIf="currentFolder">
     <div class="folder-name">[ {{ currentFolder }} ]</div>
 
-    <button class="add-folder-btn" (click)="addFolder.emit()">
-      ＋ Add Folder
-    </button>
+    <div class="header-button">
+      <button class="add-folder-btn" (click)="addItem.emit()">
+        ＋ Add Item
+      </button>
+  
+      <!-- ADD FOLDER -->
+      <button class="add-folder-btn" (click)="addFolder.emit()">
+        ＋ Add Folder
+      </button>
+
+    </div>
+    <!-- ADD ITEM -->
   </div>
 </header>

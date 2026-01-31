@@ -1,0 +1,15 @@
+<div class="loader-backdrop" *ngIf="loader.loading$ | async">
+  <svg class="dual-orbit-loader" viewBox="0 0 50 50">
+    <circle class="core" cx="25" cy="25" r="4" />
+
+    <g class="orbit-ccw">
+      <circle class="ring" cx="25" cy="25" r="20" />
+      <circle class="dot" cx="25" cy="5" r="4" />
+    </g>
+
+    <g class="orbit-cw">
+      <circle class="ring" cx="25" cy="25" r="12" />
+      <circle class="dot" cx="25" cy="13" r="3" />
+    </g>
+  </svg>
+</div>

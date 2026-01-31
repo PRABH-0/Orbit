@@ -1,0 +1,55 @@
+.loader-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.25); 
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dual-orbit-loader {
+  width: 48px;
+  height: 48px;
+}
+
+/* Shared Bold Ring Style */
+.ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 3;
+}
+
+/* Flat white dots for the orbits */
+.dot {
+  fill: #ffffff;
+}
+
+/* The Sun Core - Vivid Yellow/Orange */
+.core {
+  fill: #ffb700; 
+}
+
+/* Clockwise Animation (Inner) - Sped up to 1.2s */
+.orbit-cw {
+  transform-origin: center;
+  animation: spin-clockwise 1.2s linear infinite;
+}
+
+/* Counter-Clockwise Animation (Outer) - Sped up to 2.2s */
+.orbit-ccw {
+  transform-origin: center;
+  animation: spin-counter-clockwise 2.2s linear infinite;
+}
+
+@keyframes spin-clockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-counter-clockwise {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
