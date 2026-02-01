@@ -56,7 +56,19 @@ namespace Orbit_BE.Controllers
                 result.FileName
             );
         }
+        [AllowAnonymous]
+        [HttpGet("{fileId}/view")]
+        public async Task<IActionResult> View(Guid fileId)
+        {
+            var result = await _fileService.ViewAsync(fileId);
 
+            Response.Headers["Content-Disposition"] = "inline";
+
+            return File(
+                result.FileBytes,
+                result.ContentType
+            );
+        }
 
         [HttpDelete("{fileId}")]
         public async Task<IActionResult> Delete(Guid fileId)

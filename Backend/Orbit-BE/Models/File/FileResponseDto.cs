@@ -8,7 +8,7 @@ namespace Orbit_BE.Models.Files
         public Guid NodeId { get; set; }
 
         public string FileName { get; set; } = null!;
-        public string FileType { get; set; } = null!;
+        public string ContentType { get; set; } = null!;
         public long FileSize { get; set; }
 
         public DateTime CreatedAt { get; set; }

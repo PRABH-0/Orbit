@@ -70,7 +70,7 @@ namespace Orbit_BE.Services
                 Id = nodeFile.Id,
                 NodeId = node.Id,
                 FileName = nodeFile.FileName,
-                FileType = nodeFile.FileType,
+                ContentType = nodeFile.FileType,
                 FileSize = nodeFile.FileSize,
                 CreatedAt = nodeFile.CreatedAt
             };
@@ -98,7 +98,7 @@ namespace Orbit_BE.Services
                 Id = f.Id,
                 NodeId = f.NodeId,
                 FileName = f.FileName,
-                FileType = f.FileType,
+                ContentType = f.FileType,
                 FileSize = f.FileSize,
                 CreatedAt = f.CreatedAt
             });
@@ -143,6 +143,22 @@ namespace Orbit_BE.Services
             );
         }
 
+        public async Task<FileDownloadResult> ViewAsync(Guid fileId)
+        {
+            var file = await _unitOfWork.NodeFiles.GetByIdAsync(fileId);
+            if (file == null)
+                throw new FileNotFoundException();
+
+            var (bytes, contentType) =
+                await _fileStorage.DownloadAsync(file.StoragePath);
+
+            return new FileDownloadResult(
+                bytes,
+                file.FileName,
+                contentType,
+                false
+            );
+        }
 
         public async Task DeleteAsync(Guid userId, Guid fileId)
         {

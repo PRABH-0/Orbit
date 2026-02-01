@@ -123,6 +123,25 @@ namespace Orbit_BE.Services
                 LastEditedTimestamp = user.LastEditedTimestamp
             };
         }
+        // =========================
+        // LOGOUT
+        // =========================
+        public async Task LogoutAsync(Guid userId)
+        {
+            if (userId == Guid.Empty)
+                throw new ArgumentException("Invalid user id");
+
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user == null || user.RecordState != "Active")
+                return;
+
+            user.UserStatus = "Offline";
+            user.LastEditedTimestamp = DateTime.UtcNow;
+
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+        }
 
     }
 }

@@ -74,8 +74,23 @@ namespace Orbit_BE.Controllers
 
         return Ok(user);
     }
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
+
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized();
+
+            await _authService.LogoutAsync(userId);
+
+            return Ok(new { message = "Logged out successfully" });
+        }
 
 
-}
+    }
 
 }

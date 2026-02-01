@@ -7,6 +7,8 @@ namespace Orbit_BE.Interfaces
         Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request);
         Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
         Task<UserDetilsResponseDto> GetUserDetailsAsync(Guid userId);
+        Task LogoutAsync(Guid userId);
+
     }
 
 }
