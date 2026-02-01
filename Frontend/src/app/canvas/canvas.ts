@@ -10,6 +10,7 @@ import { ModelData } from '../model-data/model-data';
 import { DirectoryService } from '../services/directory.service';
 import { FileService } from '../services/file.service';
 import { Profile } from '../profile/profile';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 
 @Component({
@@ -40,8 +41,10 @@ lastMovedFolder: any = null;
   selectedFile: {
   type: 'image' | 'pdf' | 'video' | 'audio';
   url: string;
+  safeUrl?: SafeResourceUrl;
   id: string;
 } | null = null;
+
 
 
   isAddFolderOpen = false;
@@ -58,7 +61,8 @@ showModelData = false;
 
   constructor(
     private directoryService: DirectoryService,
-    private fileService: FileService
+    private fileService: FileService,
+    private sanitizer:DomSanitizer
   ) {}
 
   // =========================
@@ -401,9 +405,14 @@ getVisibleEdges() {
 }
 
   openImage(payload: any) {
+  if (payload.type === 'pdf') {
+    payload.safeUrl = this.sanitizer
+      .bypassSecurityTrustResourceUrl(payload.url);
+  }
+
   this.selectedFile = payload;
-  this.selectedFileId = payload.id;
 }
+
 
 closeFileViewer() {
   this.selectedFile = null;

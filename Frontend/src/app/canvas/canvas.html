@@ -111,7 +111,7 @@
     <button (click)="closeFileViewer()">✕</button>
   </div>
 
-  <!-- MEDIA CONTAINER -->
+  <!-- CENTERED CONTENT -->
   <div class="file-viewer-content" (click)="$event.stopPropagation()">
 
     <!-- IMAGE -->
@@ -124,27 +124,31 @@
     <!-- VIDEO -->
     <video
       *ngIf="selectedFile.type === 'video'"
-      [src]="selectedFile.url"
       controls
       class="file-media"
-    ></video>
+    >
+      <source [src]="selectedFile.url" />
+    </video>
 
     <!-- PDF -->
     <iframe
-      *ngIf="selectedFile.type === 'pdf'"
-      [src]="selectedFile.url"
-      class="file-media"
-    ></iframe>
+  *ngIf="selectedFile.type === 'pdf'"
+  [src]="selectedFile.safeUrl"
+  class="file-media pdf">
+</iframe>
+
 
     <!-- AUDIO -->
     <audio
       *ngIf="selectedFile.type === 'audio'"
-      [src]="selectedFile.url"
       controls
       class="file-media audio"
-    ></audio>
+    >
+      <source [src]="selectedFile.url" />
+    </audio>
 
   </div>
 </div>
+
 
 

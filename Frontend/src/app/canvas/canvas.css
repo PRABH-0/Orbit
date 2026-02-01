@@ -261,7 +261,7 @@ img {
   pointer-events: none;
   z-index: 1;
 }
-/* FULLSCREEN OVERLAY */
+/* OVERLAY */
 .file-viewer-overlay {
   position: fixed;
   inset: 0;
@@ -307,7 +307,7 @@ img {
   background: rgba(37, 99, 235, 0.5);
 }
 
-/* MEDIA CONTAINER */
+/* CENTER CONTENT */
 .file-viewer-content {
   max-width: 90vw;
   max-height: 85vh;
@@ -317,7 +317,7 @@ img {
   justify-content: center;
 }
 
-/* MEDIA (IMAGE / VIDEO / PDF) */
+/* ALL MEDIA */
 .file-media {
   max-width: 100%;
   max-height: 100%;
@@ -327,9 +327,14 @@ img {
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85);
 }
 
+/* PDF FIX */
+.file-media.pdf {
+  width: 80vw;
+  height: 80vh;
+  background: #111;
+}
+
 /* AUDIO FIX */
 .file-media.audio {
   width: 420px;
 }
-
-
