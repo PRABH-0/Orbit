@@ -40,6 +40,66 @@ export class ModelData implements OnChanges {
     const start = this.currentPage * this.pageSize;
     return this.items.slice(start, start + this.pageSize);
   }
+  openFile(file: any) {
+  const type = file.contentType;
+
+  if (type.startsWith('image/')) {
+    this.openImage(file);
+  } else if (type === 'application/pdf') {
+    this.openPdf(file);
+  } else if (type.startsWith('video/')) {
+    this.openVideo(file);
+  } else if (type.startsWith('audio/')) {
+    this.openAudio(file);
+  } else {
+    this.download(file);
+  }
+}
+openPdf(file: any) {
+  this.imageOpen.emit({
+    type: 'pdf',
+    id: file.id,
+    url: this.getImageUrl(file.id)
+  });
+}
+
+openVideo(file: any) {
+  this.imageOpen.emit({
+    type: 'video',
+    id: file.id,
+    url: this.getImageUrl(file.id)
+  });
+}
+
+openAudio(file: any) {
+  this.imageOpen.emit({
+    type: 'audio',
+    id: file.id,
+    url: this.getImageUrl(file.id)
+  });
+}
+isImage(file: any): boolean {
+  return file.contentType?.startsWith('image/');
+}
+
+isVideo(file: any): boolean {
+  return file.contentType?.startsWith('video/');
+}
+
+isPdf(file: any): boolean {
+  return file.contentType === 'application/pdf';
+}
+
+isAudio(file: any): boolean {
+  return file.contentType?.startsWith('audio/');
+}
+
+getFileIcon(file: any): string {
+  if (this.isVideo(file)) return '🎬';
+  if (this.isPdf(file)) return '📄';
+  if (this.isAudio(file)) return '🎵';
+  return '📁';
+}
 
   preloadVisibleImages() {
     for (const file of this.visibleItems) {
@@ -69,12 +129,15 @@ export class ModelData implements OnChanges {
     return this.imageCache.get(fileId) ?? null;
   }
 
-  openImage(file: any) {
+ openImage(file: any) {
   this.imageOpen.emit({
+    type: 'image', // ✅ REQUIRED
     id: file.id,
     url: this.getImageUrl(file.id)
   });
 }
+
+
 
 triggerFileInput(event: MouseEvent) {
   event.stopPropagation();

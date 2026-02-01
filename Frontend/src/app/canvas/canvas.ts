@@ -37,7 +37,12 @@ selectedFolderItems: any[] = [];
 lastMovedFolder: any = null;
 
   dataNodePosition: { x: number; y: number } | null = null;
-  selectedImage: string | null = null;
+  selectedFile: {
+  type: 'image' | 'pdf' | 'video' | 'audio';
+  url: string;
+  id: string;
+} | null = null;
+
 
   isAddFolderOpen = false;
   draftFolder: any = null;
@@ -213,25 +218,50 @@ onHeaderFileSelected(event: Event) {
       this.setDataNodePosition(dir);
     }
   }
-  downloadImage() {
-  if (!this.selectedImage) return;
+  downloadFile() {
+  if (!this.selectedFile) return;
 
-  const a = document.createElement('a');
-  a.href = this.selectedImage;
-  a.download = 'file';
-  a.click();
-}
-deleteImage() {
-  if (!this.selectedFileId) return;
+  this.fileService.downloadFile(this.selectedFile.id).subscribe({
+    next: res => {
+      const blob = res.body!;
+      const url = URL.createObjectURL(blob);
 
-  this.fileService.deleteFile(this.selectedFileId).subscribe({
-    next: () => {
-      this.closeImage();
-      this.reloadFiles();
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = this.getDownloadName(res) ?? 'file';
+      a.click();
+
+      URL.revokeObjectURL(url);
     },
-    error: err => console.error('Delete failed', err)
+    error: err => {
+      console.error('Download failed', err);
+    }
   });
 }
+getDownloadName(res: any): string | null {
+  const disposition = res.headers.get('content-disposition');
+  if (!disposition) return null;
+
+  const match = /filename="?(.+)"?/.exec(disposition);
+  return match ? match[1] : null;
+}
+
+deleteFile() {
+  if (!this.selectedFile) return;
+
+  if (!confirm('Delete this file?')) return;
+
+  this.fileService.deleteFile(this.selectedFile.id).subscribe({
+    next: () => {
+      this.closeFileViewer();
+      this.reloadFiles();
+    },
+    error: err => {
+      console.error('Delete failed', err);
+    }
+  });
+}
+
 
   getModelDataAnchor() {
   if (!this.dataNodePosition) return null;
@@ -370,16 +400,16 @@ getVisibleEdges() {
   return edges;
 }
 
-  openImage(file: any) {
-  this.selectedImage = file.url ?? file; // depending on what you emit
-  this.selectedFileId = file.id;
+  openImage(payload: any) {
+  this.selectedFile = payload;
+  this.selectedFileId = payload.id;
 }
 
-
- closeImage() {
-  this.selectedImage = null;
+closeFileViewer() {
+  this.selectedFile = null;
   this.selectedFileId = null;
 }
+
 
 reloadFiles() {
   if (!this.selectedFolderId) return;

@@ -36,12 +36,23 @@
    <div
   class="data-item"
   *ngFor="let file of visibleItems"
-  (click)="openImage(file)"
+  (click)="openFile(file)"
 >
-  <img
-    *ngIf="getImageUrl(file.id)"
-    [src]="getImageUrl(file.id)"
-  />
+  <!-- IMAGE THUMBNAIL -->
+<img
+  *ngIf="isImage(file) && getImageUrl(file.id)"
+  [src]="getImageUrl(file.id)"
+  class="file-thumb"
+/>
+
+<!-- ICON FOR NON-IMAGES -->
+<div
+  *ngIf="!isImage(file)"
+  class="file-icon"
+>
+  {{ getFileIcon(file) }}
+</div>
+
   <div class="file-tooltip">{{ file.fileName }}</div>
 </div>
 

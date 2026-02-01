@@ -99,25 +99,52 @@
   </div>
 
 </div>
-
-<!-- IMAGE VIEWER OVERLAY -->
 <div
-  class="image-overlay"
-  *ngIf="selectedImage"
-  (click)="closeImage()"
+  class="file-viewer-overlay"
+  *ngIf="selectedFile"
+  (click)="closeFileViewer()"
 >
-
-  <!-- TOP TOOLBAR -->
-  <div class="image-toolbar" (click)="$event.stopPropagation()">
-    <button title="Download" (click)="downloadImage()">⬇</button>
-    <button title="Delete" (click)="deleteImage()">🗑</button>
-    <button title="Close" (click)="closeImage()">✕</button>
+  <!-- TOOLBAR -->
+  <div class="file-toolbar" (click)="$event.stopPropagation()">
+    <button (click)="downloadFile()">⬇</button>
+    <button (click)="deleteFile()">🗑</button>
+    <button (click)="closeFileViewer()">✕</button>
   </div>
 
-  <!-- IMAGE -->
-  <img
-    class="image-preview"
-    [src]="selectedImage"
-    (click)="$event.stopPropagation()"
-  />
+  <!-- MEDIA CONTAINER -->
+  <div class="file-viewer-content" (click)="$event.stopPropagation()">
+
+    <!-- IMAGE -->
+    <img
+      *ngIf="selectedFile.type === 'image'"
+      [src]="selectedFile.url"
+      class="file-media"
+    />
+
+    <!-- VIDEO -->
+    <video
+      *ngIf="selectedFile.type === 'video'"
+      [src]="selectedFile.url"
+      controls
+      class="file-media"
+    ></video>
+
+    <!-- PDF -->
+    <iframe
+      *ngIf="selectedFile.type === 'pdf'"
+      [src]="selectedFile.url"
+      class="file-media"
+    ></iframe>
+
+    <!-- AUDIO -->
+    <audio
+      *ngIf="selectedFile.type === 'audio'"
+      [src]="selectedFile.url"
+      controls
+      class="file-media audio"
+    ></audio>
+
+  </div>
 </div>
+
+

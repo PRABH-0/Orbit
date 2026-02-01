@@ -47,6 +47,24 @@
 
   cursor: pointer;
 }
+.file-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.file-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  color: #ccc;
+}
 
 .icon-btn:hover {
   background: rgba(255, 255, 255, 0.15);
