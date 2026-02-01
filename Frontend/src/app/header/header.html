@@ -1,6 +1,11 @@
 <header class="header">
   <div class="left">
-    <span class="username">[ {{ username }} ]</span>
+    <span class="bracket">[ </span> 
+    <span class="username clickable" (click)="openProfile.emit()">
+  {{ username }}
+</span>
+
+    <span class="bracket"> ]</span>
   </div>
 
   <div class="right" *ngIf="currentFolder">
@@ -19,4 +24,5 @@
     </div>
     <!-- ADD ITEM -->
   </div>
+  
 </header>

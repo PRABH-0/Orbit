@@ -1,13 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Output,
-  ViewChild,
-  OnInit
-} from '@angular/core';
+import {AfterViewInit,Component,ElementRef,EventEmitter,HostListener,Output,ViewChild,OnInit} from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
@@ -18,21 +9,13 @@ import { Edge } from '../edge/edge';
 import { ModelData } from '../model-data/model-data';
 import { DirectoryService } from '../services/directory.service';
 import { FileService } from '../services/file.service';
+import { Profile } from '../profile/profile';
 
 
 @Component({
   selector: 'app-canvas',
   standalone: true,
-  imports: [
-    Header,
-    Directory,
-    Edge,
-    ModelData,
-    FormsModule,
-    NgFor,
-    NgIf,
-    CommonModule
-  ],
+  imports: [ Header, Directory,Profile, Edge,ModelData,FormsModule,NgFor,NgIf,CommonModule],
   templateUrl: './canvas.html',
   styleUrl: './canvas.css'
 })
@@ -58,7 +41,7 @@ lastMovedFolder: any = null;
 
   isAddFolderOpen = false;
   draftFolder: any = null;
-
+showProfile = false;
   rootOpen = false;
 selectedFileId: string | null = null;
   private isDragging = false;
@@ -106,9 +89,19 @@ showModelData = false;
     });
   }
 
-  // =========================
-  // ADD FOLDER
-  // =========================
+openUserMenu() {
+ this.showProfile = !this.showProfile;
+}
+
+closeProfile() {
+  this.showProfile = false;
+}
+
+
+logout() {
+  localStorage.clear();
+  location.href = '/login';
+}
   onAddFolder() {
     const parentId = this.selectedParentFolderId;
 
@@ -159,13 +152,14 @@ showModelData = false;
     });
   }
 onAddItem() {
+  // Upload to root if no folder selected
   if (!this.selectedFolderId) {
-    console.warn('No folder selected → cannot add item');
-    return;
+    this.selectedFolderId = 'ROOT'; // or null if backend supports root
   }
 
   this.headerFileInput.nativeElement.click();
 }
+
 
 onHeaderFileSelected(event: Event) {
   if (!this.selectedFolderId) return;

@@ -2,10 +2,27 @@
   [username]="username"
   [currentFolder]="currentFolderName"
   (addFolder)="onAddFolder()"
-  (addItem)="onAddItem()">
+  (addItem)="onAddItem()"
+  (openProfile)="openUserMenu()">
 </app-header>
 
-
+<input
+  type="file"
+  #headerFileInput
+  hidden
+  (change)="onHeaderFileSelected($event)"
+/>
+<app-profile
+  *ngIf="showProfile"
+  [username]="username"
+  (close)="closeProfile()"
+  (logout)="logout()">
+</app-profile>
+  <div
+    class="canvas-blur-overlay"
+    *ngIf="showProfile"
+    (click)="closeProfile()">
+  </div>
 <div class="grid" #grid>
 
   <!-- EDGES -->
@@ -56,7 +73,6 @@
 
 
 </div>
-
 <!-- ADD FOLDER MODAL -->
 <div class="add-folder-modal" *ngIf="isAddFolderOpen">
 

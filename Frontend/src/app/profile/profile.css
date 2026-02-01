@@ -1,0 +1,40 @@
+.profile-sidebar {
+  position: absolute;
+  top: 50px;       /* 🔥 header height */
+  left: 20px;      /* aligns with username */
+
+  min-width: 160px;
+  padding: 12px 0;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.719);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.719);
+
+  z-index: 1100;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* MENU ITEM */
+.profile-item {
+  padding: 6px 20px;
+}
+
+/* reuse existing styles */
+.profile-item .button-text:hover {
+  text-decoration-line: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.button-text{
+    color: white;
+    font-weight: 600;
+}
+.bracket{
+    color: white;
+    font-weight: 800;
+}
+.logout{
+    color: rgb(255, 23, 23);
+    font-weight: 900;
+}

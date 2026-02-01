@@ -24,8 +24,9 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.clear();
-  }
+  return this.http.post(`${this.baseUrl}/logout`, {});
+}
+
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');

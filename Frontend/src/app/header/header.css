@@ -2,7 +2,7 @@
   height: 46px;
   width: 100%;
 
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   z-index: 1000;
@@ -22,7 +22,16 @@
   font-weight: 600;
   letter-spacing: 0.3px;
 }
-
+.username:hover{
+  text-decoration-line: underline;
+  text-decoration-thickness: 3px; 
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.bracket{
+  font-weight: 800;
+  color: #ffffff;
+}
 /* RIGHT CONTAINER */
 .right {
   display: flex;
