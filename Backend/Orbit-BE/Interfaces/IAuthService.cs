@@ -8,6 +8,8 @@ namespace Orbit_BE.Interfaces
         Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
         Task<UserDetilsResponseDto> GetUserDetailsAsync(Guid userId);
         Task LogoutAsync(Guid userId);
+        Task<AuthResponseDto> GoogleLoginAsync(string idToken);
+
 
     }
 

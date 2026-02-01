@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orbit_BE.Entities;
 using Orbit_BE.Interfaces;
+using Orbit_BE.Models.Google;
+using Orbit_BE.Models.Users;
 using Orbit_BE.Models.Users;
 using Orbit_BE.Services;
 using System.Security.Claims;
+
 
 namespace Orbit_BE.Controllers
 {
@@ -90,6 +93,23 @@ namespace Orbit_BE.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin(GoogleLoginRequestDto request)
+        {
+            try
+            {
+                var result = await _authService.GoogleLoginAsync(request.IdToken);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+        }
 
     }
 

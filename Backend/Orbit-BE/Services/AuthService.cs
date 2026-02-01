@@ -3,6 +3,8 @@ using Orbit_BE.Interfaces;
 using Orbit_BE.Models.Users;
 using Orbit_BE.UnitOfWork;
 using Snera_Core.Services;
+using Google.Apis.Auth;
+using Microsoft.Extensions.Configuration;
 
 namespace Orbit_BE.Services
 {
@@ -10,11 +12,12 @@ namespace Orbit_BE.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly JwtService _jwtService;
-
-        public AuthService(IUnitOfWork unitOfWork, JwtService jwtService)
+        private readonly IConfiguration _configuration;
+        public AuthService(IUnitOfWork unitOfWork, JwtService jwtService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _jwtService = jwtService;
+            _configuration = configuration;
         }
 
         // =========================
@@ -141,6 +144,69 @@ namespace Orbit_BE.Services
 
             _unitOfWork.Users.Update(user);
             await _unitOfWork.SaveChangesAsync();
+        }
+        public async Task<AuthResponseDto> GoogleLoginAsync(string idToken)
+        {
+            if (string.IsNullOrWhiteSpace(idToken))
+                throw new ArgumentException("Invalid Google token");
+
+            GoogleJsonWebSignature.Payload payload;
+
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(
+                    idToken,
+                    new GoogleJsonWebSignature.ValidationSettings
+                    {
+                        Audience = new[] { _configuration["GoogleAuth:ClientId"] }
+                    });
+            }
+            catch
+            {
+                throw new UnauthorizedAccessException("Invalid Google token");
+            }
+
+            // Check user by email
+            var user = await _unitOfWork.Users
+                .FirstOrDefaultAsync(u =>
+                    u.Email == payload.Email &&
+                    u.RecordState == "Active");
+
+            // If user does not exist → create
+            if (user == null)
+            {
+                user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    Username = payload.Name ?? payload.Email,
+                    Email = payload.Email,
+                    PasswordHash = null, // ❌ no password for Google users
+                    UserStatus = "Online",
+                    IsAdmin = false,
+                    RecordState = "Active",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _unitOfWork.Users.AddAsync(user);
+            }
+            else
+            {
+                user.UserStatus = "Online";
+                user.LastEditedTimestamp = DateTime.UtcNow;
+                _unitOfWork.Users.Update(user);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            var token = _jwtService.CreateToken(user);
+
+            return new AuthResponseDto
+            {
+                UserId = user.Id,
+                Username = user.Username,
+                UserStatus = user.UserStatus,
+                AccessToken = token
+            };
         }
 
     }
