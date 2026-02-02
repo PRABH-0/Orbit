@@ -364,3 +364,29 @@ img {
   border-radius: 50%;
   object-fit: cover;
 }
+
+/* IMAGE WRAPPER – FLEXIBLE */
+.image-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+
+.file-media {
+  max-width: 90vw;
+  max-height: 90vh;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  border-radius: 12px;
+  background: #000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85);
+}
+

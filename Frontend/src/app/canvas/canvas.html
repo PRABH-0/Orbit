@@ -120,11 +120,14 @@
   <div class="file-viewer-content" (click)="$event.stopPropagation()">
 
     <!-- IMAGE -->
-    <img
-      *ngIf="selectedFile.type === 'image'"
-      [src]="selectedFile.url"
-      class="file-media"
-    />
+    <!-- IMAGE -->
+<div *ngIf="selectedFile.type === 'image'" class="image-wrapper">
+  <img
+    [src]="selectedFile.url"
+    class="file-media"
+  />
+</div>
+
 
     <!-- VIDEO -->
     <video
