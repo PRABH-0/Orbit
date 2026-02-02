@@ -55,7 +55,13 @@
   overflow: hidden;
   z-index: 20;
 }
-
+.user-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* 🔥 THIS IS THE KEY */
+  border-radius: 50%;
+  display: block;
+}
 .center-circle img {
   width: 100%;
   height: 100%;

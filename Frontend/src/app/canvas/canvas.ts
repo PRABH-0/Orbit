@@ -10,7 +10,7 @@ import { ModelData } from '../model-data/model-data';
 import { DirectoryService } from '../services/directory.service';
 import { FileService } from '../services/file.service';
 import { Profile } from '../profile/profile';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 
 @Component({
@@ -41,11 +41,10 @@ lastMovedFolder: any = null;
   selectedFile: {
   type: 'image' | 'pdf' | 'video' | 'audio';
   url: string;
-  safeUrl?: SafeResourceUrl;
+  safeUrl?: SafeUrl;
   id: string;
 } | null = null;
 profilePic: string | null = null;
-safeProfilePic: SafeResourceUrl | null = null;
 
 
   isAddFolderOpen = false;
@@ -59,28 +58,18 @@ selectedFileId: string | null = null;
   private x = -2500;
   private y = -2500;
 showModelData = false;
-
+cacheBuster = Date.now();
   constructor(
     private directoryService: DirectoryService,
     private fileService: FileService,
     private sanitizer:DomSanitizer
   ) {}
 
-  // =========================
-  // INIT
-  // =========================
-  ngOnInit() {
-   const pic = localStorage.getItem('profilePic');
-
-  if (pic) {
-    this.safeProfilePic =
-      this.sanitizer.bypassSecurityTrustResourceUrl(pic);
-  }
-
+ ngOnInit() {
+  this.profilePic = localStorage.getItem('profilePic');
   this.username = localStorage.getItem('username');
   this.loadDirectories();
 }
-
 
   ngAfterViewInit() {
     this.update();
