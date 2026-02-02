@@ -17,6 +17,7 @@ namespace Orbit_BE.Entities
 
         // Active / Inactive / Deleted
         public string RecordState { get; set; } = "Active";
+        public string? ProfilePictureUrl { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastEditedTimestamp { get; set; }

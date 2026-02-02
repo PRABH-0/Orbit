@@ -44,7 +44,8 @@ lastMovedFolder: any = null;
   safeUrl?: SafeResourceUrl;
   id: string;
 } | null = null;
-
+profilePic: string | null = null;
+safeProfilePic: SafeResourceUrl | null = null;
 
 
   isAddFolderOpen = false;
@@ -69,8 +70,12 @@ showModelData = false;
   // INIT
   // =========================
   ngOnInit() {
-  const token = localStorage.getItem('token');
-  if (!token) return; // 🔥 do nothing if not logged in
+   const pic = localStorage.getItem('profilePic');
+
+  if (pic) {
+    this.safeProfilePic =
+      this.sanitizer.bypassSecurityTrustResourceUrl(pic);
+  }
 
   this.username = localStorage.getItem('username');
   this.loadDirectories();

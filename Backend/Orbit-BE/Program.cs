@@ -99,13 +99,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:4200",
-                "https://localhost:4200"
-            )
+            .WithOrigins("http://localhost:4200", "https://localhost:4200") // Your Angular dev URL
+            .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+            .AllowCredentials(); // ? This is important!
+});
 });
 
 // =======================

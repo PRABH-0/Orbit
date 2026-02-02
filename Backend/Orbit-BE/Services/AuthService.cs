@@ -166,13 +166,11 @@ namespace Orbit_BE.Services
                 throw new UnauthorizedAccessException("Invalid Google token");
             }
 
-            // Check user by email
             var user = await _unitOfWork.Users
                 .FirstOrDefaultAsync(u =>
                     u.Email == payload.Email &&
                     u.RecordState == "Active");
 
-            // If user does not exist → create
             if (user == null)
             {
                 user = new User
@@ -180,7 +178,8 @@ namespace Orbit_BE.Services
                     Id = Guid.NewGuid(),
                     Username = payload.Name ?? payload.Email,
                     Email = payload.Email,
-                    PasswordHash = null, // ❌ no password for Google users
+                    ProfilePictureUrl = payload.Picture, // ✅ GOOGLE PIC
+                    PasswordHash = null,
                     UserStatus = "Online",
                     IsAdmin = false,
                     RecordState = "Active",
@@ -193,6 +192,11 @@ namespace Orbit_BE.Services
             {
                 user.UserStatus = "Online";
                 user.LastEditedTimestamp = DateTime.UtcNow;
+
+                // ✅ Update picture if changed
+                if (!string.IsNullOrEmpty(payload.Picture))
+                    user.ProfilePictureUrl = payload.Picture;
+
                 _unitOfWork.Users.Update(user);
             }
 
@@ -205,9 +209,11 @@ namespace Orbit_BE.Services
                 UserId = user.Id,
                 Username = user.Username,
                 UserStatus = user.UserStatus,
-                AccessToken = token
+                AccessToken = token,
+                ProfilePictureUrl = user.ProfilePictureUrl // ✅ RETURN IT
             };
         }
+
 
     }
 }

@@ -338,3 +338,23 @@ img {
 .file-media.audio {
   width: 420px;
 }
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: #111;
+}
+
+.profile-pic {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  z-index: 9999;
+
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}

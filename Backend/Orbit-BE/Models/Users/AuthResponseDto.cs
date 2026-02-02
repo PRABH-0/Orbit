@@ -7,6 +7,7 @@
         public string UserStatus { get; set; }
 
         public string AccessToken { get; set; }
+        public string? ProfilePictureUrl { get; set; }
     }
 
 }

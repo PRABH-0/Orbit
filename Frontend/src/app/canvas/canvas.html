@@ -43,7 +43,12 @@
     class="center-circle"
     #centerCircle
     (click)="toggleRoot()">
-    <img src="user_c.png" />
+    <img
+  class="user-avatar"
+  [src]="safeProfilePic || 'assets/user_c.png'"
+  alt="User"
+/>
+
   </div>
 
   <!-- DIRECTORIES -->

@@ -27,6 +27,13 @@ export class AuthService {
   return this.http.post(`${this.baseUrl}/logout`, {});
 }
 
+// auth.service.ts
+googleLogin(data: { idToken: string }) {
+  return this.http.post<any>(
+    `${this.baseUrl}/google-login`, // Changed from '/api/auth/google-login'
+    data
+  );
+}
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');

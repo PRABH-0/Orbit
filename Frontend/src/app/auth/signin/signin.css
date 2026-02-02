@@ -13,6 +13,12 @@
   z-index: 1000; /* above grid & card */
   user-select: none;
 }
+.google-btn {
+  background: #111;
+  border: 1px solid #444;
+  color: #fff;
+  margin-top: 10px;
+}
 
 .signin-container {
   position: fixed;
@@ -161,3 +167,24 @@ button:hover {
   color: #e5e7eb;
   text-decoration: underline;
 }
+/* ===== GOOGLE SIGN-IN WRAPPER ===== */
+.google-wrapper {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+/* subtle container feel */
+.google-wrapper > div {
+  background: #0f141b;
+  padding: 6px;
+  border-radius: 6px;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 10px 30px rgba(0, 0, 0, 0.6);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+

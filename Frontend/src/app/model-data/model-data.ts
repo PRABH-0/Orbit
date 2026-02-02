@@ -59,7 +59,7 @@ openPdf(file: any) {
   this.imageOpen.emit({
     type: 'pdf',
     id: file.id,
-    url: this.getImageUrl(file.id)
+    url: `https://localhost:44370/api/File/${file.id}/view`
   });
 }
 

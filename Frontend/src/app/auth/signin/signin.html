@@ -1,62 +1,68 @@
-<h2 class="orbit-title">[ Orbit ]</h2>
+  <h2 class="orbit-title">[ Orbit ]</h2>
 
-<div class="signin-container">
-  <div class="grid-bg"></div>
+  <div class="signin-container">
+    <div class="grid-bg"></div>
 
-  <div class="login-card">
-    <h2 class="title">
-      {{ isRegister ? 'Register' : 'Sign in' }}
-    </h2>
+    <div class="login-card">
+      <h2 class="title">
+        {{ isRegister ? 'Register' : 'Sign in' }}
+      </h2>
 
-    <!-- USERNAME (REGISTER ONLY) -->
-    <div class="input-group" *ngIf="isRegister">
-      <input
-        type="text"
-        [(ngModel)]="username"
-        placeholder="Username"
-      />
-    </div>
+      <!-- USERNAME (REGISTER ONLY) -->
+      <div class="input-group" *ngIf="isRegister">
+        <input
+          type="text"
+          [(ngModel)]="username"
+          placeholder="Username"
+        />
+      </div>
 
-    <!-- EMAIL -->
-    <div class="input-group">
-      <input
-        type="email"
-        [(ngModel)]="email"
-        placeholder="Email"
-      />
-    </div>
+      <!-- EMAIL -->
+      <div class="input-group">
+        <input
+          type="email"
+          [(ngModel)]="email"
+          placeholder="Email"
+        />
+      </div>
 
-    <!-- PASSWORD -->
-    <div class="input-group password-group">
-      <input
-        [type]="showPassword ? 'text' : 'password'"
-        [(ngModel)]="password"
-        placeholder="Password"
-      />
-      <span class="toggle" (click)="showPassword = !showPassword">
-        {{ showPassword ? 'Hide' : 'Show' }}
-      </span>
-    </div>
+      <!-- PASSWORD -->
+      <div class="input-group password-group">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          [(ngModel)]="password"
+          placeholder="Password"
+        />
+        <span class="toggle" (click)="showPassword = !showPassword">
+          {{ showPassword ? 'Hide' : 'Show' }}
+        </span>
+      </div>
 
-    <!-- CONFIRM PASSWORD (REGISTER ONLY) -->
-    <div class="input-group" *ngIf="isRegister">
-      <input
-        type="password"
-        [(ngModel)]="confirmPassword"
-        placeholder="Re-enter Password"
-      />
-    </div>
+      <!-- CONFIRM PASSWORD (REGISTER ONLY) -->
+      <div class="input-group" *ngIf="isRegister">
+        <input
+          type="password"
+          [(ngModel)]="confirmPassword"
+          placeholder="Re-enter Password"
+        />
+      </div>
 
-    <p class="error" *ngIf="error">{{ error }}</p>
+      <p class="error" *ngIf="error">{{ error }}</p>
 
-    <button (click)="submit()">
-      {{ isRegister ? 'Create Account' : 'Sign In' }}
-    </button>
+      <!-- NORMAL LOGIN -->
+      <button (click)="submit()">
+        {{ isRegister ? 'Create Account' : 'Sign In' }}
+      </button>
 
-    <div class="footer" (click)="toggleMode()">
-      {{ isRegister
-        ? 'Already have an account? Sign in'
-        : 'New here? Create account' }}
+      <!-- GOOGLE LOGIN (OFFICIAL BUTTON) -->
+      <div class="google-wrapper">
+        <div id="google-btn"></div>
+      </div>
+
+      <div class="footer" (click)="toggleMode()">
+        {{ isRegister
+          ? 'Already have an account? Sign in'
+          : 'New here? Create account' }}
+      </div>
     </div>
   </div>
-</div>

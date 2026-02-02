@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+
+declare const google: any;
 
 @Component({
   selector: 'app-signin',
@@ -11,10 +13,9 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './signin.html',
   styleUrls: ['./signin.css'],
 })
-export class Signin {
+export class Signin implements OnInit, AfterViewInit {
 
   isRegister = false;
-
   username = '';
   email = '';
   password = '';
@@ -26,11 +27,49 @@ export class Signin {
     private auth: AuthService,
     private router: Router
   ) {}
-ngOnInit() {
-  if (localStorage.getItem('token')) {
-    this.router.navigate(['/canvas']);
+
+  ngOnInit() {
+    if (localStorage.getItem('token')) {
+      this.router.navigate(['/canvas']);
+    }
   }
+
+  // 🔵 GOOGLE INITIALIZATION
+  ngAfterViewInit() {
+    google.accounts.id.initialize({
+      client_id: '335253037634-8rvgkdjbb5nr3mh9efsi6kgd8nrt28j6.apps.googleusercontent.com',
+      callback: (response: any) => this.handleGoogleLogin(response)
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById('google-btn'),
+      {
+        theme: 'outline',
+        size: 'large',
+        width: 300
+      }
+    );
+  }
+
+  handleGoogleLogin(response: any) {
+  const idToken = response.credential;
+
+  this.auth.googleLogin({ idToken }).subscribe({
+    next: res => {
+      this.auth.saveToken(res.accessToken);
+      localStorage.setItem('username', res.username);
+      localStorage.setItem('userId', res.userId);
+
+      // 🔥 ADD THIS
+      if (res.profilePictureUrl) {
+        localStorage.setItem('profilePic', res.profilePictureUrl);
+      }
+
+      this.router.navigate(['/canvas']);
+    }
+  });
 }
+
 
   toggleMode() {
     this.isRegister = !this.isRegister;
@@ -73,23 +112,22 @@ ngOnInit() {
   }
 
   login() {
-  this.auth.login({
-    email: this.email,
-    password: this.password
-  }).subscribe({
-    next: res => {
-      this.auth.saveToken(res.accessToken);
-
-      // ✅ SAVE USER INFO
-      localStorage.setItem('username', res.username);
-      localStorage.setItem('userId', res.userId);
-
-      this.router.navigate(['/']);
-    },
-    error: err => {
-      this.error = err.error?.message || 'Invalid email or password';
+    this.auth.login({
+      email: this.email,
+      password: this.password
+    }).subscribe({
+      next: res => {
+        this.auth.saveToken(res.accessToken);
+        localStorage.setItem('username', res.username);
+        localStorage.setItem('userId', res.userId);
+        if (res.profilePictureUrl) {
+      localStorage.setItem('profilePic', res.profilePictureUrl);
     }
-  });
-}
-
+        this.router.navigate(['/']);
+      },
+      error: err => {
+        this.error = err.error?.message || 'Invalid email or password';
+      }
+    });
+  }
 }

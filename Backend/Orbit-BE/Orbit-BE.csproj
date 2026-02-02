@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Orbit_BE</RootNamespace>
+    <UserSecretsId>d84af62e-0214-4b17-a5e3-6ac98eebab25</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
