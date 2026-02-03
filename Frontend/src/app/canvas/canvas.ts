@@ -11,6 +11,8 @@ import { DirectoryService } from '../services/directory.service';
 import { FileService } from '../services/file.service';
 import { Profile } from '../profile/profile';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -62,7 +64,9 @@ cacheBuster = Date.now();
   constructor(
     private directoryService: DirectoryService,
     private fileService: FileService,
-    private sanitizer:DomSanitizer
+    private sanitizer:DomSanitizer,
+    private auth:AuthService,
+    private router:Router
   ) {}
 
  ngOnInit() {
@@ -102,9 +106,12 @@ closeProfile() {
 
 
 logout() {
-  localStorage.clear();
-  location.href = '/login';
+  this.auth.logout().subscribe(() => {
+    localStorage.clear();
+    this.router.navigate(['/signin']);
+  });
 }
+
   onAddFolder() {
     const parentId = this.selectedParentFolderId;
 

@@ -34,6 +34,13 @@ googleLogin(data: { idToken: string }) {
     data
   );
 }
+refreshToken() {
+  return this.http.post<any>(
+    `${this.baseUrl}/refresh`,
+    {},
+    { withCredentials: true } // 👈 IMPORTANT (cookie!)
+  );
+}
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
