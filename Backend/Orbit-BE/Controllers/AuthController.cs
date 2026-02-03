@@ -43,21 +43,21 @@ namespace Orbit_BE.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
-            try
-            {
-                var result = await _authService.LoginAsync(request);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-        }
+            var result = await _authService.LoginAsync(request);
 
+            Response.Cookies.Append("refreshToken", result.RefreshToken!, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new
+            {
+                accessToken = result.AccessToken
+            });
+        }
 
         [Authorize]
     [HttpGet("userDetails")]
@@ -92,6 +92,7 @@ namespace Orbit_BE.Controllers
 
             return Ok(new { message = "Logged out successfully" });
         }
+        [AllowAnonymous]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh()
         {
@@ -104,7 +105,7 @@ namespace Orbit_BE.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
@@ -114,19 +115,23 @@ namespace Orbit_BE.Controllers
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLogin(GoogleLoginRequestDto request)
         {
-            try
+            var result = await _authService.GoogleLoginAsync(request.IdToken);
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken!, new CookieOptions
             {
-                var result = await _authService.GoogleLoginAsync(request.IdToken);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new
             {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
+                accessToken = result.AccessToken,
+                username = result.Username,
+                userId = result.UserId,
+                profilePictureUrl = result.ProfilePictureUrl
+            });
         }
 
     }

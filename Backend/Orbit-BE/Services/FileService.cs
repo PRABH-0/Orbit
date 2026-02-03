@@ -36,7 +36,8 @@ namespace Orbit_BE.Services
                     n.RecordState == "Active");
 
             if (node == null)
-                throw new UnauthorizedAccessException("Invalid node");
+                throw new ArgumentException("Node not found");
+
 
             string storagePath;
             using (var stream = request.File.OpenReadStream())
@@ -84,7 +85,9 @@ namespace Orbit_BE.Services
                     n.RecordState == "Active");
 
             if (node == null)
-                throw new UnauthorizedAccessException("Invalid node");
+                if (node == null)
+                    return Enumerable.Empty<FileResponseDto>();
+
 
             var allFiles = await _unitOfWork.NodeFiles.GetAllAsync();
 

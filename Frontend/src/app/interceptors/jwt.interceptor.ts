@@ -3,7 +3,10 @@ import { HttpInterceptorFn } from '@angular/common/http';
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('token');
 
-  // skip auth endpoints
+  if (req.url.includes('/auth/refresh')) {
+  return next(req);
+}
+
   if (!token || req.url.includes('/auth/login') || req.url.includes('/auth/register')) {
     return next(req);
   }

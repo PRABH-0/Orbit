@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Orbit_BE.Interfaces;
 using Orbit_BE.Models.Files;
 using System.Security.Claims;
@@ -82,12 +83,15 @@ namespace Orbit_BE.Controllers
 
         private Guid GetUserIdFromToken()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier) ??
+                User.FindFirst("sub");
 
-            if (string.IsNullOrEmpty(userIdClaim))
-                throw new UnauthorizedAccessException("Invalid token");
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                throw new SecurityTokenException("Invalid token");
 
-            return Guid.Parse(userIdClaim);
+            return userId;
         }
+
     }
 }

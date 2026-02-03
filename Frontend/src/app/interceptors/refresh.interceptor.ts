@@ -11,16 +11,18 @@ export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  if (req.url.includes('/auth/refresh')) {
+    return next(req);
+  }
+
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        // 🔁 Try refresh token
+
         return authService.refreshToken().pipe(
           switchMap(res => {
-            // save new access token
             localStorage.setItem('token', res.accessToken);
 
-            // retry original request
             const clonedReq = req.clone({
               setHeaders: {
                 Authorization: `Bearer ${res.accessToken}`
@@ -30,7 +32,6 @@ export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
             return next(clonedReq);
           }),
           catchError(() => {
-            // ❌ refresh failed → logout
             localStorage.clear();
             router.navigate(['/signin']);
             return throwError(() => error);
@@ -42,3 +43,4 @@ export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+
