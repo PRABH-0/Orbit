@@ -92,6 +92,24 @@ namespace Orbit_BE.Controllers
 
             return Ok(new { message = "Logged out successfully" });
         }
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh()
+        {
+            if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+                return Unauthorized();
+
+            var result = await _authService.RefreshTokenAsync(refreshToken);
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken!, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new { accessToken = result.AccessToken });
+        }
 
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLogin(GoogleLoginRequestDto request)

@@ -16,7 +16,7 @@ namespace Orbit_BE.Data
         public DbSet<NodePosition> NodePositions { get; set; }
         public DbSet<NodeFile> NodeFiles { get; set; }
         public DbSet<CanvasEdge> CanvasEdges { get; set; }
-
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -40,6 +40,10 @@ namespace Orbit_BE.Data
                 .WithMany()
                 .HasForeignKey(e => e.FromNodeId)
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<RefreshToken>()
+    .HasOne(rt => rt.User)
+    .WithMany(u => u.RefreshTokens)
+    .HasForeignKey(rt => rt.UserId);
 
             modelBuilder.Entity<CanvasEdge>()
                 .HasOne(e => e.ToNode)

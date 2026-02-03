@@ -10,7 +10,7 @@ namespace Orbit_BE.Interfaces
         Task LogoutAsync(Guid userId);
         Task<AuthResponseDto> GoogleLoginAsync(string idToken);
 
-
+        Task<AuthResponseDto> RefreshTokenAsync(string token);
     }
 
 }

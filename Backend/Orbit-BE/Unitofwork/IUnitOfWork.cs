@@ -13,6 +13,8 @@ namespace Orbit_BE.UnitOfWork
         IRepository<NodeFile> NodeFiles { get; }
         IRepository<CanvasEdge> CanvasEdges { get; }
 
+        IRepository<RefreshToken> RefreshTokens { get; }
+
         IRepository<T> Repository<T>() where T : class;
 
         Task<int> SaveAllAsync();

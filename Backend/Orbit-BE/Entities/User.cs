@@ -24,5 +24,7 @@ namespace Orbit_BE.Entities
 
         // Navigation
         public ICollection<Node> Nodes { get; set; } = new List<Node>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
     }
 }

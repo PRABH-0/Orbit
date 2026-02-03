@@ -55,6 +55,10 @@ namespace Orbit_BE.UnitOfWork
         public IRepository<CanvasEdge> CanvasEdges =>
             _canvasEdges ??= Repository<CanvasEdge>();
 
+        private IRepository<RefreshToken>? _refreshTokens;
+        public IRepository<RefreshToken> RefreshTokens =>
+            _refreshTokens ??= Repository<RefreshToken>();
+
         // =========================
         // Transaction Methods
         // =========================
