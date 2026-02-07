@@ -38,6 +38,7 @@
     currentFolderName: string | null = null;
   selectedFolderItems: any[] = [];
   lastMovedFolder: any = null;
+activeFolder: any = null;
 
     dataNodePosition: { x: number; y: number } | null = null;
     selectedFile: {
@@ -279,10 +280,16 @@
       y: this.dataNodePosition.y + HEIGHT / 2
     };
   }
-  onFolderClick(dir: any) {
+ onFolderClick(dir: any) {
   if (!dir || !dir.id) return;
 
+  // ✅ CORE STATE
   this.selectedFolderId = dir.id;
+  this.selectedParentFolderId = dir.id;
+  this.currentFolderName = dir.name; // 🔥 THIS FIXES HEADER
+
+  this.activeFolder = dir;
+  this.rootOpen = true;
 
   this.fileService.getFilesByNode(dir.id).subscribe({
     next: files => {
@@ -296,13 +303,14 @@
         this.dataNodePosition = null;
       }
     },
-    error: err => {
+    error: () => {
       this.selectedFolderItems = [];
       this.showModelData = false;
       this.dataNodePosition = null;
     }
   });
 }
+
 
     // =========================
     // TREE HELPERS
@@ -341,19 +349,38 @@
       }
     }
 
-    // =========================
-    // DATA NODE
-    // =========================
     setDataNodePosition(dir: any) {
-      const GAP = 160;
-      const WIDTH = 800;
-      const HEIGHT = 580;
+  const GAP = 160;
+  const WIDTH = 800;
+  const HEIGHT = 580;
 
-      let x = dir.x + GAP;
-      let y = dir.y - HEIGHT / 2;
+  const CENTER_X = 2500;
+  const CENTER_Y = 2500;
 
-      this.dataNodePosition = { x, y };
-    }
+  let x = dir.x;
+  let y = dir.y;
+
+  // Horizontal decision
+  if (dir.x < CENTER_X) {
+    // folder is LEFT → data node on LEFT
+    x = dir.x - WIDTH - GAP;
+  } else {
+    // folder is RIGHT → data node on RIGHT
+    x = dir.x + GAP;
+  }
+
+  // Vertical decision
+  if (dir.y < CENTER_Y) {
+    // folder is ABOVE → data node ABOVE
+    y = dir.y - HEIGHT - GAP / 2;
+  } else {
+    // folder is BELOW → data node centered vertically
+    y = dir.y - HEIGHT / 2;
+  }
+
+  this.dataNodePosition = { x, y };
+}
+
   getVisibleEdges() {
     const edges: any[] = [];
     const ROOT_X = 2500;
@@ -391,20 +418,34 @@
     return edges;
   }
 
-    openImage(payload: any) {
-    if (payload.type === 'pdf') {
-      payload.safeUrl = this.sanitizer
-        .bypassSecurityTrustResourceUrl(payload.url);
-    }
-
-    this.selectedFile = payload;
+  openImage(payload: any) {
+  // 🔒 Preserve folder name
+  if (this.activeFolder) {
+    this.currentFolderName = this.activeFolder.name;
+    this.selectedFolderId = this.activeFolder.id;
   }
 
-
-  closeFileViewer() {
-    this.selectedFile = null;
-    this.selectedFileId = null;
+  // Sanitize streamable files
+  if (
+    payload.type === 'pdf' ||
+    payload.type === 'audio' ||
+    payload.type === 'video'
+  ) {
+    payload.safeUrl = this.sanitizer
+      .bypassSecurityTrustResourceUrl(payload.url);
   }
+
+  this.selectedFile = payload;
+}
+
+closeFileViewer() {
+  this.selectedFile = null;
+
+  if (this.activeFolder) {
+    this.currentFolderName = this.activeFolder.name;
+    this.selectedFolderId = this.activeFolder.id;
+  }
+}
 
 
   reloadFiles() {

@@ -62,22 +62,26 @@ openPdf(file: any) {
     url: `https://localhost:44370/api/File/${file.id}/view`
   });
 }
-
+getStreamUrl(fileId: string): string {
+  return `https://localhost:44370/api/File/${fileId}/view`;
+}
 openVideo(file: any) {
   this.imageOpen.emit({
     type: 'video',
     id: file.id,
-    url: this.getImageUrl(file.id)
+    url: this.getStreamUrl(file.id)
   });
 }
+
 
 openAudio(file: any) {
   this.imageOpen.emit({
     type: 'audio',
     id: file.id,
-    url: this.getImageUrl(file.id)
+    url: this.getStreamUrl(file.id)
   });
 }
+
 isImage(file: any): boolean {
   return file.contentType?.startsWith('image/');
 }
