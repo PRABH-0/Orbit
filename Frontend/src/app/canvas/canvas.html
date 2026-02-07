@@ -3,6 +3,7 @@
   [currentFolder]="currentFolderName"
   (addFolder)="onAddFolder()"
   (addItem)="onAddItem()"
+  (delete)="onDeleteFolder()"
   (openProfile)="openUserMenu()">
 </app-header>
 
@@ -17,6 +18,7 @@
   [username]="username"
   (close)="closeProfile()"
   (logout)="logout()"
+  (about)="aboutpage()"
   (payment)="payment()">
 </app-profile>
   <div

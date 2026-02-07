@@ -16,6 +16,7 @@
 
 /* LEFT */
 .username {
+  display: inline-block;
   color: #ffffff;
   font-size: 18px;
   font-family: 'IBM Plex Mono', monospace;
@@ -28,8 +29,33 @@
   text-underline-offset: 2px;
   cursor: pointer;
 }
+/* DELETE ACTION */
+.delete-action {
+  display: inline-block;
+  font-size: 13px;                 /* smaller than username */
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding-top: 4px;
+  color: #ef4444;                  /* red-500 */
+  cursor: pointer;
+}
+
+.delete-action:hover {
+  text-decoration-line: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 2px;
+
+  color: #f87171;                  /* lighter red on hover */
+}
+
 .bracket{
   font-weight: 800;
+  color: #ffffff;
+}
+.del-bracket{
+  font-weight: 800;
+  font-size: 12px;
   color: #ffffff;
 }
 /* RIGHT CONTAINER */
@@ -41,6 +67,18 @@
   margin-top: 10px;
   padding: 6px 50px;
   border-radius: 6px;
+}
+/* TOP ROW (folder + delete) */
+.right-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Keep buttons aligned right */
+.header-button {
+  display: flex;
+  gap: 6px;
 }
 
 /* FOLDER NAME */

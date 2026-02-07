@@ -23,6 +23,8 @@ export class Header {
   @Output() addFolder = new EventEmitter<void>();
   @Output() addItem = new EventEmitter<void>();
   @Output() openProfile = new EventEmitter<void>();
+  @Output() delete = new EventEmitter<void>();
+
 
   constructor(
     private authService: AuthService,

@@ -12,12 +12,15 @@ export class Profile {
   @Output() close = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
   @Output() payment = new EventEmitter<void>();
+  @Output() about = new EventEmitter<void>();
 
 
   closeProfile() {
     this.close.emit();
   }
-
+aboutpage(){
+this.about.emit();
+}
   logoutUser() {
     this.logout.emit();
   }

@@ -2,27 +2,36 @@
   <div class="left">
     <span class="bracket">[ </span> 
     <span class="username clickable" (click)="openProfile.emit()">
-  {{ username }}
+  {{ username}}
 </span>
-
     <span class="bracket"> ]</span>
   </div>
 
-  <div class="right" *ngIf="currentFolder">
+<div class="right" *ngIf="currentFolder">
+
+  <!-- TOP ROW -->
+  <div class="right-top">
     <div class="folder-name">[ {{ currentFolder }} ]</div>
 
-    <div class="header-button">
-      <button class="add-folder-btn" (click)="addItem.emit()">
-        ＋ Add Item
-      </button>
-  
-      <!-- ADD FOLDER -->
-      <button class="add-folder-btn" (click)="addFolder.emit()">
-        ＋ Add Folder
-      </button>
-
-    </div>
-    <!-- ADD ITEM -->
+    <span class="del-bracket">[ </span>
+    <span class="delete-action clickable"(click)="delete.emit()">
+      Delete
+    </span>
+    <span class="del-bracket"> ]</span>
   </div>
+
+  <!-- BUTTON ROW -->
+  <div class="header-button">
+    <button class="add-folder-btn" (click)="addItem.emit()">
+      ＋ Add Item
+    </button>
+
+    <button class="add-folder-btn" (click)="addFolder.emit()">
+      ＋ Add Folder
+    </button>
+  </div>
+
+</div>
+
   
 </header>
