@@ -112,6 +112,9 @@ activeFolder: any = null;
       this.router.navigate(['/signin']);
     });
   }
+  payment(){
+    this.router.navigate(['/payment']);
+  }
 
     onAddFolder() {
       const parentId = this.selectedParentFolderId;
@@ -360,21 +363,15 @@ activeFolder: any = null;
   let x = dir.x;
   let y = dir.y;
 
-  // Horizontal decision
   if (dir.x < CENTER_X) {
-    // folder is LEFT → data node on LEFT
     x = dir.x - WIDTH - GAP;
   } else {
-    // folder is RIGHT → data node on RIGHT
     x = dir.x + GAP;
   }
 
-  // Vertical decision
   if (dir.y < CENTER_Y) {
-    // folder is ABOVE → data node ABOVE
     y = dir.y - HEIGHT - GAP / 2;
   } else {
-    // folder is BELOW → data node centered vertically
     y = dir.y - HEIGHT / 2;
   }
 

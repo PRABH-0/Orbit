@@ -11,6 +11,8 @@ namespace Orbit_BE.UnitOfWork
         IRepository<Node> Nodes { get; }
         IRepository<NodePosition> NodePositions { get; }
         IRepository<NodeFile> NodeFiles { get; }
+        IRepository<Payment> Payments { get; }
+        IRepository<UserPlan> UserPlans { get; }
         IRepository<CanvasEdge> CanvasEdges { get; }
 
         IRepository<RefreshToken> RefreshTokens { get; }

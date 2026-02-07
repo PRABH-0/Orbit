@@ -9,6 +9,7 @@ using Orbit_BE.Repositories;
 using Orbit_BE.Services;
 using Orbit_BE.UnitOfWork;
 using Snera_Core.Services;
+using Stripe;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -116,8 +117,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<INodeService, NodeService>();
-// File handling
-builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddScoped<IFileService, Orbit_BE.Services.FileService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddMemoryCache(options =>
 {
@@ -146,7 +148,8 @@ app.Use(async (context, next) =>
     }
     await next();
 });
-
+StripeConfiguration.ApiKey =
+    builder.Configuration["Stripe:SecretKey"];
 
 // =======================
 // Middleware Order (IMPORTANT)

@@ -59,6 +59,14 @@ namespace Orbit_BE.UnitOfWork
         public IRepository<RefreshToken> RefreshTokens =>
             _refreshTokens ??= Repository<RefreshToken>();
 
+        private IRepository<Payment>? _payments;
+        public IRepository<Payment> Payments =>
+            _payments ??= Repository<Payment>();
+
+        private IRepository<UserPlan>? _userPlan;
+        public IRepository<UserPlan> UserPlans =>
+            _userPlan ??= Repository<UserPlan>();
+
         // =========================
         // Transaction Methods
         // =========================

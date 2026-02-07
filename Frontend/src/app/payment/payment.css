@@ -1,0 +1,222 @@
+.orbit-title {
+  position: fixed;
+  top: 18px;
+  right: 40px;   /* 🔥 moved to right */
+  left: auto;    /* important */
+
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+
+  color: #f9fafb;
+  z-index: 1000;
+  user-select: none;
+}
+
+/* ===== CONTAINER ===== */
+.payment-container {
+  position: fixed;
+  inset: 0;
+  background: #0b0f14;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: 'IBM Plex Mono', monospace;
+  overflow: hidden;
+}
+
+/* ===== GRID BACKGROUND (SAME AS SIGNIN) ===== */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+
+  background-size: 40px 40px;
+  background-position: center;
+  opacity: 0.9;
+}
+
+/* ===== MAIN WRAPPER ===== */
+.payment-wrapper {
+  position: relative;
+  z-index: 10;
+
+  width: 90%;
+  max-width: 1100px;
+  height: 90vh;
+
+  padding: 30px;
+
+  /* 🔥 REMOVE BACKGROUND */
+  background: transparent;
+  backdrop-filter: none;
+
+  border-radius: 0;
+  box-shadow: none;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ===== HEADER ===== */
+.payment-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+/* ===== PLANS ===== */
+.plans {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.plan-card {
+  padding: 22px;
+
+  background: rgba(15, 15, 18, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  color: #e5e7eb;
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.85),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+
+.plan-card.active {
+  border-color: rgba(59, 130, 246, 0.9);
+
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(59, 130, 246, 0.7),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+.back-wrapper {
+  position: fixed;
+  top: 18px;
+  left: 40px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-family: 'IBM Plex Mono', monospace;
+  z-index: 1000;
+}
+.bracket {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f9fafb;
+  user-select: none;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+
+  color: #f9fafb;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  text-decoration: underline; /* ✅ only text */
+  color: #e5e7eb;
+}
+
+.plan-card.disabled {
+  filter: grayscale(0.2);
+}
+
+/* ===== TEXT ===== */
+.plan-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.price {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 10px 0 14px;
+}
+
+.plan-card ul {
+  padding-left: 16px;
+  font-size: 13px;
+  color: #cbd5f5;
+}
+
+.plan-card li {
+  margin-bottom: 6px;
+}
+
+.plan-card button {
+  margin-top: auto;
+  padding: 8px;
+
+  background: #ffffff;
+  color: #000;
+
+  border: none;
+  border-radius: 6px;
+
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 13px;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.plan-card button:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+
+.plan-card button:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.plan-card button:disabled {
+  background: #2a2a2a;
+  color: #9ca3af;
+  cursor: not-allowed;
+}

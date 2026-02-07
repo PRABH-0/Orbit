@@ -17,6 +17,8 @@ namespace Orbit_BE.Data
         public DbSet<NodeFile> NodeFiles { get; set; }
         public DbSet<CanvasEdge> CanvasEdges { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<UserPlan> UserPlans { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -45,6 +47,11 @@ namespace Orbit_BE.Data
     .WithMany(u => u.RefreshTokens)
     .HasForeignKey(rt => rt.UserId);
 
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.Property(p => p.Amount)
+                      .HasPrecision(10, 2); // ₹99,999,999.99 safe
+            });
             modelBuilder.Entity<CanvasEdge>()
                 .HasOne(e => e.ToNode)
                 .WithMany()

@@ -11,6 +11,8 @@ export class Profile {
   @Input() username: string | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
+  @Output() payment = new EventEmitter<void>();
+
 
   closeProfile() {
     this.close.emit();
@@ -18,5 +20,8 @@ export class Profile {
 
   logoutUser() {
     this.logout.emit();
+  }
+  paymentpage(){
+    this.payment.emit();
   }
 }

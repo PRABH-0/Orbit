@@ -1,0 +1,75 @@
+
+
+<div class="back-wrapper">
+  <span class="bracket">[</span>
+
+  <button class="back-btn" (click)="goBack()">
+    ← Back
+  </button>
+
+  <span class="bracket">]</span>
+</div>
+
+<h2 class="orbit-title">[ Orbit ]</h2>
+
+
+<div class="payment-container">
+  <div class="grid-bg"></div>
+
+  <div class="payment-wrapper">
+
+    <!-- HEADER -->
+    <div class="payment-header">
+      <h2 class="title">Upgrade Storage</h2>
+      <p class="subtitle">Get more space for your Orbit files</p>
+    </div>
+
+    <!-- PLANS -->
+    <div class="plans">
+
+      <!-- FREE -->
+      <div class="plan-card disabled">
+        <h3>Free</h3>
+        <div class="price">₹0</div>
+
+        <ul>
+          <li>100 MB Storage</li>
+          <li>Basic Upload</li>
+          <li>No Sharing</li>
+        </ul>
+
+        <button disabled>Current Plan</button>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan-card active">
+        <h3>Pro</h3>
+        <div class="price">₹99 </div>
+
+        <ul>
+          <li>5 GB Storage</li>
+          <li>Fast Upload</li>
+          <li>File Preview</li>
+        </ul>
+
+        <button (click)="purchase('pro')">Purchase</button>
+      </div>
+
+      <!-- ULTRA -->
+      <div class="plan-card">
+        <h3>Ultra</h3>
+        <div class="price">₹199</div>
+
+        <ul>
+          <li>20 GB Storage</li>
+          <li>Large Files</li>
+          <li>Priority Access</li>
+        </ul>
+
+        <button (click)="purchase('ultra')">Purchase</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -111,6 +111,9 @@ export class Signin implements OnInit, AfterViewInit {
     });
   }
 
+  openAbout(){
+    this.router.navigate(['about'])
+  }
   login() {
     this.auth.login({
       email: this.email,
