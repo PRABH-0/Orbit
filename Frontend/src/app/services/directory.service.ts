@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DirectoryService {
-  private baseUrl = 'https://localhost:44370/api/Node';
+  private baseUrl = `${environment.apiBaseUrl}/Node`;
 
   constructor(private http: HttpClient) {}
 

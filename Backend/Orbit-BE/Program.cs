@@ -7,6 +7,7 @@ using Orbit_BE.Interface;
 using Orbit_BE.Interfaces;
 using Orbit_BE.Repositories;
 using Orbit_BE.Services;
+using Orbit_BE.Services.Interfaces;
 using Orbit_BE.UnitOfWork;
 using Snera_Core.Services;
 using Stripe;
@@ -118,7 +119,8 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<INodeService, NodeService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IFileService, Orbit_BE.Services.FileService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddMemoryCache(options =>

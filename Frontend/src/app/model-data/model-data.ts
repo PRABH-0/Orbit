@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnChanges, ViewChild, ElementRef } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { FileService } from '../services/file.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-model-data',
@@ -59,11 +60,11 @@ openPdf(file: any) {
   this.imageOpen.emit({
     type: 'pdf',
     id: file.id,
-    url: `https://localhost:44370/api/File/${file.id}/view`
+    url: `${environment.apiBaseUrl}/${file.id}/view`
   });
 }
 getStreamUrl(fileId: string): string {
-  return `https://localhost:44370/api/File/${fileId}/view`;
+  return `${environment.apiBaseUrl}/File/${fileId}/view`;
 }
 openVideo(file: any) {
   this.imageOpen.emit({

@@ -3,93 +3,134 @@
   <button class="orbit-btn" (click)="backToSignin()">Orbit</button>
   <span class="bracket">]</span>
 </h2>
+<h2 class="orbit-title orbit-right" *ngIf="isLoggedIn">
+  <span class="bracket">[</span>
+  <button class="orbit-btn" (click)="openFeedback()">Feedback</button>
+  <span class="bracket">]</span>
+</h2>
+
 
 <div class="about-container">
   <div class="grid-bg"></div>
 
-  <div class="about-content">
-    <h1 class="about-title">About Orbit</h1>
-    <div class="content-line"></div>
-
-
-    <p>
-      Orbit is a <span class="u">visual file management tool</span> designed to help
-      users understand and navigate <span class="u">complex folder structures</span>
-      without losing context. Instead of relying on long lists and deep directory
-      trees, Orbit focuses on showing relationships between folders in a clear and
-      intuitive way.
-    </p>
-
-    <p>
-      Traditional file systems work well for small projects, but as files grow,
-      users often feel lost. Navigating deep folders breaks context, makes exploration
-      harder, and turns file management into a cognitive task rather than a natural
-      action. Orbit exists to solve this exact problem.
-    </p>
-
-    <p>
-      The core idea behind Orbit is simple:
-      <strong><span class="u">keep structure visible at all times</span></strong>.
-      Orbit follows a <span class="u">visual-first</span> approach where folders are
-      treated as connected visual entities rather than isolated items in a list.
-    </p>
-
-    <p>
-      At the center of Orbit is a <span class="u">private root directory</span>.
-      From there, folders expand outward, preserving hierarchy while keeping the user
-      oriented. Users can explore deeply without ever losing their sense of place.
-    </p>
-
-    <p>
-      Orbit is built for developers, students, designers, and anyone who works with
-      structured data and values clarity over clutter—especially when understanding
-      structure matters more than simply opening files.
-    </p>
-
-    <p>
-      Security is a core principle of Orbit. Each user operates within an isolated
-      environment protected through authentication and access control. Visual clarity
-      never compromises data safety or user trust.
-    </p>
-
-    <p>
-      Orbit is currently under active development. Future improvements will focus on
-      smarter navigation, controlled sharing, and intelligent organization—always
-      guided by simplicity and usability.
-    </p>
-
-    <p class="closing">
-      Orbit is not just a file manager.  
-      It’s a new way to understand files.
-    </p>
-
-    <!-- FOOTER -->
-    <footer class="about-footer">
+  <ng-container *ngIf="!showFeedback">
+    <div class="about-content">
+      <h1 class="about-title">About Orbit</h1>
       <div class="content-line"></div>
 
-      <div class="footer-content">
-        <div>
-          <strong>Contact</strong><br />
-          orbit.project@gmail.com
+      <p>
+        Orbit is a <span class="u">visual file management tool</span> designed to help
+        users understand and navigate <span class="u">complex folder structures</span>
+        without losing context. Instead of relying on long lists and deep directory
+        trees, Orbit focuses on showing relationships between folders in a clear and
+        intuitive way.
+      </p>
+
+      <p>
+        Traditional file systems work well for small projects, but as files grow,
+        users often feel lost. Navigating deep folders breaks context, makes exploration
+        harder, and turns file management into a cognitive task rather than a natural
+        action. Orbit exists to solve this exact problem.
+      </p>
+
+      <p>
+        The core idea behind Orbit is simple:
+        <strong><span class="u">keep structure visible at all times</span></strong>.
+        Orbit follows a <span class="u">visual-first</span> approach where folders are
+        treated as connected visual entities rather than isolated items in a list.
+      </p>
+
+      <p>
+        At the center of Orbit is a <span class="u">private root directory</span>.
+        From there, folders expand outward, preserving hierarchy while keeping the user
+        oriented. Users can explore deeply without ever losing their sense of place.
+      </p>
+
+      <p>
+        Orbit is built for developers, students, designers, and anyone who works with
+        structured data and values clarity over clutter—especially when understanding
+        structure matters more than simply opening files.
+      </p>
+
+      <p>
+        Security is a core principle of Orbit. Each user operates within an isolated
+        environment protected through authentication and access control. Visual clarity
+        never compromises data safety or user trust.
+      </p>
+
+      <p>
+        Orbit is currently under active development. Future improvements will focus on
+        smarter navigation, controlled sharing, and intelligent organization—always
+        guided by simplicity and usability.
+      </p>
+
+      <p class="closing">
+        Orbit is not just a file manager.  
+        It's a new way to understand files.
+      </p>
+
+      <!-- FOOTER -->
+      <footer class="about-footer">
+        <div class="content-line"></div>
+
+        <div class="footer-content">
+          <div>
+            <strong>Contact</strong><br />
+            orbit.project@gmail.com
+          </div>
+
+          <div>
+            <strong>Project</strong><br />
+            Visual File Management System
+          </div>
+
+          <div>
+            <strong>Version</strong><br />
+            v1.0 (Prototype)
+          </div>
         </div>
 
-        <div>
-          <strong>Project</strong><br />
-          Visual File Management System
+        <div class="footer-bottom">
+          © 2026 Orbit. All rights reserved.
         </div>
+      </footer>
 
-        <div>
-          <strong>Version</strong><br />
-          v1.0 (Prototype)
+      <!-- EXTRA BOTTOM SPACE -->
+      <div class="bottom-space"></div>
+    </div>
+  </ng-container>
+
+  <!-- FEEDBACK SECTION -->
+  <ng-container *ngIf="showFeedback">
+    <div class="about-content">
+      <h1 class="about-title">Send Feedback</h1>
+      <div class="content-line"></div>
+
+      <form class="feedback-form" (ngSubmit)="sendFeedback()">
+        <label>Type</label>
+        <select [(ngModel)]="feedbackType" name="type">
+          <option>General Feedback</option>
+          <option>Bug Report</option>
+          <option>Complaint</option>
+          <option>Suggestion</option>
+        </select>
+
+        <label>Your Message</label>
+        <textarea
+          rows="6"
+          placeholder="Write your feedback here..."
+          [(ngModel)]="feedbackMessage"
+          name="message"
+        ></textarea>
+
+        <div class="feedback-actions">
+          <button type="submit" [disabled]="isSending">
+  {{ isSending ? 'Sending...' : 'Send' }}
+</button>
+
+          <button type="button" class="cancel" (click)="closeFeedback()">Cancel</button>
         </div>
-      </div>
-
-      <div class="footer-bottom">
-        © 2026 Orbit. All rights reserved.
-      </div>
-    </footer>
-
-    <!-- EXTRA BOTTOM SPACE -->
-    <div class="bottom-space"></div>
-  </div>
+      </form>
+    </div>
+  </ng-container>
 </div>

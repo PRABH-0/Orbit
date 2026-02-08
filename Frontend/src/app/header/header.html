@@ -13,11 +13,14 @@
   <div class="right-top">
     <div class="folder-name">[ {{ currentFolder }} ]</div>
 
-    <span class="del-bracket">[ </span>
-    <span class="delete-action clickable"(click)="delete.emit()">
-      Delete
-    </span>
-    <span class="del-bracket"> ]</span>
+    <div *ngIf="currentFolder!=='Root'">
+
+      <span  class="del-bracket">[ </span>
+      <span class="delete-action clickable"(click)="delete.emit()">
+        Delete
+      </span>
+      <span class="del-bracket"> ]</span>
+    </div>
   </div>
 
   <!-- BUTTON ROW -->
