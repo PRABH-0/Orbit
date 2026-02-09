@@ -7,14 +7,12 @@
             string fileName,
             string contentType,
             Guid userId,
-            Guid nodeId
-        );
+            Guid nodeId);
 
         Task<(byte[] FileBytes, string ContentType)> DownloadAsync(string storagePath);
-        (FileStream Stream, string ContentType) OpenStream(string storagePath);
-
 
         Task DeleteAsync(string storagePath);
     }
+
 
 }

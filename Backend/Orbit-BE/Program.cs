@@ -12,6 +12,8 @@ using Orbit_BE.UnitOfWork;
 using Snera_Core.Services;
 using Stripe;
 using System.Text;
+using Orbit_BE.Options;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,9 +57,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// =======================
-// Database
-// =======================
+builder.Services.Configure<SupabaseOptions>(
+    builder.Configuration.GetSection("Supabase"));
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -118,11 +119,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<INodeService, NodeService>();
+builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IFileService, Orbit_BE.Services.FileService>();
-builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+//builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 1024 * 1024 * 500;

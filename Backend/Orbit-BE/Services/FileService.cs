@@ -14,42 +14,39 @@ namespace Orbit_BE.Services
         private readonly IMemoryCache _cache;
 
         public FileService(
-        IUnitOfWork unitOfWork,
-        IMemoryCache cache,
-        IFileStorageService fileStorage)
+            IUnitOfWork unitOfWork,
+            IMemoryCache cache,
+            IFileStorageService fileStorage)
         {
             _unitOfWork = unitOfWork;
             _cache = cache;
             _fileStorage = fileStorage;
         }
 
-
-        public async Task<FileResponseDto> UploadAsync(Guid userId, UploadFileRequestDto request)
+        public async Task<FileResponseDto> UploadAsync(
+            Guid userId,
+            UploadFileRequestDto request)
         {
             if (request.File == null || request.File.Length == 0)
                 throw new ArgumentException("File is required");
 
-            var node = await _unitOfWork.Nodes
-                .FirstOrDefaultAsync(n =>
-                    n.Id == request.NodeId &&
-                    n.UserId == userId &&
-                    n.RecordState == "Active");
+            var node = await _unitOfWork.Nodes.FirstOrDefaultAsync(n =>
+                n.Id == request.NodeId &&
+                n.UserId == userId &&
+                n.RecordState == "Active");
 
             if (node == null)
                 throw new ArgumentException("Node not found");
 
+            using var stream = request.File.OpenReadStream();
 
-            string storagePath;
-            using (var stream = request.File.OpenReadStream())
-            {
-                storagePath = await _fileStorage.UploadAsync(
-                    stream,
-                    request.File.FileName,
-                    request.File.ContentType,
-                    userId,
-                    node.Id
-                );
-            }
+            var storagePath = await _fileStorage.UploadAsync(
+                stream,
+                request.File.FileName,
+                request.File.ContentType,
+                userId,
+                node.Id
+            );
 
             var nodeFile = new NodeFile
             {
@@ -76,87 +73,43 @@ namespace Orbit_BE.Services
                 CreatedAt = nodeFile.CreatedAt
             };
         }
+
         public async Task<IEnumerable<FileResponseDto>> GetFilesByNodeAsync(Guid userId, Guid nodeId)
         {
-            var node = await _unitOfWork.Nodes
-                .FirstOrDefaultAsync(n =>
-                    n.Id == nodeId &&
-                    n.UserId == userId &&
-                    n.RecordState == "Active");
+            var node = await _unitOfWork.Nodes.FirstOrDefaultAsync(n =>
+                n.Id == nodeId &&
+                n.UserId == userId &&
+                n.RecordState == "Active");
 
             if (node == null)
-                if (node == null)
-                    return Enumerable.Empty<FileResponseDto>();
+                return Enumerable.Empty<FileResponseDto>();
 
+            var files = await _unitOfWork.NodeFiles.GetAllAsync();
 
-            var allFiles = await _unitOfWork.NodeFiles.GetAllAsync();
-
-            var files = allFiles
-                .Where(f =>
-                    f.NodeId == nodeId &&
-                    f.RecordState == "Active");
-
-            return files.Select(f => new FileResponseDto
-            {
-                Id = f.Id,
-                NodeId = f.NodeId,
-                FileName = f.FileName,
-                ContentType = f.FileType,
-                FileSize = f.FileSize,
-                CreatedAt = f.CreatedAt
-            });
+            return files
+                .Where(f => f.NodeId == nodeId && f.RecordState == "Active")
+                .Select(f => new FileResponseDto
+                {
+                    Id = f.Id,
+                    NodeId = f.NodeId,
+                    FileName = f.FileName,
+                    ContentType = f.FileType,
+                    FileSize = f.FileSize,
+                    CreatedAt = f.CreatedAt
+                });
         }
 
         public async Task<FileDownloadResult> DownloadAsync(Guid userId, Guid fileId)
         {
-            var cacheKey = $"file:{fileId}";
-
-            if (_cache.TryGetValue(cacheKey,
-                out (byte[] FileBytes, string FileName, string ContentType) cachedFile))
-            {
-                return new FileDownloadResult(
-                    cachedFile.FileBytes,
-                    cachedFile.FileName,
-                    cachedFile.ContentType,
-                    true
-                );
-            }
-
             var file = await _unitOfWork.NodeFiles.GetByIdAsync(fileId);
             if (file == null)
-                throw new UnauthorizedAccessException();
+                throw new FileNotFoundException();
 
             var (bytes, contentType) =
                 await _fileStorage.DownloadAsync(file.StoragePath);
 
-            var result = (bytes, file.FileName, contentType);
-
-            _cache.Set(cacheKey, result,
-                new MemoryCacheEntryOptions
-                {
-                    SlidingExpiration = TimeSpan.FromMinutes(10),
-                    Size = bytes.Length
-                });
-
-            return new FileDownloadResult(
-                bytes,
-                file.FileName,
-                contentType,
-                false
-            );
+            return new FileDownloadResult(bytes, file.FileName, contentType, false);
         }
-        public (FileStream Stream, string ContentType, string FileName) ViewStream(Guid fileId)
-        {
-            var file = _unitOfWork.NodeFiles.GetByIdAsync(fileId).Result;
-            if (file == null)
-                throw new FileNotFoundException();
-
-            var (stream, contentType) =
-                _fileStorage.OpenStream(file.StoragePath);
-
-            return (stream, contentType, file.FileName);
-        }
-
 
         public async Task<FileDownloadResult> ViewAsync(Guid fileId)
         {
@@ -167,32 +120,19 @@ namespace Orbit_BE.Services
             var (bytes, contentType) =
                 await _fileStorage.DownloadAsync(file.StoragePath);
 
-            return new FileDownloadResult(
-                bytes,
-                file.FileName,
-                contentType,
-                false
-            );
+            return new FileDownloadResult(bytes, file.FileName, contentType, false);
         }
 
         public async Task DeleteAsync(Guid userId, Guid fileId)
         {
-            var cacheKey = $"file:{fileId}";
-
             var file = await _unitOfWork.NodeFiles.GetByIdAsync(fileId);
             if (file == null)
-                throw new UnauthorizedAccessException();
+                throw new FileNotFoundException();
 
-            // delete physical file
             await _fileStorage.DeleteAsync(file.StoragePath);
 
-            // delete DB record
             _unitOfWork.NodeFiles.Delete(file);
             await _unitOfWork.SaveChangesAsync();
-
-            // clear cache
-            _cache.Remove(cacheKey);
         }
-
     }
 }

@@ -59,19 +59,17 @@ namespace Orbit_BE.Controllers
         }
         [AllowAnonymous]
         [HttpGet("{fileId}/view")]
-        public IActionResult View(Guid fileId)
+        public async Task<IActionResult> View(Guid fileId)
         {
-            var (stream, contentType, fileName) =
-                _fileService.ViewStream(fileId);
-
-            Response.Headers.Add("Accept-Ranges", "bytes");
+            var result = await _fileService.ViewAsync(fileId);
 
             return File(
-                stream,
-                contentType,
+                result.FileBytes,
+                result.ContentType,
                 enableRangeProcessing: true
             );
         }
+
 
         [HttpDelete("{fileId}")]
         public async Task<IActionResult> Delete(Guid fileId)
