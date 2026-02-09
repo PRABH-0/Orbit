@@ -111,7 +111,14 @@
   class="file-viewer-overlay"
   *ngIf="selectedFile"
   (click)="closeFileViewer()"
+><!-- FILE NAME -->
+<div
+  class="file-name"
+  (click)="$event.stopPropagation()"
 >
+  {{ selectedFile.fileName }}
+</div>
+
   <!-- TOOLBAR -->
   <div class="file-toolbar" (click)="$event.stopPropagation()">
     <button (click)="downloadFile()">⬇</button>
@@ -140,6 +147,14 @@
     >
       <source [src]="selectedFile.url" />
     </video>
+    <!-- TEXT / CODE VIEWER -->
+<pre
+  *ngIf="selectedFile.type === 'text'"
+  class="code-viewer"
+>
+{{ selectedFile.content }}
+</pre>
+
 
     <!-- PDF -->
     <iframe
@@ -148,15 +163,12 @@
   class="file-media pdf">
 </iframe>
 
+<div *ngIf="selectedFile.type === 'audio'" class="audio-wrapper">
+  <audio controls>
+    <source [src]="selectedFile.url" type="audio/mpeg" />
 
-    <!-- AUDIO -->
-    <audio
-      *ngIf="selectedFile.type === 'audio'"
-      controls
-      class="file-media audio"
-    >
-      <source [src]="selectedFile.safeUrl" />
-    </audio>
+  </audio>
+</div>
 
   </div>
 </div>

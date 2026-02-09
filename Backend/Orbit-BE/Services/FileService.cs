@@ -145,6 +145,18 @@ namespace Orbit_BE.Services
                 false
             );
         }
+        public (FileStream Stream, string ContentType, string FileName) ViewStream(Guid fileId)
+        {
+            var file = _unitOfWork.NodeFiles.GetByIdAsync(fileId).Result;
+            if (file == null)
+                throw new FileNotFoundException();
+
+            var (stream, contentType) =
+                _fileStorage.OpenStream(file.StoragePath);
+
+            return (stream, contentType, file.FileName);
+        }
+
 
         public async Task<FileDownloadResult> ViewAsync(Guid fileId)
         {

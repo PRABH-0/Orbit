@@ -1,6 +1,4 @@
-﻿
-using Orbit_BE.Interfaces;
-using Orbit_BE.Models.Feedback;
+﻿using Orbit_BE.Models.Feedback;
 using Orbit_BE.Services.Interfaces;
 
 namespace Orbit_BE.Services
@@ -14,7 +12,10 @@ namespace Orbit_BE.Services
             _emailService = emailService;
         }
 
-        public async Task SendFeedbackAsync(FeedbackDto dto)
+        public async Task SendFeedbackAsync(
+            FeedbackDto dto,
+            string? userEmail
+        )
         {
             var subject = $"Orbit Feedback | {dto.Type}";
 
@@ -23,13 +24,19 @@ namespace Orbit_BE.Services
             Type: {dto.Type}
             Time: {DateTime.UtcNow}
 
+            User Email: {userEmail ?? "Anonymous"}
+
             Message:
             --------------------
             {dto.Message}
             --------------------
             """;
 
-            await _emailService.SendAsync(subject, body);
+            await _emailService.SendAsync(
+                subject,
+                body,
+                replyTo: userEmail
+            );
         }
     }
 }

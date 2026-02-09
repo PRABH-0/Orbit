@@ -283,7 +283,7 @@ img {
 /* TOOLBAR */
 .file-toolbar {
   position: fixed;
-  top: 16px;
+  top: -10px;
   left: 50%;
   transform: translateX(-50%);
 
@@ -313,15 +313,7 @@ img {
   background: rgba(37, 99, 235, 0.5);
 }
 
-/* CENTER CONTENT */
-.file-viewer-content {
-  max-width: 90vw;
-  max-height: 85vh;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* ALL MEDIA */
 .file-media {
@@ -390,3 +382,118 @@ img {
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85);
 }
 
+/* ===============================
+   OVERLAY
+================================ */
+.file-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===============================
+   TOOLBAR (TOP, NOT OVERLAPPING)
+================================ */
+.file-toolbar {
+  margin-top: 16px;
+  margin-bottom: 12px;
+
+  display: flex;
+  gap: 12px;
+
+  background: #1f2937;
+  padding: 8px 14px;
+  border-radius: 8px;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.file-toolbar button {
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  color: #fff;
+
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.file-toolbar button:hover {
+  background: #2563eb;
+}
+.file-viewer-content {
+  width: 90vw;
+  max-width: 1200px;
+  height: calc(100vh - 140px);
+
+  background: transparent;
+
+  display: flex;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.audio-wrapper {
+  background: #111827;
+  padding: 24px 28px;
+  border-radius: 14px;
+
+  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-wrapper audio {
+  width: 420px;
+}
+
+.code-viewer {
+  margin: 0;
+  padding: 24px 28px;
+
+  background: #ffffff;
+  color: #111827;
+
+  font-family: Consolas, "JetBrains Mono", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+
+  white-space: pre;
+  overflow-x: auto;
+}
+/* FILE NAME (TOP LEFT) */
+.file-name {
+  position: fixed;
+  top: 18px;
+  left: 20px;
+
+  max-width: 60vw;
+  padding: 6px 10px;
+
+  background: rgba(15, 23, 42, 0.85);
+  color: #e5e7eb;
+
+  font-size: 13px;
+  font-family: 'IBM Plex Mono', monospace;
+
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  z-index: 10000;
+  pointer-events: auto;
+}

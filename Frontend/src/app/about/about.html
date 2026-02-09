@@ -47,22 +47,43 @@
       </p>
 
       <p>
-        Orbit is built for developers, students, designers, and anyone who works with
-        structured data and values clarity over clutter—especially when understanding
-        structure matters more than simply opening files.
-      </p>
+  Orbit is built for developers, students, designers, and anyone who works with
+  structured data and values <span class="u">clarity</span> over clutter—especially
+  when understanding structure matters more than simply opening files.
+</p>
 
-      <p>
-        Security is a core principle of Orbit. Each user operates within an isolated
-        environment protected through authentication and access control. Visual clarity
-        never compromises data safety or user trust.
-      </p>
+<p>
+  <span class="u">Security</span> is a core principle of Orbit. Each user operates
+  within an isolated environment protected through authentication and access control.
+  Visual clarity never compromises data safety or user trust.
+</p>
 
-      <p>
-        Orbit is currently under active development. Future improvements will focus on
-        smarter navigation, controlled sharing, and intelligent organization—always
-        guided by simplicity and usability.
-      </p>
+<p>
+  Orbit is currently under <span class="u">active development</span>. Future
+  improvements will focus on smarter navigation, controlled sharing, and intelligent
+  organization—always guided by simplicity and usability.
+</p>
+
+<!-- FEEDBACK INVITE MESSAGE -->
+<div class="feedback-invite">
+
+  <!-- Logged-in user message -->
+  <p *ngIf="isLoggedIn">
+    <strong>Tell us about your experience.</strong><br />
+    Your <span class="u">feedback</span> helps us improve Orbit and build a better
+    experience for you. Feel free to share <span class="u">suggestions</span>,
+    <span class="u">issues</span>, or new ideas anytime.
+  </p>
+
+  <!-- Not logged-in user message -->
+  <p *ngIf="!isLoggedIn">
+    <strong>Explore Orbit freely.</strong><br />
+    You can use Orbit as you like. To send <span class="u">feedback</span> or raise a
+    <span class="u">complaint</span>, please <span class="u">log in</span> and share
+    your experience with us.
+  </p>
+
+</div>
 
       <p class="closing">
         Orbit is not just a file manager.  
@@ -76,7 +97,7 @@
         <div class="footer-content">
           <div>
             <strong>Contact</strong><br />
-            orbit.project@gmail.com
+            orbitstorage.app@gmail.com
           </div>
 
           <div>

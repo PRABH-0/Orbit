@@ -4,7 +4,6 @@
   text-align: center;
   cursor: default;
   z-index: 10;
-
   margin-top: -20px;
   margin-left: -40px;
 
@@ -14,7 +13,10 @@
 .folder-directory:active {
   cursor: grabbing;
 }
+.folderImg{
+  cursor: pointer;
 
+}
 .folder-icon {
   pointer-events: none;
 }

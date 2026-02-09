@@ -82,9 +82,28 @@ namespace Orbit_BE.Services
             return Task.CompletedTask;
         }
 
-        // =========================
-        // HELPER
-        // =========================
+        public (FileStream Stream, string ContentType) OpenStream(string storagePath)
+        {
+            var fullPath = Path.Combine(
+                _env.WebRootPath ?? "wwwroot",
+                storagePath
+            );
+
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException("File not found");
+
+            var contentType = GetContentType(fullPath);
+
+            var stream = new FileStream(
+                fullPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read
+            );
+
+            return (stream, contentType);
+        }
+
         private static string GetContentType(string path)
         {
             var ext = Path.GetExtension(path).ToLowerInvariant();
@@ -96,6 +115,9 @@ namespace Orbit_BE.Services
                 ".jpeg" => "image/jpeg",
                 ".gif" => "image/gif",
                 ".pdf" => "application/pdf",
+                ".mp3" => "audio/mpeg",
+                ".wav" => "audio/wav",
+                ".ogg" => "audio/ogg",
                 ".mp4" => "video/mp4",
                 _ => "application/octet-stream"
             };

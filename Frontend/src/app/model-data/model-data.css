@@ -53,6 +53,16 @@
   object-fit: cover;
   border-radius: 8px;
 }
+.file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e5e7eb; /* light gray */
+}
+
+.data-item:hover .file-icon {
+  color: #60a5fa; /* blue hover */
+}
 
 .file-icon {
   width: 72px;

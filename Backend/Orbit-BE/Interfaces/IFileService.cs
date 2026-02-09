@@ -9,7 +9,8 @@ namespace Orbit_BE.Interfaces
         Task<IEnumerable<FileResponseDto>> GetFilesByNodeAsync(Guid userId, Guid nodeId);
         Task<FileDownloadResult> DownloadAsync(Guid userId, Guid fileId);
         Task DeleteAsync(Guid userId, Guid fileId);
-        Task<FileDownloadResult> ViewAsync(Guid fileId);
+        (FileStream Stream, string ContentType, string FileName) ViewStream(Guid fileId);
+
 
 
     }

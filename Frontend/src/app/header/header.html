@@ -25,7 +25,7 @@
 
   <!-- BUTTON ROW -->
   <div class="header-button">
-    <button class="add-folder-btn" (click)="addItem.emit()">
+    <button class="add-folder-btn"  *ngIf="currentFolder!=='Root'" (click)="addItem.emit()">
       ＋ Add Item
     </button>
 

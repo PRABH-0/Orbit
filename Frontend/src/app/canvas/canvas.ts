@@ -49,11 +49,14 @@ export class Canvas implements OnInit, AfterViewInit {
 
   dataNodePosition: { x: number; y: number } | null = null;
   selectedFile: {
-    type: 'image' | 'pdf' | 'video' | 'audio';
-    url: string;
-    safeUrl?: SafeUrl;
-    id: string;
-  } | null = null;
+  type: 'image' | 'pdf' | 'video' | 'audio' | 'text';
+  id: string;
+  url?: string;
+  safeUrl?: SafeUrl;
+  content?: string;
+  fileName?: string;
+} | null = null;
+
   profilePic: string | null = null;
 
   isAddFolderOpen = false;
@@ -326,60 +329,51 @@ export class Canvas implements OnInit, AfterViewInit {
     };
   }
   onFolderClick(dir: any) {
-    if (!dir || !dir.id) return;
+  if (!dir || !dir.id) return;
 
-    // =============================
-    // 1️⃣ TOGGLE TREE STATE
-    // =============================
-    dir.isOpen = !dir.isOpen;
+  dir.isOpen = !dir.isOpen;
 
-    // If closing → close all children & UI
-    if (!dir.isOpen) {
-      this.closeAllChildren(dir.id);
-      this.closeModelData();
-      return;
-    }
+  if (!dir.isOpen) {
+    this.closeAllChildren(dir.id);
 
-    // =============================
-    // 2️⃣ RESET PREVIOUS UI STATE
-    // =============================
-    this.showModelData = false;
-    this.dataNodePosition = null;
-    this.selectedFolderItems = [];
-    this.selectedFile = null;
-
-    // =============================
-    // 3️⃣ SET ACTIVE FOLDER
-    // =============================
     this.selectedFolderId = dir.id;
     this.selectedParentFolderId = dir.id;
     this.currentFolderName = dir.name;
     this.activeFolder = dir;
-    this.rootOpen = true;
 
-    // =============================
-    // 4️⃣ LOAD FILES
-    // =============================
-    this.fileService.getFilesByNode(dir.id).subscribe({
-      next: (files) => {
-        this.selectedFolderItems = files ?? [];
+    this.closeModelData();
 
-        if (files && files.length > 0) {
-          this.setDataNodePosition(dir);
-          this.showModelData = true;
-        }
-      },
-      error: () => {
-        this.selectedFolderItems = [];
-        this.showModelData = false;
-        this.dataNodePosition = null;
-      },
-    });
+    return;
   }
 
-  // =========================
-  // TREE HELPERS
-  // =========================
+  this.showModelData = false;
+  this.dataNodePosition = null;
+  this.selectedFolderItems = [];
+  this.selectedFile = null;
+
+  this.selectedFolderId = dir.id;
+  this.selectedParentFolderId = dir.id;
+  this.currentFolderName = dir.name;
+  this.activeFolder = dir;
+  this.rootOpen = true;
+
+  this.fileService.getFilesByNode(dir.id).subscribe({
+    next: (files) => {
+      this.selectedFolderItems = files ?? [];
+
+      if (files && files.length > 0) {
+        this.setDataNodePosition(dir);
+        this.showModelData = true;
+      }
+    },
+    error: () => {
+      this.selectedFolderItems = [];
+      this.showModelData = false;
+      this.dataNodePosition = null;
+    },
+  });
+}
+
   hasChildren(dir: any): boolean {
     return this.directories.some((d) => d.parentId === dir.id);
   }
@@ -404,15 +398,24 @@ export class Canvas implements OnInit, AfterViewInit {
     return !!parent?.isOpen;
   }
 
-  toggleRoot() {
-    this.rootOpen = !this.rootOpen;
-    if (!this.rootOpen) {
-      this.directories.forEach((d) => (d.isOpen = false));
-      this.closeModelData();
-    } else {
-      this.currentFolderName = 'Root';
-    }
+ toggleRoot() {
+  this.rootOpen = !this.rootOpen;
+
+  if (!this.rootOpen) {
+    this.directories.forEach((d) => (d.isOpen = false));
+    this.closeModelData();
+    return;
   }
+
+  this.selectedParentFolderId = null;
+  this.selectedFolderId = null;
+  this.activeFolder = null;
+  this.currentFolderName = 'Root';
+
+  this.showModelData = false;
+  this.dataNodePosition = null;
+  this.selectedFolderItems = [];
+}
 
   setDataNodePosition(dir: any) {
     const GAP = 160;
@@ -478,19 +481,20 @@ export class Canvas implements OnInit, AfterViewInit {
   }
 
   openImage(payload: any) {
-    // 🔒 Preserve folder name
-    if (this.activeFolder) {
-      this.currentFolderName = this.activeFolder.name;
-      this.selectedFolderId = this.activeFolder.id;
-    }
-
-    // Sanitize streamable files
-    if (payload.type === 'pdf' || payload.type === 'audio' || payload.type === 'video') {
-      payload.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
-    }
-
+  if (payload.type === 'text') {
     this.selectedFile = payload;
+    return;
   }
+
+  // ✅ PDF only
+  if (payload.type === 'pdf') {
+    payload.safeUrl =
+      this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
+  }
+
+  // ❌ NO sanitizer for audio/video
+  this.selectedFile = payload;
+}
 
   closeFileViewer() {
     this.selectedFile = null;

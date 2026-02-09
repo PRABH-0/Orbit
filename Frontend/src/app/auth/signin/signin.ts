@@ -51,16 +51,18 @@ export class Signin implements OnInit, AfterViewInit {
     );
   }
 
-  handleGoogleLogin(response: any) {
+handleGoogleLogin(response: any) {
   const idToken = response.credential;
 
   this.auth.googleLogin({ idToken }).subscribe({
     next: res => {
+      // 🔥 FIX: clear old session completely
+      localStorage.clear();
+
       this.auth.saveToken(res.accessToken);
       localStorage.setItem('username', res.username);
       localStorage.setItem('userId', res.userId);
 
-      // 🔥 ADD THIS
       if (res.profilePictureUrl) {
         localStorage.setItem('profilePic', res.profilePictureUrl);
       }
@@ -69,6 +71,7 @@ export class Signin implements OnInit, AfterViewInit {
     }
   });
 }
+
 
 
   toggleMode() {
@@ -115,22 +118,28 @@ export class Signin implements OnInit, AfterViewInit {
     this.router.navigate(['about'])
   }
   login() {
-    this.auth.login({
-      email: this.email,
-      password: this.password
-    }).subscribe({
-      next: res => {
-        this.auth.saveToken(res.accessToken);
-        localStorage.setItem('username', res.username);
-        localStorage.setItem('userId', res.userId);
-        if (res.profilePictureUrl) {
-      localStorage.setItem('profilePic', res.profilePictureUrl);
-    }
-        this.router.navigate(['/']);
-      },
-      error: err => {
-        this.error = err.error?.message || 'Invalid email or password';
+  this.auth.login({
+    email: this.email,
+    password: this.password
+  }).subscribe({
+    next: res => {
+      // 🔥 FIX: clear old session completely
+      localStorage.clear();
+
+      this.auth.saveToken(res.accessToken);
+      localStorage.setItem('username', res.username);
+      localStorage.setItem('userId', res.userId);
+
+      if (res.profilePictureUrl) {
+        localStorage.setItem('profilePic', res.profilePictureUrl);
       }
-    });
-  }
+
+      this.router.navigate(['/canvas']);
+    },
+    error: err => {
+      this.error = err.error?.message || 'Invalid email or password';
+    }
+  });
+}
+
 }

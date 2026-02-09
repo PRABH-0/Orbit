@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output, OnChanges, ViewChild, ElementRef } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgFor, NgIf ,NgSwitch} from '@angular/common';
 import { FileService } from '../services/file.service';
 import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-model-data',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [CommonModule],
   templateUrl: './model-data.html',
   styleUrl: './model-data.css',
 })
@@ -52,17 +52,49 @@ export class ModelData implements OnChanges {
     this.openVideo(file);
   } else if (type.startsWith('audio/')) {
     this.openAudio(file);
-  } else {
+  }
+  else if (this.isText(file)) {
+    this.openText(file); // 🔥 NEW
+  }
+  else {
     this.download(file);
   }
 }
+isText(file: any): boolean {
+  return (
+    file.contentType?.startsWith('text/') ||
+    /\.(txt|js|ts|tsx|json|html|css|md)$/i.test(file.fileName)
+  );
+}
+
+openText(file: any) {
+  this.fileService.downloadFile(file.id).subscribe({
+    next: res => {
+      const blob = res.body!;
+      blob.text().then(text => {
+        this.imageOpen.emit({
+          type: 'text',
+          id: file.id,
+          fileName: file.fileName,
+          content: text
+        });
+      });
+    },
+    error: err => {
+      console.error('Text preview failed', err);
+    }
+  });
+}
+
 openPdf(file: any) {
   this.imageOpen.emit({
     type: 'pdf',
     id: file.id,
-    url: `${environment.apiBaseUrl}/${file.id}/view`
+    url: `${environment.apiBaseUrl}/${file.id}/view`,
+    fileName: file.fileName
   });
 }
+
 getStreamUrl(fileId: string): string {
   return `${environment.apiBaseUrl}/File/${fileId}/view`;
 }
@@ -70,16 +102,17 @@ openVideo(file: any) {
   this.imageOpen.emit({
     type: 'video',
     id: file.id,
-    url: this.getStreamUrl(file.id)
+    url: this.getStreamUrl(file.id),
+    fileName: file.fileName
   });
 }
-
 
 openAudio(file: any) {
   this.imageOpen.emit({
     type: 'audio',
     id: file.id,
-    url: this.getStreamUrl(file.id)
+    url: this.getStreamUrl(file.id),
+    fileName: file.fileName
   });
 }
 
@@ -136,11 +169,13 @@ getFileIcon(file: any): string {
 
  openImage(file: any) {
   this.imageOpen.emit({
-    type: 'image', // ✅ REQUIRED
+    type: 'image',
     id: file.id,
-    url: this.getImageUrl(file.id)
+    url: this.getImageUrl(file.id),
+    fileName: file.fileName
   });
 }
+
 
 
 

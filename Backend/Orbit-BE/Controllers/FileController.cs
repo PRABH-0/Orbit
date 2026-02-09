@@ -59,15 +59,17 @@ namespace Orbit_BE.Controllers
         }
         [AllowAnonymous]
         [HttpGet("{fileId}/view")]
-        public async Task<IActionResult> View(Guid fileId)
+        public IActionResult View(Guid fileId)
         {
-            var result = await _fileService.ViewAsync(fileId);
+            var (stream, contentType, fileName) =
+                _fileService.ViewStream(fileId);
 
-            Response.Headers["Content-Disposition"] = "inline";
+            Response.Headers.Add("Accept-Ranges", "bytes");
 
             return File(
-                result.FileBytes,
-                result.ContentType
+                stream,
+                contentType,
+                enableRangeProcessing: true
             );
         }
 

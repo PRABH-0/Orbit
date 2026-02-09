@@ -13,7 +13,11 @@ namespace Orbit_BE.Services
             _config = config;
         }
 
-        public async Task SendAsync(string subject, string body)
+        public async Task SendAsync(
+            string subject,
+            string body,
+            string? replyTo = null
+        )
         {
             var smtp = _config.GetSection("Smtp");
 
@@ -35,6 +39,11 @@ namespace Orbit_BE.Services
             };
 
             mail.To.Add(smtp["Username"]);
+
+            if (!string.IsNullOrWhiteSpace(replyTo))
+            {
+                mail.ReplyToList.Add(replyTo);
+            }
 
             await client.SendMailAsync(mail);
         }

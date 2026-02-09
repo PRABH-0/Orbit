@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Orbit_BE.Models.Feedback;
 using Orbit_BE.Services.Interfaces;
 
@@ -7,6 +8,7 @@ namespace Orbit_BE.Controllers
 {
     [ApiController]
     [Route("api/feedback")]
+    [Authorize] 
     public class FeedbackController : ControllerBase
     {
         private readonly IFeedbackService _feedbackService;
@@ -22,7 +24,9 @@ namespace Orbit_BE.Controllers
             if (string.IsNullOrWhiteSpace(dto.Message))
                 return BadRequest("Feedback message is required");
 
-            await _feedbackService.SendFeedbackAsync(dto);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            await _feedbackService.SendFeedbackAsync(dto, userEmail);
 
             return Ok(new { message = "Feedback sent successfully" });
         }
