@@ -4,14 +4,14 @@ namespace Orbit_BE.Interface
 {
     public interface INodeService
     {
-        Task<NodeDto> CreateNodeAsync(CreateNodeDto dto, Guid userId);
+        Task<NodeDto> CreateNodeAsync(CreateNodeDto dto, string userId);
 
-        Task<List<NodeDto>> GetUserNodesAsync(Guid userId);
+        Task<List<NodeDto>> GetUserNodesAsync(string userId);
 
-        Task<NodeDto?> GetNodeByIdAsync(Guid nodeId, Guid userId);
+        Task<NodeDto?> GetNodeByIdAsync(Guid nodeId, string userId);
 
-        Task<bool> UpdateNodePositionAsync(Guid nodeId, Guid userId, UpdateNodePositionDto dto);
+        Task<bool> UpdateNodePositionAsync(Guid nodeId, string userId, UpdateNodePositionDto dto);
 
-        Task<bool> DeleteNodeAsync(Guid nodeId, Guid userId);
+        Task<bool> DeleteNodeAsync(Guid nodeId, string userId);
     }
 }

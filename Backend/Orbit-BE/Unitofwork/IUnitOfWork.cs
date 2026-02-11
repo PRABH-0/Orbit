@@ -15,8 +15,6 @@ namespace Orbit_BE.UnitOfWork
         IRepository<UserPlan> UserPlans { get; }
         IRepository<CanvasEdge> CanvasEdges { get; }
 
-        IRepository<RefreshToken> RefreshTokens { get; }
-
         IRepository<T> Repository<T>() where T : class;
 
         Task<int> SaveAllAsync();

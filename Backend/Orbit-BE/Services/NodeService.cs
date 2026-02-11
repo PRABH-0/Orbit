@@ -2,29 +2,34 @@
 using Orbit_BE.Entities;
 using Orbit_BE.Interface;
 using Orbit_BE.Models.NodeModels;
+using Orbit_BE.Models.Users;
 using Orbit_BE.UnitOfWork;
+using System.Security.Claims;
 
 namespace Orbit_BE.Services
 {
     public class NodeService : INodeService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public NodeService(IUnitOfWork unitOfWork)
+        public NodeService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
-            _unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork; _httpContextAccessor = httpContextAccessor;
         }
 
         // =========================
         // CREATE NODE
         // =========================
-        public async Task<NodeDto> CreateNodeAsync(CreateNodeDto dto, Guid userId)
+        public async Task<NodeDto> CreateNodeAsync(CreateNodeDto dto, string supabaseUserId)
         {
+            var user = await GetOrCreateUserAsync(supabaseUserId);
+
             var node = new Node
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
-                UserId = userId,
+                UserId = user.Id, // ✅ Guid
                 ParentId = dto.ParentId,
                 BasePath = dto.BasePath,
                 RecordState = "Active",
@@ -50,15 +55,14 @@ namespace Orbit_BE.Services
             return MapToDto(node);
         }
 
-        // =========================
-        // GET ALL USER NODES
-        // =========================
-        public async Task<List<NodeDto>> GetUserNodesAsync(Guid userId)
+        public async Task<List<NodeDto>> GetUserNodesAsync(string supabaseUserId)
         {
+            var user = await GetOrCreateUserAsync(supabaseUserId);
+
             var nodes = await _unitOfWork.Nodes
                 .GetQueryable()
                 .Where(n =>
-                    n.UserId == userId &&
+                    n.UserId == user.Id &&
                     n.RecordState == "Active")
                 .Include(n => n.Position)
                 .ToListAsync();
@@ -66,36 +70,38 @@ namespace Orbit_BE.Services
             return nodes.Select(MapToDto).ToList();
         }
 
+
         // =========================
         // GET NODE BY ID
         // =========================
-        public async Task<NodeDto?> GetNodeByIdAsync(Guid nodeId, Guid userId)
+        public async Task<NodeDto?> GetNodeByIdAsync(Guid nodeId, string supabaseUserId)
         {
+            var user = await GetOrCreateUserAsync(supabaseUserId);
+
             var node = await _unitOfWork.Nodes
                 .GetQueryable()
                 .Include(n => n.Position)
                 .FirstOrDefaultAsync(n =>
                     n.Id == nodeId &&
-                    n.UserId == userId &&
+                    n.UserId == user.Id &&
                     n.RecordState == "Active");
 
             return node == null ? null : MapToDto(node);
         }
 
-        // =========================
-        // UPDATE NODE POSITION
-        // =========================
         public async Task<bool> UpdateNodePositionAsync(
-            Guid nodeId,
-            Guid userId,
-            UpdateNodePositionDto dto)
+      Guid nodeId,
+      string supabaseUserId,
+      UpdateNodePositionDto dto)
         {
+            var user = await GetOrCreateUserAsync(supabaseUserId);
+
             var node = await _unitOfWork.Nodes
                 .GetQueryable()
                 .Include(n => n.Position)
                 .FirstOrDefaultAsync(n =>
                     n.Id == nodeId &&
-                    n.UserId == userId &&
+                    n.UserId == user.Id &&
                     n.RecordState == "Active");
 
             if (node?.Position == null)
@@ -111,14 +117,13 @@ namespace Orbit_BE.Services
             return true;
         }
 
-        // =========================
-        // SOFT DELETE NODE
-        // =========================
-        public async Task<bool> DeleteNodeAsync(Guid nodeId, Guid userId)
+        public async Task<bool> DeleteNodeAsync(Guid nodeId, string supabaseUserId)
         {
+            var user = await GetOrCreateUserAsync(supabaseUserId);
+
             var node = await _unitOfWork.Nodes.FirstOrDefaultAsync(
                 n => n.Id == nodeId &&
-                     n.UserId == userId &&
+                     n.UserId == user.Id &&
                      n.RecordState == "Active");
 
             if (node == null)
@@ -133,9 +138,76 @@ namespace Orbit_BE.Services
             return true;
         }
 
-        // =========================
-        // MAPPER
-        // =========================
+        private async Task<User> GetOrCreateUserAsync(string supabaseUserId)
+        {
+            var user = await _unitOfWork.Users
+                .FirstOrDefaultAsync(u => u.Id == Guid.Parse(supabaseUserId)
+);
+
+            if (user != null)
+                return user;
+
+            user = new User
+            {
+                Id = Guid.NewGuid(),
+                //SupabaseUserId = supabaseUserId,
+                CreatedAt = DateTime.UtcNow,
+                RecordState = "Active"
+            };
+
+            await _unitOfWork.Users.AddAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return user;
+        }
+        public async Task<UserDetilsResponseDto?> GetCurrentUserAsync(string supabaseUserId)
+        {
+            var user = await _unitOfWork.Users
+                .FirstOrDefaultAsync(u => u.Id == Guid.Parse(supabaseUserId)
+);
+
+            if (user == null)
+            {
+                var email = GetEmailFromToken();
+
+                if (string.IsNullOrWhiteSpace(email))
+                    throw new Exception("Email missing in Supabase token");
+
+                user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    //SupabaseUserId = supabaseUserId,
+                    //Email = email,              // ✅ FIX
+                    UserStatus = "Online",
+                    RecordState = "Active",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _unitOfWork.Users.AddAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return new UserDetilsResponseDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                //Email = user.Email,
+                UserStatus = user.UserStatus,
+                IsAdmin = user.IsAdmin,
+                CreatedAt = user.CreatedAt
+            };
+        }
+
+        private string? GetEmailFromToken()
+        {
+            return _httpContextAccessor.HttpContext?
+                .User?
+                .FindFirstValue(ClaimTypes.Email)
+                ?? _httpContextAccessor.HttpContext?
+                    .User?
+                    .FindFirstValue("email");
+        }
+
         private static NodeDto MapToDto(Node node)
         {
             return new NodeDto

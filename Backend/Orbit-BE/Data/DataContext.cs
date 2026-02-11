@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Orbit_BE.Entities;
-using System.Xml.Linq;
 
 namespace Orbit_BE.Data
 {
@@ -16,47 +15,73 @@ namespace Orbit_BE.Data
         public DbSet<NodePosition> NodePositions { get; set; }
         public DbSet<NodeFile> NodeFiles { get; set; }
         public DbSet<CanvasEdge> CanvasEdges { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<UserPlan> UserPlans { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Self-referencing Node (Parent → Children)
+            // TABLE NAME MAPPING
+            // ========================
+            modelBuilder.Entity<User>().ToTable("users");
+            modelBuilder.Entity<Node>().ToTable("nodes");
+            modelBuilder.Entity<NodePosition>().ToTable("node_positions");
+            modelBuilder.Entity<NodeFile>().ToTable("node_files");
+            modelBuilder.Entity<CanvasEdge>().ToTable("canvas_edges");
+            modelBuilder.Entity<Payment>().ToTable("payments");
+            modelBuilder.Entity<UserPlan>().ToTable("user_plans");
+
+            // ========================
+            // RELATIONSHIPS
+            // ========================
+
+            modelBuilder.Entity<Node>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Nodes)
+                .HasForeignKey(n => n.UserId);
+
             modelBuilder.Entity<Node>()
                 .HasOne(n => n.Parent)
                 .WithMany(n => n.Children)
                 .HasForeignKey(n => n.ParentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // One-to-One: Node → Position
             modelBuilder.Entity<NodePosition>()
                 .HasOne(p => p.Node)
                 .WithOne(n => n.Position)
                 .HasForeignKey<NodePosition>(p => p.NodeId);
 
-            // Canvas edges (self references)
+            modelBuilder.Entity<NodeFile>()
+                .HasOne(f => f.Node)
+                .WithMany(n => n.Files)
+                .HasForeignKey(f => f.NodeId);
+
             modelBuilder.Entity<CanvasEdge>()
                 .HasOne(e => e.FromNode)
                 .WithMany()
                 .HasForeignKey(e => e.FromNodeId)
                 .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<RefreshToken>()
-    .HasOne(rt => rt.User)
-    .WithMany(u => u.RefreshTokens)
-    .HasForeignKey(rt => rt.UserId);
 
-            modelBuilder.Entity<Payment>(entity =>
-            {
-                entity.Property(p => p.Amount)
-                      .HasPrecision(10, 2); // ₹99,999,999.99 safe
-            });
             modelBuilder.Entity<CanvasEdge>()
                 .HasOne(e => e.ToNode)
                 .WithMany()
                 .HasForeignKey(e => e.ToNodeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(p => p.UserId);
+
+            modelBuilder.Entity<UserPlan>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(p => p.UserId);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(10, 2);
         }
     }
 }

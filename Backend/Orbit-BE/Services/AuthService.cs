@@ -2,111 +2,49 @@
 using Orbit_BE.Interfaces;
 using Orbit_BE.Models.Users;
 using Orbit_BE.UnitOfWork;
-using Snera_Core.Services;
-using Google.Apis.Auth;
-using Microsoft.Extensions.Configuration;
-using System.Security.Cryptography;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Orbit_BE.Services
 {
     public class AuthService : IAuthService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly JwtService _jwtService;
-        private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
             IUnitOfWork unitOfWork,
-            JwtService jwtService,
-            IConfiguration configuration)
+            IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
-            _jwtService = jwtService;
-            _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        // =========================
-        // REGISTER
-        // =========================
-        public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
+        public async Task<UserDetilsResponseDto?> GetCurrentUserAsync(string supabaseUserId)
         {
-            var existing = await _unitOfWork.Users
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
+            var userId = Guid.Parse(supabaseUserId);
 
-            if (existing != null)
-                throw new InvalidOperationException("User already exists");
+            var email = GetEmailFromToken();
+            var fullName = GetFullNameFromToken();
+            var profilePicture = GetProfilePictureFromToken();
 
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Username = request.Username,
-                Email = request.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                RecordState = "Active",
-                UserStatus = "Offline",
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _unitOfWork.Users.AddAsync(user);
-            await _unitOfWork.SaveChangesAsync();
-
-            return new AuthResponseDto
-            {
-                UserId = user.Id,
-                Username = user.Username
-            };
-        }
-
-        // =========================
-        // LOGIN
-        // =========================
-        public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
-        {
-            var user = await _unitOfWork.Users
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            if (user == null ||
-                !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-                throw new UnauthorizedAccessException("Invalid credentials");
-
-            var accessToken = _jwtService.CreateToken(user);
-            var refreshToken = CreateRefreshToken(user.Id);
-
-            await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
-            await _unitOfWork.SaveChangesAsync();
-
-            return new AuthResponseDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken.Token
-            };
-        }
-
-        // =========================
-        // GOOGLE LOGIN
-        // =========================
-        public async Task<AuthResponseDto> GoogleLoginAsync(string idToken)
-        {
-            var payload = await GoogleJsonWebSignature.ValidateAsync(
-                idToken,
-                new GoogleJsonWebSignature.ValidationSettings
-                {
-                    Audience = new[] { _configuration["GoogleAuth:ClientId"] }
-                });
+            var username =
+                !string.IsNullOrEmpty(fullName)
+                    ? fullName
+                    : email?.Split('@')[0] ?? "User";
 
             var user = await _unitOfWork.Users
-                .FirstOrDefaultAsync(u => u.Email == payload.Email);
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
                 user = new User
                 {
-                    Id = Guid.NewGuid(),
-                    Username = payload.Name ?? payload.Email,
-                    Email = payload.Email,
-                    ProfilePictureUrl = payload.Picture,
-                    RecordState = "Active",
+                    Id = userId,
+                    Username = username,
+                    ProfilePictureUrl = profilePicture,
                     UserStatus = "Online",
+                    RecordState = "Active",
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -115,102 +53,79 @@ namespace Orbit_BE.Services
             else
             {
                 user.UserStatus = "Online";
-                user.ProfilePictureUrl = payload.Picture;
+
+                // 🔥 Always keep name synced with Google
+                if (!string.IsNullOrEmpty(username))
+                    user.Username = username;
+
+                // 🔥 Always keep profile picture synced
+                if (!string.IsNullOrEmpty(profilePicture))
+                    user.ProfilePictureUrl = profilePicture;
+
                 _unitOfWork.Users.Update(user);
             }
 
-            var accessToken = _jwtService.CreateToken(user);
-            var refreshToken = CreateRefreshToken(user.Id);
-
-            await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
             await _unitOfWork.SaveChangesAsync();
-
-            return new AuthResponseDto
-            {
-                UserId = user.Id,
-                Username = user.Username,
-                AccessToken = accessToken,
-                RefreshToken = refreshToken.Token,
-                ProfilePictureUrl = user.ProfilePictureUrl
-            };
-        }
-
-        // =========================
-        // REFRESH TOKEN
-        // =========================
-        public async Task<AuthResponseDto> RefreshTokenAsync(string token)
-        {
-            var storedToken = await _unitOfWork.RefreshTokens
-                .FirstOrDefaultAsync(rt =>
-                    rt.Token == token &&
-                    !rt.IsRevoked &&
-                    rt.ExpiresAt > DateTime.UtcNow);
-
-            if (storedToken == null)
-                throw new UnauthorizedAccessException("Invalid refresh token");
-
-            storedToken.IsRevoked = true;
-
-            var newRefreshToken = CreateRefreshToken(storedToken.UserId);
-            var user = await _unitOfWork.Users.GetByIdAsync(storedToken.UserId);
-            var newAccessToken = _jwtService.CreateToken(user);
-
-            await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken);
-            await _unitOfWork.SaveChangesAsync();
-
-            return new AuthResponseDto
-            {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken.Token
-            };
-        }
-
-        // =========================
-        // LOGOUT
-        // =========================
-        public async Task LogoutAsync(Guid userId)
-        {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null) return;
-
-            user.UserStatus = "Offline";
-            _unitOfWork.Users.Update(user);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        // =========================
-        // HELPERS
-        // =========================
-       
-        private RefreshToken CreateRefreshToken(Guid userId)
-        {
-            return new RefreshToken
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                Token = Convert.ToBase64String(
-                    RandomNumberGenerator.GetBytes(64)
-                ),
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
-                IsRevoked = false
-            };
-        }
-
-        public async Task<UserDetilsResponseDto?> GetUserDetailsAsync(Guid userId)
-        {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null) return null;
 
             return new UserDetilsResponseDto
             {
                 Id = user.Id,
                 Username = user.Username,
-                Email = user.Email,
+                Email = email,
+                ProfilePictureUrl = user.ProfilePictureUrl,
                 UserStatus = user.UserStatus,
                 IsAdmin = user.IsAdmin,
                 CreatedAt = user.CreatedAt
             };
+        }
+
+        // =============================
+        // TOKEN CLAIM HELPERS
+        // =============================
+
+        private string? GetEmailFromToken()
+        {
+            return _httpContextAccessor.HttpContext?
+                .User?
+                .FindFirstValue(ClaimTypes.Email)
+                ?? _httpContextAccessor.HttpContext?
+                    .User?
+                    .FindFirstValue("email");
+        }
+
+        private string? GetFullNameFromToken()
+        {
+            var metadata = _httpContextAccessor.HttpContext?
+                .User?
+                .FindFirstValue("user_metadata");
+
+            if (string.IsNullOrEmpty(metadata))
+                return null;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(metadata);
+
+                if (doc.RootElement.TryGetProperty("full_name", out var fullName))
+                    return fullName.GetString();
+
+                if (doc.RootElement.TryGetProperty("name", out var name))
+                    return name.GetString();
+            }
+            catch { }
+
+            return null;
+        }
+
+
+        private string? GetProfilePictureFromToken()
+        {
+            return _httpContextAccessor.HttpContext?
+                .User?
+                .FindFirstValue("avatar_url")
+                ?? _httpContextAccessor.HttpContext?
+                    .User?
+                    .FindFirstValue("picture");
         }
     }
 }

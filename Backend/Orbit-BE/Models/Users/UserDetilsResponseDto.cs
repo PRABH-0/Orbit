@@ -7,6 +7,7 @@
         public string Username { get; set; } = null!;
         public string Email { get; set; } = null;
         public bool IsAdmin { get; set; }
+        public string? ProfilePictureUrl { get; set; }
 
         // Online / Offline
         public string UserStatus { get; set; } = "Offline";

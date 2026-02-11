@@ -18,7 +18,7 @@ export class Header {
   @Input() x!: number;
   @Input() y!: number;
   @Input() showActions = true;
-
+@Input() userState : any;
   // ===== Outputs =====
   @Output() addFolder = new EventEmitter<void>();
   @Output() addItem = new EventEmitter<void>();
@@ -31,13 +31,14 @@ export class Header {
     private router: Router
   ) {}
 
-  // ===== Logout handler (called from Profile component) =====
-  onLogout() {
-    this.authService.logout().subscribe({
-      next: () => this.clearSession(),
-      error: () => this.clearSession() // fail-safe
-    });
+async onLogout() {
+  try {
+    await this.authService.logout();
+  } finally {
+    this.clearSession();
   }
+}
+
 
   // ===== Clear session and redirect =====
   private clearSession() {

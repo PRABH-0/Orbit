@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Orbit_BE.Data;
 using Orbit_BE.Interface;
 using Orbit_BE.Interfaces;
+using Orbit_BE.Options;
 using Orbit_BE.Repositories;
 using Orbit_BE.Services;
 using Orbit_BE.Services.Interfaces;
 using Orbit_BE.UnitOfWork;
-using Snera_Core.Services;
 using Stripe;
 using System.Text;
-using Orbit_BE.Options;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,40 +59,29 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.Configure<SupabaseOptions>(
     builder.Configuration.GetSection("Supabase"));
+//builder.Services.AddDbContext<DataContext>(options =>
+//    options.UseSqlServer(
+//        builder.Configuration.GetConnectionString("DefaultConnection")
+//    )
+//);
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
-    )
+    ).UseSnakeCaseNamingConvention()
 );
 
-// =======================
-// JWT Authentication
-// =======================
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var key = builder.Configuration["JwtConfig:Key"];
-        if (string.IsNullOrEmpty(key))
-            throw new Exception("JWT Key is missing.");
-
+        options.Authority = "https://sxkegulacdjtpnifhydz.supabase.co/auth/v1";
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
-
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["JwtConfig:Audience"],
-
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(key)
-            ),
-
-            ClockSkew = TimeSpan.Zero
+            ValidateAudience = false
         };
     });
+
+
 
 // =======================
 // ? CORS (SINGLE, CORRECT)
@@ -116,7 +105,6 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<INodeService, NodeService>();
 builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();

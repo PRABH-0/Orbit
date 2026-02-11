@@ -1,49 +1,79 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
+import { supabase } from '../supabase.client';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = `${environment.apiBaseUrl}/auth`;
+
+private apiUrl = 'https://localhost:44370/api/auth';
+
 
   constructor(private http: HttpClient) {}
 
-  login(data: { email: string; password: string }) {
-    return this.http.post<any>(`${this.baseUrl}/login`, data);
+  // =====================
+  // LOGIN
+  // =====================
+  async login(email: string, password: string) {
+    return await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
   }
 
-  register(data: { username: string; email: string; password: string }) {
-    return this.http.post<any>(`${this.baseUrl}/register`, data);
+  // =====================
+  // REGISTER
+  // =====================
+  async register(email: string, password: string) {
+    return await supabase.auth.signUp({
+      email,
+      password,
+    });
   }
-
-  getUserDetails() {
-    return this.http.get<any>(`${this.baseUrl}/userDetails`);
+// =====================
+// SYNC USER WITH BACKEND
+// =====================
+async syncUser() {
+  try {
+    return await this.getCurrentUser();
+  } catch (error) {
+    console.error('User sync failed', error);
+    throw error;
   }
-
-  saveToken(token: string) {
-    localStorage.setItem('token', token);
-  }
-
-  logout() {
-  return this.http.post(`${this.baseUrl}/logout`, {});
 }
 
-// auth.service.ts
-googleLogin(data: { idToken: string }) {
-  return this.http.post<any>(
-    `${this.baseUrl}/google-login`, // Changed from '/api/auth/google-login'
-    data
-  );
-}
-refreshToken() {
-  return this.http.post<any>(
-    `${this.baseUrl}/refresh`,
-    {},
-    { withCredentials: true } // 👈 IMPORTANT (cookie!)
-  );
-}
+  // =====================
+  // GET ACCESS TOKEN
+  // =====================
+  private async getAuthHeaders(): Promise<HttpHeaders> {
+    const { data } = await supabase.auth.getSession();
 
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    const token = data.session?.access_token;
+
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+  }
+
+  // =====================
+  // GET CURRENT USER (api/auth/me)
+  // =====================
+  async getCurrentUser() {
+    const headers = await this.getAuthHeaders();
+    return this.http.get(`${this.apiUrl}/me`, { headers }).toPromise();
+  }
+
+  // =====================
+  // LOGOUT (Backend optional)
+  // =====================
+  async logout() {
+    await supabase.auth.signOut();
+  }
+
+  // =====================
+  // CHECK LOGIN
+  // =====================
+  async isLoggedIn(): Promise<boolean> {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
   }
 }

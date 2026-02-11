@@ -20,8 +20,10 @@ import { DirectoryService } from '../services/directory.service';
 import { FileService } from '../services/file.service';
 import { Profile } from '../profile/profile';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { supabase } from '../supabase.client';
+import { UserStateService } from '../services/user-state.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-canvas',
@@ -75,15 +77,22 @@ export class Canvas implements OnInit, AfterViewInit {
     private directoryService: DirectoryService,
     private fileService: FileService,
     private sanitizer: DomSanitizer,
-    private auth: AuthService,
+    public userState:UserStateService,
+    public auth : AuthService,
     private router: Router,
   ) {}
 
-  ngOnInit() {
-    this.profilePic = localStorage.getItem('profilePic');
-    this.username = localStorage.getItem('username');
-    this.loadDirectories();
+async ngOnInit() {
+  const user: any = await this.auth.syncUser();
+
+  if (user) {
+    this.userState.setUser(user);
   }
+
+  this.loadDirectories();
+}
+
+
 
   ngAfterViewInit() {
     this.update();
@@ -114,12 +123,12 @@ export class Canvas implements OnInit, AfterViewInit {
     this.showProfile = false;
   }
 
-  logout() {
-    this.auth.logout().subscribe(() => {
-      localStorage.clear();
-      this.router.navigate(['/signin']);
-    });
-  }
+  async logout() {
+  await supabase.auth.signOut();
+localStorage.clear();
+
+}
+
   payment() {
     this.router.navigate(['/payment']);
   }

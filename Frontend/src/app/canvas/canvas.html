@@ -1,5 +1,5 @@
 <app-header
-  [username]="username"
+  [userState]="userState"
   [currentFolder]="currentFolderName"
   (addFolder)="onAddFolder()"
   (addItem)="onAddItem()"
@@ -46,9 +46,9 @@
     class="center-circle"
     #centerCircle
     (click)="toggleRoot()">
-    <img
+   <img
   class="user-avatar"
-  [src]="profilePic || 'assets/user_c.png'"
+  [src]="userState.avatarUrl || 'assets/user_c.png'"
   alt="User"
 />
 

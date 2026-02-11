@@ -63,9 +63,10 @@
       </button>
 
       <!-- GOOGLE LOGIN (OFFICIAL BUTTON) -->
-      <div class="google-wrapper">
-        <div id="google-btn"></div>
-      </div>
+      <button class="google-btn" (click)="googleLogin()">
+  Continue with Google
+</button>
+
 
       <div class="footer" (click)="toggleMode()">
         {{ isRegister
