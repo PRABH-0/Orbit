@@ -143,9 +143,6 @@ app.Use(async (context, next) =>
 StripeConfiguration.ApiKey =
     builder.Configuration["Stripe:SecretKey"];
 
-// =======================
-// Middleware Order (IMPORTANT)
-// =======================
 app.UseHttpsRedirection();
 
 app.UseRouting();
