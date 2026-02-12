@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { supabase } from '../supabase.client';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -65,9 +66,11 @@ async syncUser() {
   // =====================
   // LOGOUT (Backend optional)
   // =====================
-  async logout() {
-    await supabase.auth.signOut();
-  }
+async logout(router: Router) {
+  await supabase.auth.signOut();
+  localStorage.clear();
+  router.navigate(['/signin']);
+}
 
   // =====================
   // CHECK LOGIN

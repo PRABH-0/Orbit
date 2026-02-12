@@ -32,12 +32,9 @@ export class Header {
   ) {}
 
 async onLogout() {
-  try {
-    await this.authService.logout();
-  } finally {
-    this.clearSession();
-  }
+  await this.authService.logout(this.router);
 }
+
 
 
   // ===== Clear session and redirect =====

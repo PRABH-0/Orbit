@@ -85,14 +85,14 @@ export class Canvas implements OnInit, AfterViewInit {
 async ngOnInit() {
   const user: any = await this.auth.syncUser();
 
-  if (user) {
-    this.userState.setUser(user);
+  if (!user) {
+    this.router.navigate(['/signin']);
+    return;
   }
 
+  this.userState.setUser(user);
   this.loadDirectories();
 }
-
-
 
   ngAfterViewInit() {
     this.update();
@@ -123,11 +123,6 @@ async ngOnInit() {
     this.showProfile = false;
   }
 
-  async logout() {
-  await supabase.auth.signOut();
-localStorage.clear();
-
-}
 
   payment() {
     this.router.navigate(['/payment']);
@@ -230,6 +225,9 @@ localStorage.clear();
 
     this.headerFileInput.nativeElement.click();
   }
+async logout() {
+  await this.auth.logout(this.router);
+}
 
   onHeaderFileSelected(event: Event) {
     if (!this.selectedFolderId) return;
