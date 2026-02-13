@@ -15,11 +15,26 @@
     <h2 class="title">Welcome to <span class="title-orbit" >Orbit</span></h2>
 
     <p class="subtitle">
-      The Visual File Management System
+     [ The Visual File Management System ]
     </p>
+    <div class="admin-pin-container">
+
+  <input
+    type="password"
+    placeholder="Admin PIN"
+    [(ngModel)]="adminPin"
+    class="admin-input"
+  />
+</div>
+
 
     <!-- GOOGLE LOGIN -->
-    <button class="google-btn" (click)="googleLogin()">
+  <button 
+  class="google-btn" 
+  (click)="googleLogin()" 
+  [disabled]="!adminPin"
+  [ngStyle]="{ cursor: !adminPin ? 'not-allowed' : 'pointer' }">
+
       <svg class="google-icon" viewBox="0 0 48 48">
         <path fill="#EA4335"
           d="M24 9.5c3.4 0 6.5 1.2 8.9 3.2l6.6-6.6C35.5 2.5 30.1 0 24 0 14.6 0 6.6 5.8 2.7 14.2l7.8 6.1C12.4 13.3 17.7 9.5 24 9.5z" />

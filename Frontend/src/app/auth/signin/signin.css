@@ -217,7 +217,23 @@ button:hover {
   font-weight: 600;
   letter-spacing: 0.4px;
 }
+.admin-input{
+  width: 93%;
 
+  color: #000;
+
+  border-radius: 8px;
+
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 14px;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 /* Subtitle */
 .subtitle {
   padding-top: 30px;

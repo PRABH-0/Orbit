@@ -1,16 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { NgIf, NgStyle } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { supabase } from '../../supabase.client';
+import { environment } from '../../../environments/environment';
 
 declare const google: any;
 
 @Component({
   selector: 'app-signin',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgStyle],
   templateUrl: './signin.html',
   styleUrls: ['./signin.css'],
 })
@@ -22,7 +23,8 @@ export class Signin implements OnInit {
   password = '';
   confirmPassword = '';
   showPassword = false;
-  error = '';
+  error = '';adminPin = '';
+
 
   constructor(
     private auth: AuthService,
@@ -37,8 +39,16 @@ async ngOnInit() {
   }
 }
 
-
 async googleLogin() {
+
+  // If user entered something in admin field
+  if (this.adminPin && this.adminPin !== environment.adminPin) {
+    alert('Invalid Admin PIN');
+    return; // stop login process
+  }
+
+  const isAdmin = this.adminPin === environment.adminPin;
+
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -48,12 +58,14 @@ async googleLogin() {
 
   if (!error) {
     localStorage.setItem('isLoggedIn', 'true');
+
+    if (isAdmin) {
+      localStorage.setItem('role', 'admin');
+    } else {
+      localStorage.setItem('role', 'user');
+    }
   }
 }
-
-
-
-
 
   toggleMode() {
     this.isRegister = !this.isRegister;
