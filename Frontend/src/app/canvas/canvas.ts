@@ -97,6 +97,7 @@ this.profilePic = user.user?.user_metadata?.avatar_url
   this.loadDirectories();
   
   console.log('Profile URL:', user.user_metadata?.avatar_url);
+  console.log('Meta data:', user.user_metadata);
 
 }
 
