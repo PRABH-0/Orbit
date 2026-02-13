@@ -10,7 +10,7 @@ declare const google: any;
 @Component({
   selector: 'app-signin',
   standalone: true,
-  imports: [FormsModule, NgIf],
+  imports: [FormsModule],
   templateUrl: './signin.html',
   styleUrls: ['./signin.css'],
 })
@@ -39,13 +39,18 @@ async ngOnInit() {
 
 
 async googleLogin() {
-  await supabase.auth.signInWithOAuth({
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: window.location.origin + '/canvas',
     },
   });
+
+  if (!error) {
+    localStorage.setItem('isLoggedIn', 'true');
+  }
 }
+
 
 
 

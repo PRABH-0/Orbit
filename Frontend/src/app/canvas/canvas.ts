@@ -226,6 +226,7 @@ async ngOnInit() {
     this.headerFileInput.nativeElement.click();
   }
 async logout() {
+  localStorage.clear();
   await this.auth.logout(this.router);
 }
 

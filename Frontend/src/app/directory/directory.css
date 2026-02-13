@@ -13,10 +13,7 @@
 .folder-directory:active {
   cursor: grabbing;
 }
-.folderImg{
-  cursor: pointer;
 
-}
 .folder-icon {
   pointer-events: none;
 }

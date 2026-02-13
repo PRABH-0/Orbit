@@ -1,21 +1,29 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { CommonModule, NgIf } from '@angular/common';
+import { Component,OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FeedbackService } from '../services/feedback.service';
 import { HttpClientModule } from '@angular/common/http';
+import { supabase } from '../supabase.client';
+import { AuthService } from '../services/auth.service';
+import { NgZone } from '@angular/core';
+
+
 
 @Component({
   selector: 'app-about',
   imports: [FormsModule,CommonModule,HttpClientModule],
   templateUrl: './about.html',
+  standalone: true,
   styleUrl: './about.css',
 })
 
-export class About {
+export class About implements OnInit {
   constructor(
     private router: Router,
-    private feedbackService: FeedbackService
+    private ngZone: NgZone,
+    private feedbackService: FeedbackService,
+    private authService : AuthService
   ) {}
 
   showFeedback = false;
@@ -24,9 +32,10 @@ export class About {
   isLoggedIn = false;
   isSending = false;
 
-  ngOnInit() {
-    this.isLoggedIn = !!localStorage.getItem('token');
-  }
+ngOnInit() {
+  this.isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  console.log(this.isLoggedIn);
+}
 
   openFeedback() {
     this.showFeedback = true;

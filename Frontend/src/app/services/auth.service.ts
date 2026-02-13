@@ -15,6 +15,7 @@ private apiUrl = 'https://localhost:44370/api/auth';
   // LOGIN
   // =====================
   async login(email: string, password: string) {
+    localStorage.setItem('isLoggedIn', 'true');
     return await supabase.auth.signInWithPassword({
       email,
       password,
@@ -30,17 +31,20 @@ private apiUrl = 'https://localhost:44370/api/auth';
       password,
     });
   }
-// =====================
-// SYNC USER WITH BACKEND
-// =====================
+  
 async syncUser() {
   try {
-    return await this.getCurrentUser();
-  } catch (error) {
-    console.error('User sync failed', error);
-    throw error;
+    const backendUser = await this.getCurrentUser();
+    if (backendUser) return backendUser;
+  } catch (e) {
+    console.warn('Backend sync failed, using Supabase session');
   }
+
+  // fallback to supabase session
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user ?? null;
 }
+
 
   // =====================
   // GET ACCESS TOKEN
