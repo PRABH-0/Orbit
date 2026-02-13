@@ -117,15 +117,32 @@ namespace Orbit_BE.Services
             return null;
         }
 
-
         private string? GetProfilePictureFromToken()
         {
-            return _httpContextAccessor.HttpContext?
+            var metadata = _httpContextAccessor.HttpContext?
                 .User?
-                .FindFirstValue("avatar_url")
-                ?? _httpContextAccessor.HttpContext?
-                    .User?
-                    .FindFirstValue("picture");
+                .FindFirstValue("user_metadata");
+
+            if (string.IsNullOrEmpty(metadata))
+                return null;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(metadata);
+
+                if (doc.RootElement.TryGetProperty("avatar_url", out var avatar))
+                    return avatar.GetString();
+
+                if (doc.RootElement.TryGetProperty("picture", out var picture))
+                    return picture.GetString();
+            }
+            catch
+            {
+                // ignore parsing errors
+            }
+
+            return null;
         }
+
     }
 }

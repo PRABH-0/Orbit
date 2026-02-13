@@ -89,9 +89,7 @@ async ngOnInit() {
     this.router.navigate(['/signin']);
     return;
   }
-this.profilePic = user.user?.user_metadata?.avatar_url 
-                  || user.user?.user_metadata?.picture 
-                  || null;
+this.profilePic = user.profilePictureUrl;
 
   this.userState.setUser(user);
   this.loadDirectories();

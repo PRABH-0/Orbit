@@ -8,7 +8,7 @@ export class UserStateService {
 
   setUser(user: any) {
     this.username = user.username;
-    this.avatarUrl = user.user_metadata?.avatar_url;
+    this.avatarUrl = user.profilePictureUrl;
   }
 
   clear() {
