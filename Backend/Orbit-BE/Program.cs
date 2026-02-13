@@ -94,7 +94,6 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:4200", "https://localhost:4200") // Your Angular dev URL
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials(); // ? This is important!
 });
 });
 
