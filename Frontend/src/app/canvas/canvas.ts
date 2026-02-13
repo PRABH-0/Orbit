@@ -409,16 +409,16 @@ async logout() {
  toggleRoot() {
   this.rootOpen = !this.rootOpen;
 
+  this.selectedParentFolderId = null;
+  this.selectedFolderId = null;
+  this.activeFolder = null;
+  this.currentFolderName = 'Root';
   if (!this.rootOpen) {
     this.directories.forEach((d) => (d.isOpen = false));
     this.closeModelData();
     return;
   }
 
-  this.selectedParentFolderId = null;
-  this.selectedFolderId = null;
-  this.activeFolder = null;
-  this.currentFolderName = 'Root';
 
   this.showModelData = false;
   this.dataNodePosition = null;

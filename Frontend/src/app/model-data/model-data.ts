@@ -90,7 +90,7 @@ openPdf(file: any) {
   this.imageOpen.emit({
     type: 'pdf',
     id: file.id,
-    url: `${environment.apiBaseUrl}/${file.id}/view`,
+    url: this.getStreamUrl(file.id),  // ✅ FIXED
     fileName: file.fileName
   });
 }
