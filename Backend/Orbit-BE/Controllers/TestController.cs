@@ -17,8 +17,26 @@ namespace Orbit_BE.Controllers
         [HttpGet("db")]
         public async Task<IActionResult> TestDatabase()
         {
-            var users = await _unitOfWork.Users.GetAllAsync();
-            return Ok(users);
+            try
+            {
+                var users = await _unitOfWork.Users.GetAllAsync();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Database connected successfully",
+                    data = users
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    error = ex.Message,
+                    innerError = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                });
+            }
         }
     }
 }
