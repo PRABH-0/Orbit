@@ -152,6 +152,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGet("/", () => "Orbit API is running 🚀");
 
 app.Run();
