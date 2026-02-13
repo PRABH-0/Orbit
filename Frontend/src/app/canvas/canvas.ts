@@ -92,6 +92,9 @@ async ngOnInit() {
 
   this.userState.setUser(user);
   this.loadDirectories();
+  
+  console.log('Profile URL:', user.user_metadata?.avatar_url);
+
 }
 
   ngAfterViewInit() {

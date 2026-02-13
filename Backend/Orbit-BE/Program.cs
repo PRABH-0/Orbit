@@ -120,43 +120,37 @@ builder.Services.AddMemoryCache(options =>
 var app = builder.Build();
 
 
-// =======================
-// Swagger UI
-// =======================
+
+
+StripeConfiguration.ApiKey =
+    builder.Configuration["Stripe:SecretKey"];
+
+app.UseHttpsRedirection();
+
+app.UseDefaultFiles();   // 👈 must come BEFORE static files
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseCors("AllowAngular");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Orbit API v1");
 });
 
-// Redirect root to swagger
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path == "/")
-    {
-        context.Response.Redirect("/swagger/index.html");
-        return;
-    }
-    await next();
-});
-StripeConfiguration.ApiKey =
-    builder.Configuration["Stripe:SecretKey"];
-
-app.UseHttpsRedirection();
-
-app.UseRouting();
-
-app.UseCors("AllowAngular"); // ? MUST be here
-
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.MapControllers();
+
+app.MapFallbackToFile("index.html");
+
 if (builder.Environment.IsProduction())
 {
     var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
     app.Urls.Add($"http://0.0.0.0:{port}");
 }
-
 
 app.Run();
