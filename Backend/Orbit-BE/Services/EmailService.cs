@@ -1,5 +1,5 @@
-﻿using System.Net;
-using System.Net.Mail;
+﻿using SendGrid;
+using SendGrid.Helpers.Mail;
 using Orbit_BE.Services.Interfaces;
 
 namespace Orbit_BE.Services
@@ -14,57 +14,43 @@ namespace Orbit_BE.Services
         }
 
         public async Task SendAsync(
-    string subject,
-    string body,
-    string? replyTo = null
-)
+            string subject,
+            string body,
+            string? replyTo = null
+        )
         {
-            var smtp = _config.GetSection("Smtp");
+            var apiKey = _config["SendGrid:ApiKey"];
+            var fromEmail = _config["SendGrid:FromEmail"];
+            var fromName = _config["SendGrid:FromName"];
 
-            if (smtp == null || string.IsNullOrEmpty(smtp["Host"]))
-                throw new Exception("SMTP configuration missing from environment variables.");
+            if (string.IsNullOrEmpty(apiKey))
+                throw new Exception("SendGrid API Key missing.");
 
-            try
+            var client = new SendGridClient(apiKey);
+
+            var from = new EmailAddress(fromEmail, fromName);
+            var to = new EmailAddress(fromEmail); // sending to yourself
+
+            var msg = MailHelper.CreateSingleEmail(
+                from,
+                to,
+                subject,
+                body,
+                body
+            );
+
+            if (!string.IsNullOrWhiteSpace(replyTo))
             {
-                var client = new SmtpClient(smtp["Host"], int.Parse(smtp["Port"]))
-                {
-                    Credentials = new NetworkCredential(
-                        smtp["Username"],
-                        smtp["Password"]
-                    ),
-                    EnableSsl = true
-                };
-
-                var mail = new MailMessage
-                {
-                    From = new MailAddress(smtp["From"]),
-                    Subject = subject,
-                    Body = body,
-                    IsBodyHtml = false
-                };
-
-                mail.To.Add(smtp["Username"]);
-
-                if (!string.IsNullOrWhiteSpace(replyTo))
-                {
-                    mail.ReplyToList.Add(replyTo);
-                }
-
-                await client.SendMailAsync(mail);
+                msg.ReplyTo = new EmailAddress(replyTo);
             }
-            catch (SmtpException smtpEx)
+
+            var response = await client.SendEmailAsync(msg);
+
+            if (!response.IsSuccessStatusCode)
             {
-                throw new Exception(
-                    $"SMTP Exception: {smtpEx.Message} | StatusCode: {smtpEx.StatusCode} | Inner: {smtpEx.InnerException?.Message}"
-                );
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(
-                    $"General Exception: {ex.Message} | Inner: {ex.InnerException?.Message}"
-                );
+                var errorBody = await response.Body.ReadAsStringAsync();
+                throw new Exception($"SendGrid Error: {errorBody}");
             }
         }
-
     }
 }
