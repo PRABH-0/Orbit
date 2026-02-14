@@ -14,33 +14,26 @@ namespace Orbit_BE.Services
 
         public async Task SendFeedbackAsync(FeedbackDto dto, string? userEmail)
         {
-            try
-            {
-                var subject = $"Orbit Feedback | {dto.Type}";
+            var subject = $"Orbit Feedback | {dto.Type}";
 
-                var body = $"""
-        Project: Orbit
-        Type: {dto.Type}
-        Time: {DateTime.UtcNow}
+            var body = $"""
+    Project: Orbit
+    Type: {dto.Type}
+    Time: {DateTime.UtcNow}
 
-        User Email: {userEmail ?? "Anonymous"}
+    User Email: {userEmail ?? "Anonymous"}
 
-        Message:
-        --------------------
-        {dto.Message}
-        --------------------
-        """;
+    Message:
+    --------------------
+    {dto.Message}
+    --------------------
+    """;
 
-                await _emailService.SendAsync(
-                    subject,
-                    body,
-                    replyTo: userEmail
-                );
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Email sending failed: " + ex.Message);
-            }
+            await _emailService.SendAsync(
+                subject,
+                body,
+                replyTo: userEmail
+            );
         }
 
     }

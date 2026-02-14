@@ -36,11 +36,12 @@ namespace Orbit_BE.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Something went wrong while sending feedback",
-                    error = ex.Message
+                    message = "SMTP ERROR",
+                    exception = ex.ToString()   // VERY IMPORTANT
                 });
             }
         }
+
 
     }
 }
