@@ -21,14 +21,26 @@ namespace Orbit_BE.Controllers
         [HttpPost]
         public async Task<IActionResult> SendFeedback([FromBody] FeedbackDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Message))
-                return BadRequest("Feedback message is required");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(dto.Message))
+                    return BadRequest("Feedback message is required");
 
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-            await _feedbackService.SendFeedbackAsync(dto, userEmail);
+                await _feedbackService.SendFeedbackAsync(dto, userEmail);
 
-            return Ok(new { message = "Feedback sent successfully" });
+                return Ok(new { message = "Feedback sent successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Something went wrong while sending feedback",
+                    error = ex.Message
+                });
+            }
         }
+
     }
 }
