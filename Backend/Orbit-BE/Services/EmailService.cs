@@ -29,7 +29,8 @@ namespace Orbit_BE.Services
             var client = new SendGridClient(apiKey);
 
             var from = new EmailAddress(fromEmail, fromName);
-            var to = new EmailAddress(fromEmail); // sending to yourself
+            var to = new EmailAddress("ps7584153@gmail.com");
+
 
             var msg = MailHelper.CreateSingleEmail(
                 from,
