@@ -42,6 +42,10 @@ export class ModelData implements OnChanges {
     return this.items.slice(start, start + this.pageSize);
   }
   openFile(file: any) {
+    if (file.isGoogle) {
+    this.openGoogleFile(file);
+    return;
+  }
   const type = file.contentType;
 
   if (type.startsWith('image/')) {
@@ -64,6 +68,12 @@ isText(file: any): boolean {
   return (
     file.contentType?.startsWith('text/') ||
     /\.(txt|js|ts|tsx|json|html|css|md)$/i.test(file.fileName)
+  );
+}
+openGoogleFile(file: any) {
+  window.open(
+    `https://drive.google.com/file/d/${file.id}/view`,
+    '_blank'
   );
 }
 
@@ -139,13 +149,17 @@ getFileIcon(file: any): string {
   return '📁';
 }
 
-  preloadVisibleImages() {
-    for (const file of this.visibleItems) {
-      if (!this.imageCache.has(file.id)) {
-        this.loadImage(file.id);
-      }
+ preloadVisibleImages() {
+  for (const file of this.visibleItems) {
+
+    // 🔥 Skip Google files
+    if (file.isGoogle) continue;
+
+    if (!this.imageCache.has(file.id)) {
+      this.loadImage(file.id);
     }
   }
+}
 
   loadImage(fileId: string) {
     this.fileService.downloadFile(fileId).subscribe({

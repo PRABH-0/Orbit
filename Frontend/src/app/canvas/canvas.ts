@@ -24,6 +24,7 @@ import { Router } from '@angular/router';
 import { supabase } from '../supabase.client';
 import { UserStateService } from '../services/user-state.service';
 import { AuthService } from '../services/auth.service';
+import { GoogleDriveService } from '../services/google-drive.service';
 
 @Component({
   selector: 'app-canvas',
@@ -79,6 +80,7 @@ export class Canvas implements OnInit, AfterViewInit {
     private sanitizer: DomSanitizer,
     public userState:UserStateService,
     public auth : AuthService,
+    private googleDriveService: GoogleDriveService,
     private router: Router,
   ) {}
 
@@ -93,9 +95,9 @@ this.profilePic = user.profilePictureUrl;
 
   this.userState.setUser(user);
   this.loadDirectories();
-  
-  console.log('Profile URL:', user.user_metadata?.avatar_url);
-  console.log('Meta data:', user.user_metadata);
+  const { data } = await supabase.auth.getSession();
+console.log("Provider Token:", data.session?.provider_token);
+
 
 }
 
@@ -103,22 +105,36 @@ this.profilePic = user.profilePictureUrl;
     this.update();
   }
 
-  // =========================
-  // LOAD FROM API
-  // =========================
-  loadDirectories() {
-    this.directoryService.getDirectories().subscribe({
-      next: (data) => {
-        this.directories = data.map((d) => ({
-          ...d,
-          isOpen: false,
-        }));
-      },
-      error: (err) => {
-        console.error('Failed to load directories', err);
-      },
-    });
-  }
+ loadDirectories() {
+  this.directoryService.getDirectories().subscribe({
+    next: (data) => {
+
+      this.directories = data.map((d) => ({
+        ...d,
+        isOpen: false,
+      }));
+
+      console.log("Directories from API:", this.directories);
+
+      // ✅ ADD GOOGLE FOLDER HERE
+      this.directories.push({
+        id: 'google-drive',
+        name: 'Google Drive',
+        x: 2700,
+        y: 2500,
+        parentId: null,
+        isOpen: false,
+        isVirtual: true
+      });
+
+      console.log("Directories after adding Google:", this.directories);
+    },
+    error: (err) => {
+      console.error('Failed to load directories', err);
+    },
+  });
+}
+
 
   openUserMenu() {
     this.showProfile = !this.showProfile;
@@ -341,7 +357,52 @@ async logout() {
       y: this.dataNodePosition.y + HEIGHT / 2,
     };
   }
+  private mapMimeType(mime: string): 'image' | 'pdf' | 'video' | 'audio' | 'text' {
+
+  if (!mime) return 'text';
+
+  if (mime.startsWith('image/')) return 'image';
+  if (mime === 'application/pdf') return 'pdf';
+  if (mime.startsWith('video/')) return 'video';
+  if (mime.startsWith('audio/')) return 'audio';
+
+  return 'text';
+}
+
   onFolderClick(dir: any) {
+    if (dir.id === 'google-drive') {
+
+  console.log("Google Drive folder clicked");
+
+  // 🔥 Set position manually
+  this.setDataNodePosition(dir);
+
+  this.selectedFolderId = dir.id;
+  this.currentFolderName = "Google Drive";
+  this.activeFolder = dir;
+
+  this.googleDriveService.getGoogleDriveFiles()
+    .subscribe({
+      next: files => {
+
+        this.selectedFolderItems = files.map(f => ({
+          id: f.id,
+          fileName: f.name,
+          contentType: f.mimeType,
+          isGoogle: true
+        }));
+
+        this.showModelData = true;
+      },
+      error: err => {
+        console.error("Google API error:", err);
+      }
+    });
+
+  return;
+}
+
+
   if (!dir || !dir.id) return;
 
   dir.isOpen = !dir.isOpen;

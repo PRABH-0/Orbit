@@ -50,11 +50,12 @@ async googleLogin() {
   const isAdmin = this.adminPin === environment.adminPin;
 
   const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: window.location.origin + '/canvas',
-    },
-  });
+  provider: 'google',
+  options: {
+    redirectTo: window.location.origin + '/canvas',
+    scopes: 'openid email profile https://www.googleapis.com/auth/drive.readonly',
+  },
+});
 
   if (!error) {
     localStorage.setItem('isLoggedIn', 'true');
