@@ -117,6 +117,8 @@ builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 1024 * 1024 * 500;
 });
+builder.Services.AddHttpClient();
+
 
 var app = builder.Build();
 

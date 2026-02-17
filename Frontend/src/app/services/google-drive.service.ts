@@ -32,4 +32,14 @@ export class GoogleDriveService {
       })
     );
   }
+  downloadGoogleFile(url: string, token: string) {
+  return this.http.get(url, {
+    headers: {
+      'Google-Access-Token': token
+    },
+    observe: 'response',
+    responseType: 'blob'
+  });
+}
+
 }

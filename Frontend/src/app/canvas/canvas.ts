@@ -96,6 +96,10 @@ this.profilePic = user.profilePictureUrl;
   this.userState.setUser(user);
   this.loadDirectories();
   const { data } = await supabase.auth.getSession();
+  localStorage.setItem(
+  'google_provider_token',
+  data.session?.provider_token!
+);
 console.log("Provider Token:", data.session?.provider_token);
 
 
@@ -561,10 +565,12 @@ async logout() {
   }
 
   // ✅ PDF only
-  if (payload.type === 'pdf') {
-    payload.safeUrl =
-      this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
-  }
+ // Only sanitize local URLs
+if (payload.type === 'pdf' && payload.url?.startsWith('http')) {
+  payload.safeUrl =
+    this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
+}
+
 
   // ❌ NO sanitizer for audio/video
   this.selectedFile = payload;

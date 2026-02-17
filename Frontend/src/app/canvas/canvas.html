@@ -159,7 +159,7 @@
     <!-- PDF -->
     <iframe
   *ngIf="selectedFile.type === 'pdf'"
-  [src]="selectedFile.safeUrl"
+  [src]="selectedFile.safeUrl" type="application/pdf"
   class="file-media pdf">
 </iframe>
 

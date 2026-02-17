@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, OnChanges, ViewChild, ElementRe
 import { CommonModule, NgFor, NgIf ,NgSwitch} from '@angular/common';
 import { FileService } from '../services/file.service';
 import { environment } from '../../environments/environment';
+import { GoogleDriveService } from '../services/google-drive.service';
 
 @Component({
   selector: 'app-model-data',
@@ -30,7 +31,7 @@ export class ModelData implements OnChanges {
   /** fileId → objectURL */
   imageCache = new Map<string, string>();
 
-  constructor(private fileService: FileService) {}
+  constructor(private fileService: FileService , private googleDriveService :GoogleDriveService) {}
 
   ngOnChanges() {
     this.currentPage = 0;
@@ -70,11 +71,36 @@ isText(file: any): boolean {
     /\.(txt|js|ts|tsx|json|html|css|md)$/i.test(file.fileName)
   );
 }
+detectType(mime: string): 'image' | 'pdf' | 'video' | 'audio' | 'text' {
+
+  if (mime.startsWith('image/')) return 'image';
+  if (mime === 'application/pdf') return 'pdf';
+  if (mime.startsWith('video/')) return 'video';
+  if (mime.startsWith('audio/')) return 'audio';
+  return 'text';
+}
+
 openGoogleFile(file: any) {
-  window.open(
-    `https://drive.google.com/file/d/${file.id}/view`,
-    '_blank'
-  );
+
+  const providerToken =
+    localStorage.getItem('google_provider_token');
+
+  const url =
+    `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
+
+  this.googleDriveService.downloadGoogleFile(url, providerToken!)
+    .subscribe(res => {
+
+      const blob = res.body!;
+      const objectUrl = URL.createObjectURL(blob);
+
+      this.imageOpen.emit({
+        type: this.detectType(file.contentType),
+        id: file.id,
+        url: objectUrl,
+        fileName: file.fileName
+      });
+    });
 }
 
 openText(file: any) {
@@ -151,9 +177,8 @@ getFileIcon(file: any): string {
 
  preloadVisibleImages() {
   for (const file of this.visibleItems) {
+if (file.isGoogle) continue; // IMPORTANT
 
-    // 🔥 Skip Google files
-    if (file.isGoogle) continue;
 
     if (!this.imageCache.has(file.id)) {
       this.loadImage(file.id);
