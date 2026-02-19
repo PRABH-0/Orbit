@@ -32,76 +32,45 @@
 
   <!-- CONTENT -->
   <div class="data-grid">
-
-   <div
+<div
   class="data-item"
   *ngFor="let file of visibleItems"
   (click)="openFile(file)"
 >
-  <!-- IMAGE THUMBNAIL -->
+<!-- IMAGE -->
 <img
-  *ngIf="isImage(file) && getImageUrl(file.id)"
-  [src]="getImageUrl(file.id)"
+  *ngIf="isImage(file)"
+  [src]="file.thumbnail || getImageUrl(file.id)"
   class="file-thumb"
 />
-<!-- ICON FOR NON-IMAGES -->
-<div *ngIf="!isImage(file)" class="file-icon" [ngSwitch]="true">
 
-  <!-- PDF -->
-  <svg *ngSwitchCase="isPdf(file)"
-       xmlns="http://www.w3.org/2000/svg"
-       viewBox="0 0 24 24"
-       width="24" height="24"
-       fill="none"
-       stroke="currentColor"
-       stroke-width="2"
-       stroke-linecap="round"
-       stroke-linejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <path d="M14 2v6h6"/>
-  </svg>
+<!-- IF NOT PREVIEWABLE → SHOW FOLDER -->
+<div *ngIf="!isImage(file) && !isPreviewable(file)"
+     class="file-icon">
+  📁
+</div>
 
-  <!-- VIDEO -->
-  <svg *ngSwitchCase="isVideo(file)"
-       xmlns="http://www.w3.org/2000/svg"
-       viewBox="0 0 24 24"
-       width="24" height="24"
-       fill="none"
-       stroke="currentColor"
-       stroke-width="2">
-    <polygon points="23 7 16 12 23 17 23 7"/>
-    <rect x="1" y="5" width="15" height="14" rx="2"/>
-  </svg>
+<!-- VIDEO -->
+<div *ngIf="isVideo(file)" class="file-icon">
+  🎬
+</div>
 
-  <!-- AUDIO -->
-  <svg *ngSwitchCase="isAudio(file)"
-       xmlns="http://www.w3.org/2000/svg"
-       viewBox="0 0 24 24"
-       width="24" height="24"
-       fill="none"
-       stroke="currentColor"
-       stroke-width="2">
-    <path d="M9 18V5l12-2v13"/>
-    <circle cx="6" cy="18" r="3"/>
-    <circle cx="18" cy="16" r="3"/>
-  </svg>
+<!-- PDF OR GOOGLE DOC -->
+<div *ngIf="isPdf(file) || isGoogleDoc(file)" class="file-icon">
+  📄
+</div>
 
-  <!-- DEFAULT FILE -->
-  <svg *ngSwitchDefault
-       xmlns="http://www.w3.org/2000/svg"
-       viewBox="0 0 24 24"
-       width="24" height="24"
-       fill="none"
-       stroke="currentColor"
-       stroke-width="2">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <path d="M14 2v6h6"/>
-  </svg>
-
+<!-- AUDIO -->
+<div *ngIf="isAudio(file)" class="file-icon">
+  🎵
 </div>
 
 
-  <div class="file-tooltip">{{ file.fileName }}</div>
+  <!-- 👇 ADD THIS -->
+  <div class="file-label">
+    [{{ file.fileName }}]
+  </div>
+
 </div>
 
 

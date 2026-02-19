@@ -12,10 +12,6 @@ public class GoogleDriveService : IGoogleDriveService
     {
         _httpClientFactory = httpClientFactory;
     }
-
-    // ==============================
-    // LIST FILES
-    // ==============================
     public async Task<List<object>> GetFilesAsync(string accessToken)
     {
         var credential = GoogleCredential.FromAccessToken(accessToken);
@@ -26,19 +22,36 @@ public class GoogleDriveService : IGoogleDriveService
             ApplicationName = "Orbit"
         });
 
-        var request = service.Files.List();
-        request.PageSize = 20;
-        request.Fields = "files(id, name, mimeType)";
+        var allFiles = new List<Google.Apis.Drive.v3.Data.File>();
+        string? nextPageToken = null;
 
-        var result = await request.ExecuteAsync();
+        do
+        {
+            var request = service.Files.List();
+            request.PageSize = 100; // max safe value
+            request.Fields = "nextPageToken, files(id, name, mimeType)";
+            request.PageToken = nextPageToken;
 
-        return result.Files.Select(f => new
+            var result = await request.ExecuteAsync();
+
+            if (result.Files != null)
+                allFiles.AddRange(result.Files);
+
+            nextPageToken = result.NextPageToken;
+
+        } while (!string.IsNullOrEmpty(nextPageToken));
+
+        return allFiles.Select(f => new
         {
             id = f.Id,
             name = f.Name,
-            mimeType = f.MimeType
+            mimeType = f.MimeType,
+            thumbnail = f.ThumbnailLink,
+            streamUrl = $"/api/google-drive/file/{f.Id}"
         }).Cast<object>().ToList();
+
     }
+
 
     // ==============================
     // STREAM FILE

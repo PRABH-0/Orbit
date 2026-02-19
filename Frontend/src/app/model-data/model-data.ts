@@ -42,43 +42,154 @@ export class ModelData implements OnChanges {
     const start = this.currentPage * this.pageSize;
     return this.items.slice(start, start + this.pageSize);
   }
-  openFile(file: any) {
-    if (file.isGoogle) {
-    this.openGoogleFile(file);
+
+  openInNewTab(file: any) {
+
+  const url = `${environment.apiBaseUrl}/File/${file.id}/view`;
+
+  window.open(url, '_blank');
+}
+getMime(file: any): string {
+  return (file.contentType || file.mimeType || '').toLowerCase();
+}
+
+downloadGoogleFile(file: any) {
+
+  const providerToken =
+    localStorage.getItem('google_provider_token');
+
+  const url =
+    `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
+
+  this.googleDriveService
+    .downloadGoogleFile(url, providerToken!)
+    .subscribe(res => {
+
+      const blob = res.body!;
+      const objectUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = file.fileName;
+      a.click();
+
+      URL.revokeObjectURL(objectUrl);
+    });
+}
+
+handleGoogleFile(file: any) {
+
+  const type = this.detectType(file);
+
+  if (type === 'other') {
+
+    const confirmDownload = confirm(
+      `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
+    );
+
+    if (confirmDownload) {
+      this.downloadGoogleFile(file);
+    }
+
     return;
   }
-  const type = file.contentType;
 
-  if (type.startsWith('image/')) {
-    this.openImage(file);
-  } else if (type === 'application/pdf') {
-    this.openPdf(file);
-  } else if (type.startsWith('video/')) {
-    this.openVideo(file);
-  } else if (type.startsWith('audio/')) {
-    this.openAudio(file);
+  // only previewable files download blob
+  this.openGoogleFile(file);
+}
+
+openFile(file: any) {
+
+  if (file.isGoogle) {
+    this.handleGoogleFile(file);
+    return;
   }
-  else if (this.isText(file)) {
-    this.openText(file); // 🔥 NEW
+
+  const type = this.detectType(file);
+
+  if (type === 'other') {
+
+    const confirmDownload = confirm(
+      `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
+    );
+
+    if (confirmDownload) {
+      this.download(file);
+    }
+
+    return;
   }
-  else {
-    this.download(file);
+
+  switch (type) {
+    case 'image':
+      this.openImage(file);
+      break;
+
+    case 'pdf':
+      this.openPdf(file);
+      break;
+
+    case 'video':
+      this.openVideo(file);
+      break;
+
+    case 'audio':
+      this.openAudio(file);
+      break;
+
+    case 'text':
+      this.openText(file);
+      break;
   }
 }
+
+
 isText(file: any): boolean {
   return (
     file.contentType?.startsWith('text/') ||
     /\.(txt|js|ts|tsx|json|html|css|md)$/i.test(file.fileName)
   );
 }
-detectType(mime: string): 'image' | 'pdf' | 'video' | 'audio' | 'text' {
 
-  if (mime.startsWith('image/')) return 'image';
-  if (mime === 'application/pdf') return 'pdf';
-  if (mime.startsWith('video/')) return 'video';
-  if (mime.startsWith('audio/')) return 'audio';
-  return 'text';
+detectType(file: any): 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'other' {
+
+  const mime = file.contentType?.toLowerCase() || '';
+  const name = file.fileName?.toLowerCase() || '';
+
+  // 🔥 GOOGLE DOCS → treat as PDF
+  if (mime.startsWith('application/vnd.google-apps')) {
+    return 'pdf';
+  }
+
+  if (mime.startsWith('image/') ||
+      /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name)) {
+    return 'image';
+  }
+
+  if (mime === 'application/pdf' || name.endsWith('.pdf')) {
+    return 'pdf';
+  }
+
+  if (mime.startsWith('video/') ||
+      /\.(mp4|webm|ogg|mov)$/i.test(name)) {
+    return 'video';
+  }
+
+  if (mime.startsWith('audio/') ||
+      /\.(mp3|wav|aac|flac)$/i.test(name)) {
+    return 'audio';
+  }
+
+  if (
+    mime.startsWith('text/') ||
+    /\.(txt|js|ts|json|html|css|md)$/i.test(name)
+  ) {
+    return 'text';
+  }
+
+  return 'other';
 }
+
 
 openGoogleFile(file: any) {
 
@@ -95,7 +206,8 @@ openGoogleFile(file: any) {
       const objectUrl = URL.createObjectURL(blob);
 
       this.imageOpen.emit({
-        type: this.detectType(file.contentType),
+       type: this.detectType(file),
+
         id: file.id,
         url: objectUrl,
         fileName: file.fileName
@@ -151,22 +263,34 @@ openAudio(file: any) {
     fileName: file.fileName
   });
 }
+isFolder(file: any): boolean {
+  return this.getMime(file) === 'application/vnd.google-apps.folder';
+}
+isPreviewable(file: any): boolean {
+  const type = this.detectType(file);
+  return type !== 'other';
+}
+
+isGoogleDoc(file: any): boolean {
+  return this.getMime(file).startsWith('application/vnd.google-apps');
+}
 
 isImage(file: any): boolean {
-  return file.contentType?.startsWith('image/');
+  return this.getMime(file).startsWith('image/');
 }
 
 isVideo(file: any): boolean {
-  return file.contentType?.startsWith('video/');
-}
-
-isPdf(file: any): boolean {
-  return file.contentType === 'application/pdf';
+  return this.getMime(file).startsWith('video/');
 }
 
 isAudio(file: any): boolean {
-  return file.contentType?.startsWith('audio/');
+  return this.getMime(file).startsWith('audio/');
 }
+
+isPdf(file: any): boolean {
+  return this.getMime(file) === 'application/pdf';
+}
+
 
 getFileIcon(file: any): string {
   if (this.isVideo(file)) return '🎬';

@@ -128,9 +128,51 @@
   padding: 10px;
   align-content: start;
 }
+.file-label {
+  position: absolute;
+  bottom: -18px;     /* below the box */
 
-/* ITEM */
+  width: 72px;       /* same as icon width */
+  left: 50%;
+  transform: translateX(-50%);
+
+  font-size: 11px;
+  color: #cfd8e3;
+  text-align: center;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-name {
+  width: 100%;
+  font-size: 11px;
+  color: #cfd8e3;
+
+  text-align: center;
+
+  white-space: nowrap;         /* no wrapping */
+  overflow: hidden;            /* hide overflow */
+  text-overflow: ellipsis;     /* show ... */
+
+  padding: 0 4px;
+}
+
+.file-preview {
+  width: 72px;
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #1e1e1e;
+  border-radius: 8px;
+}
+
 .data-item {
+  margin-bottom: 16px;
   width: 97%;
   aspect-ratio: 1 / 1;
 
@@ -141,10 +183,10 @@
   align-items: center;
   justify-content: center;
 
-  overflow: visible; /* important for tooltip */
   position: relative;
   cursor: pointer;
 }
+
 
 /* IMAGE */
 .data-item img {

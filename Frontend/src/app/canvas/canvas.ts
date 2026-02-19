@@ -564,13 +564,10 @@ async logout() {
     return;
   }
 
-  // ✅ PDF only
- // Only sanitize local URLs
-if (payload.type === 'pdf' && payload.url?.startsWith('http')) {
-  payload.safeUrl =
-    this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
-}
-
+ if (payload.type === 'pdf') {
+    payload.safeUrl =
+      this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
+  }
 
   // ❌ NO sanitizer for audio/video
   this.selectedFile = payload;
