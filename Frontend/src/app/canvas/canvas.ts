@@ -393,7 +393,8 @@ async logout() {
           id: f.id,
           fileName: f.name,
           contentType: f.mimeType,
-          isGoogle: true
+          isGoogle: true,
+           thumbnail: f.thumbnail   
         }));
 
         this.showModelData = true;

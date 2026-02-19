@@ -28,8 +28,8 @@ public class GoogleDriveService : IGoogleDriveService
         do
         {
             var request = service.Files.List();
-            request.PageSize = 100; // max safe value
-            request.Fields = "nextPageToken, files(id, name, mimeType)";
+            request.PageSize = 100;
+            request.Fields = "nextPageToken, files(id, name, mimeType, thumbnailLink)";
             request.PageToken = nextPageToken;
 
             var result = await request.ExecuteAsync();
@@ -41,17 +41,43 @@ public class GoogleDriveService : IGoogleDriveService
 
         } while (!string.IsNullOrEmpty(nextPageToken));
 
-        return allFiles.Select(f => new
+        var client = _httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", accessToken);
+
+        var finalList = new List<object>();
+
+        foreach (var f in allFiles)
         {
-            id = f.Id,
-            name = f.Name,
-            mimeType = f.MimeType,
-            thumbnail = f.ThumbnailLink,
-            streamUrl = $"/api/google-drive/file/{f.Id}"
-        }).Cast<object>().ToList();
+            string? base64Thumbnail = null;
 
+            if (!string.IsNullOrEmpty(f.ThumbnailLink))
+            {
+                try
+                {
+                    var thumbResponse = await client.GetAsync(f.ThumbnailLink);
+                    var bytes = await thumbResponse.Content.ReadAsByteArrayAsync();
+                    var base64 = Convert.ToBase64String(bytes);
+                    base64Thumbnail = $"data:image/jpeg;base64,{base64}";
+                }
+                catch
+                {
+                    base64Thumbnail = null;
+                }
+            }
+
+            finalList.Add(new
+            {
+                id = f.Id,
+                name = f.Name,
+                mimeType = f.MimeType,
+                thumbnail = base64Thumbnail,
+                streamUrl = $"/api/google-drive/file/{f.Id}"
+            });
+        }
+
+        return finalList;
     }
-
 
     // ==============================
     // STREAM FILE

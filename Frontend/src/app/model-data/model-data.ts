@@ -7,7 +7,7 @@ import { GoogleDriveService } from '../services/google-drive.service';
 @Component({
   selector: 'app-model-data',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,NgSwitch],
   templateUrl: './model-data.html',
   styleUrl: './model-data.css',
 })
@@ -32,9 +32,11 @@ export class ModelData implements OnChanges {
   imageCache = new Map<string, string>();
 
   constructor(private fileService: FileService , private googleDriveService :GoogleDriveService) {}
+videoThumbnailCache = new Map<string, string>();
 
   ngOnChanges() {
     this.currentPage = 0;
+     console.log("ITEMS RECEIVED:", this.items);
     this.preloadVisibleImages();
   }
 
@@ -50,7 +52,33 @@ export class ModelData implements OnChanges {
   window.open(url, '_blank');
 }
 getMime(file: any): string {
-  return (file.contentType || file.mimeType || '').toLowerCase();
+  return (file.mimeType || file.contentType || '').toLowerCase();
+}
+
+getFileType(file: any): string {
+
+  const mime = this.getMime(file);
+
+  if (mime === 'application/vnd.google-apps.folder')
+    return 'folder';
+
+  if (mime.startsWith('image/'))
+    return 'image';
+
+  if (mime.startsWith('video/')) {
+    return this.videoThumbnailCache.has(file.id)
+      ? 'video'
+      : 'video-fallback';
+  }
+
+  if (mime.startsWith('audio/'))
+    return 'audio';
+
+  if (mime === 'application/pdf' ||
+      mime.startsWith('application/vnd.google-apps'))
+    return 'pdf';
+
+  return 'default';
 }
 
 downloadGoogleFile(file: any) {
@@ -293,15 +321,21 @@ isPdf(file: any): boolean {
 
 
 getFileIcon(file: any): string {
+
+  if (this.isFolder(file)) return '📁';
   if (this.isVideo(file)) return '🎬';
   if (this.isPdf(file)) return '📄';
   if (this.isAudio(file)) return '🎵';
-  return '📁';
+  if (this.isGoogleDoc(file)) return '📘';
+
+  return '📦';
 }
+
 
  preloadVisibleImages() {
   for (const file of this.visibleItems) {
 if (file.isGoogle) continue; // IMPORTANT
+
 
 
     if (!this.imageCache.has(file.id)) {
