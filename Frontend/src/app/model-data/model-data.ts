@@ -17,7 +17,7 @@ export class ModelData implements OnChanges {
   @Input() y!: number;
   @Input() title: string | null = '';
   @Input() items: any[] = [];
-
+@Input() isGoogleFolder: boolean = false;
   @Output() closeNode = new EventEmitter<void>();
   @Output() imageOpen = new EventEmitter<any>();
 @Input() nodeId!: string | null; // 🔥 important
@@ -53,6 +53,23 @@ videoThumbnailCache = new Map<string, string>();
 }
 getMime(file: any): string {
   return (file.mimeType || file.contentType || '').toLowerCase();
+}
+isGoogleFile(file: any): boolean {
+  return file.isGoogle === true;
+}
+
+isAudio(file: any): boolean {
+  const type = file.contentType || file.mimeType;
+  return type?.startsWith('audio/');
+}
+
+isImage(file: any): boolean {
+  const type = file.contentType || file.mimeType;
+  return type?.startsWith('image/');
+}
+
+getLocalImageUrl(file: any): string | null {
+  return this.getImageUrl(file.id);
 }
 
 getFileType(file: any): string {
@@ -303,17 +320,13 @@ isGoogleDoc(file: any): boolean {
   return this.getMime(file).startsWith('application/vnd.google-apps');
 }
 
-isImage(file: any): boolean {
-  return this.getMime(file).startsWith('image/');
-}
+
 
 isVideo(file: any): boolean {
   return this.getMime(file).startsWith('video/');
 }
 
-isAudio(file: any): boolean {
-  return this.getMime(file).startsWith('audio/');
-}
+
 
 isPdf(file: any): boolean {
   return this.getMime(file) === 'application/pdf';

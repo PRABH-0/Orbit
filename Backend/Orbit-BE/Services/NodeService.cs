@@ -29,12 +29,14 @@ namespace Orbit_BE.Services
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
-                UserId = user.Id, // ✅ Guid
+                UserId = user.Id,
                 ParentId = dto.ParentId,
                 BasePath = dto.BasePath,
+                StorageProvider = "Local",   // ✅ ADD THIS
                 RecordState = "Active",
                 CreatedAt = DateTime.UtcNow
             };
+
 
             var position = new NodePosition
             {
@@ -197,7 +199,63 @@ namespace Orbit_BE.Services
                 CreatedAt = user.CreatedAt
             };
         }
+        public async Task<bool> UpdateOrCreateGoogleNodePositionAsync(
+    string externalId,
+    string name,
+    string userId,
+    UpdateNodePositionDto dto)
+        {
+            var user = await GetOrCreateUserAsync(userId);
 
+            var node = await _unitOfWork.Nodes
+                .GetQueryable()
+                .Include(n => n.Position)
+                .FirstOrDefaultAsync(n =>
+                    n.StorageProvider == "GoogleDrive" &&
+                    n.ParentId == null &&
+                    n.UserId == user.Id &&
+                    n.RecordState == "Active");
+
+            if (node != null)
+            {
+                node.Position!.X = dto.X;
+                node.Position.Y = dto.Y;
+                node.Position.LastEditedTimestamp = DateTime.UtcNow;
+
+                _unitOfWork.NodePositions.Update(node.Position);
+                await _unitOfWork.SaveChangesAsync();
+
+                return true;
+            }
+
+            var newNode = new Node
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+                StorageProvider = "GoogleDrive",
+                UserId = user.Id,
+                RecordState = "Active",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var position = new NodePosition
+            {
+                Id = Guid.NewGuid(),
+                NodeId = newNode.Id,
+                X = dto.X,
+                Y = dto.Y,
+                RecordState = "Active",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            newNode.Position = position;
+
+            await _unitOfWork.Nodes.AddAsync(newNode);
+            await _unitOfWork.NodePositions.AddAsync(position);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
         private string? GetEmailFromToken()
         {
             return _httpContextAccessor.HttpContext?
@@ -217,6 +275,8 @@ namespace Orbit_BE.Services
                 ParentId = node.ParentId,
                 X = node.Position?.X ?? 0,
                 Y = node.Position?.Y ?? 0,
+                StorageProvider = node.StorageProvider,   // ✅ ADD
+                ExternalId = node.ExternalId,
                 BasePath = node.BasePath
             };
         }

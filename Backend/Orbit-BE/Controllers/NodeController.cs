@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Orbit_BE.Entities;
 using Orbit_BE.Interface;
+using Orbit_BE.Models.Node;
 using Orbit_BE.Models.NodeModels;
 using System.Security.Claims;
 
@@ -63,6 +64,27 @@ namespace Orbit_BE.Controllers
             if (!updated) return NotFound();
 
             return NoContent();
+        }
+        [HttpPut("google/position")]
+        public async Task<IActionResult> UpdateGooglePosition(
+    UpdateGoogleNodePositionDto dto)
+        {
+            var supabaseUserId = GetSupabaseUserId();
+            if (supabaseUserId == null) return Unauthorized();
+
+
+            var result = await _nodeService
+                .UpdateOrCreateGoogleNodePositionAsync(
+                    dto.ExternalId,
+                    dto.Name,
+                    supabaseUserId,
+                    new UpdateNodePositionDto
+                    {
+                        X = dto.X,
+                        Y = dto.Y
+                    });
+
+            return result ? Ok() : BadRequest();
         }
 
         [HttpDelete("{nodeId:guid}")]

@@ -10,7 +10,7 @@
     <!-- ADD ITEM BUTTON -->
    <button
   class="add-btn"
-  title="Add file"
+  title="Add file"*ngIf="!isGoogleFolder"
   (click)="triggerFileInput($event)"
 >
   ＋
@@ -39,22 +39,44 @@
   (click)="openFile(file)"
 >
 
-  <div class="file-preview">
+<div class="file-preview">
 
-    <!-- SHOW THUMBNAIL IF EXISTS -->
-    <img
-      *ngIf="file.thumbnail"
-      [src]="file.thumbnail"
-      class="file-thumb"
-      alt="thumbnail"
-    />
-
-    <!-- IF NO THUMBNAIL → SHOW FOLDER ICON -->
-    <div *ngIf="!file.thumbnail" class="file-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-down-icon lucide-folder-down"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="m15 13-3 3-3-3"/></svg>
-    </div>
-
+  <!-- 🎵 AUDIO -->
+  <div *ngIf="isAudio(file)" class="file-icon">
+    🎵
   </div>
+
+  <!-- 🖼 GOOGLE IMAGE -->
+  <img
+    *ngIf="!isAudio(file) && isGoogleFile(file) && file.thumbnail"
+    [src]="file.thumbnail"
+    class="file-thumb"
+    alt="thumbnail"
+  />
+
+  <!-- 🖼 LOCAL IMAGE -->
+  <img
+    *ngIf="!isAudio(file) && !isGoogleFile(file) && getLocalImageUrl(file)"
+    [src]="getLocalImageUrl(file)"
+    class="file-thumb"
+    alt="thumbnail"
+  />
+
+  <!-- 📁 FALLBACK -->
+  <div
+    *ngIf="
+      !isAudio(file) &&
+      !(
+        (isGoogleFile(file) && file.thumbnail) ||
+        (!isGoogleFile(file) && getLocalImageUrl(file))
+      )
+    "
+    class="file-icon"
+  >
+    📁
+  </div>
+
+</div>
 
   <div class="file-name">
     [{{ file.fileName }}]

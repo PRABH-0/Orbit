@@ -23,6 +23,17 @@ export class DirectoryService {
   }) {
     return this.http.post<any>(this.baseUrl, data);
   }
+updateGooglePosition(payload: {
+  externalId: string;
+  name: string;
+  x: number;
+  y: number;
+}) {
+  return this.http.put(
+    `${this.baseUrl}/google/position`,
+    payload
+  );
+}
 
   // Update directory position
   updatePosition(directoryId: string, x: number, y: number) {

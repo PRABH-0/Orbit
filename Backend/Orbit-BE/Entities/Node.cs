@@ -15,6 +15,9 @@ namespace Orbit_BE.Entities
 
         // For file system mapping
         public string? BasePath { get; set; }
+        public string? ExternalId { get; set; }     // Google file id
+        public string StorageProvider { get; set; } // "Local" | "GoogleDrive"
+
 
         // Active / Inactive / Deleted
         public string RecordState { get; set; } = "Active";

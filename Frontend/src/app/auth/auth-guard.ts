@@ -8,9 +8,11 @@ export class AuthGuard implements CanActivate {
   constructor(private router: Router) {}
 
   async canActivate(): Promise<boolean> {
-    const { data } = await supabase.auth.getSession();
 
-    if (!data.session) {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data.user) {
+      await supabase.auth.signOut();
       this.router.navigate(['/signin']);
       return false;
     }

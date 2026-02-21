@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { Loader } from './shared/loader/loader';
+import { supabase } from './supabase.client';
 
 @Component({
   selector: 'app-root',
@@ -10,5 +11,11 @@ import { Loader } from './shared/loader/loader';
   styleUrl: './app.css'
 })
 export class App {
-  
+  constructor(private router: Router) {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (!session) {
+      this.router.navigate(['/signin']);
+    }
+  });
+}
 }

@@ -109,7 +109,7 @@ console.log("Provider Token:", data.session?.provider_token);
     this.update();
   }
 
- loadDirectories() {
+loadDirectories() {
   this.directoryService.getDirectories().subscribe({
     next: (data) => {
 
@@ -118,27 +118,27 @@ console.log("Provider Token:", data.session?.provider_token);
         isOpen: false,
       }));
 
-      console.log("Directories from API:", this.directories);
+      // 🔥 Check if GoogleDrive folder already exists in DB
+      const hasGoogle = this.directories.some(
+        d => d.storageProvider === 'GoogleDrive'
+      );
 
-      // ✅ ADD GOOGLE FOLDER HERE
-      this.directories.push({
-        id: 'google-drive',
-        name: 'Google Drive',
-        x: 2700,
-        y: 2500,
-        parentId: null,
-        isOpen: false,
-        isVirtual: true
-      });
-
-      console.log("Directories after adding Google:", this.directories);
-    },
-    error: (err) => {
-      console.error('Failed to load directories', err);
-    },
+      // 🔥 Only add virtual if not saved in DB
+      if (!hasGoogle) {
+        this.directories.push({
+          id: 'google-drive',
+          name: 'Google Drive',
+          x: 2700,
+          y: 2500,
+          parentId: null,
+          isOpen: false,
+          isVirtual: true,
+          storageProvider: 'GoogleDrive'
+        });
+      }
+    }
   });
 }
-
 
   openUserMenu() {
     this.showProfile = !this.showProfile;
@@ -374,7 +374,7 @@ async logout() {
 }
 
   onFolderClick(dir: any) {
-    if (dir.id === 'google-drive') {
+   if (dir.storageProvider === 'GoogleDrive'){
 
   console.log("Google Drive folder clicked");
 
@@ -628,20 +628,38 @@ async logout() {
     this.update();
   }
 
-  @HostListener('mouseup')
-  onMouseUp() {
-    this.isDragging = false;
+ @HostListener('mouseup')
+onMouseUp() {
+  this.isDragging = false;
 
-    if (this.lastMovedFolder?.id) {
-      const { id, x, y } = this.lastMovedFolder;
+  if (!this.lastMovedFolder) return;
 
-      this.directoryService.updatePosition(id, x, y).subscribe({
-        complete: () => {
-          this.lastMovedFolder = null;
-        },
-      });
-    }
+  const { id, x, y, isVirtual, name } = this.lastMovedFolder;
+
+  // 🔥 Google folder
+ if (this.lastMovedFolder.storageProvider === 'GoogleDrive') {
+    this.directoryService.updateGooglePosition({
+      externalId: id,
+      name: name,
+      x: x,
+      y: y
+    }).subscribe({
+      complete: () => {
+        this.lastMovedFolder = null;
+      }
+    });
+
+    return;
   }
+
+  // 🔥 Local folder
+  this.directoryService.updatePosition(id, x, y).subscribe({
+    complete: () => {
+      this.lastMovedFolder = null;
+    }
+  });
+}
+
 
   private update() {
     this.grid.nativeElement.style.transform = `translate(${this.x}px, ${this.y}px)`;
