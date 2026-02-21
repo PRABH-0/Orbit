@@ -251,36 +251,34 @@ detectType(file: any): 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'other' {
   return 'other';
 }
 
-
 openGoogleFile(file: any) {
-
-  const providerToken =
-    localStorage.getItem('google_provider_token');
 
   const url =
     `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
 
- this.googleDriveService
-  .downloadGoogleFile(url)
-  .subscribe({
-    next: (res) => {
+  this.googleDriveService
+    .downloadGoogleFile(url)
+    .subscribe({
+      next: (res) => {
 
-      if (!res || !res.body) return;
+        if (!res || !res.body) return;
 
-      const blob = res.body;
-      const objectUrl = URL.createObjectURL(blob);
+        const blob = res.body;
+        const objectUrl = URL.createObjectURL(blob);
 
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = file.fileName;
-      a.click();
+        const type = this.detectType(file);
 
-      URL.revokeObjectURL(objectUrl);
-    },
-    error: (err) => {
-      console.error('Google download failed', err);
-    }
-  });
+        this.imageOpen.emit({
+          type: type,
+          id: file.id,
+          url: objectUrl,
+          fileName: file.fileName
+        });
+      },
+      error: (err) => {
+        console.error('Google preview failed', err);
+      }
+    });
 }
 
 openText(file: any) {
