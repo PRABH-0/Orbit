@@ -23,14 +23,26 @@ namespace Orbit_BE.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var supabaseUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            try
+            {
+                var supabaseUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (string.IsNullOrEmpty(supabaseUserId))
-                return Unauthorized();
+                if (string.IsNullOrEmpty(supabaseUserId))
+                    return Unauthorized();
 
-            var user = await _authService.GetCurrentUserAsync(supabaseUserId);
+                var user = await _authService.GetCurrentUserAsync(supabaseUserId);
 
-            return Ok(user);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    innerError = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                });
+            }
         }
 
         // =========================
