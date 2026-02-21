@@ -149,6 +149,15 @@ openFile(file: any) {
     this.handleGoogleFile(file);
     return;
   }
+  if (file.isPhoto) {
+  this.imageOpen.emit({
+    type: 'image',
+    id: file.id,
+    url: file.fullUrl,
+    fileName: file.fileName
+  });
+  return;
+}
 
   const type = this.detectType(file);
 
@@ -422,6 +431,10 @@ delete(file: any) {
 }
 
 onFileSelected(event: Event) {
+  if (this.isGoogleFolder) {
+  console.warn("Upload not allowed for cloud folder");
+  return;
+}
   if (!this.nodeId) {
     console.warn('Upload blocked: nodeId is null');
     return;

@@ -17,23 +17,13 @@
     <p class="subtitle">
      [ The Visual File Management System ]
     </p>
-    <div class="admin-pin-container">
 
-  <input
-    type="password"
-    placeholder="Admin PIN"
-    [(ngModel)]="adminPin"
-    class="admin-input"
-  />
-</div>
 
 
     <!-- GOOGLE LOGIN -->
   <button 
   class="google-btn" 
-  (click)="googleLogin()" 
-  [disabled]="!adminPin"
-  [ngStyle]="{ cursor: !adminPin ? 'not-allowed' : 'pointer' }">
+  (click)="googleLogin()">
 
       <svg class="google-icon" viewBox="0 0 48 48">
         <path fill="#EA4335"

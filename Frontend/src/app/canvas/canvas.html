@@ -72,7 +72,9 @@
   [y]="dataNodePosition.y"
   [title]="currentFolderName"
   [items]="selectedFolderItems"
-  [isGoogleFolder]="activeFolder?.storageProvider === 'GoogleDrive'"
+  [isGoogleFolder]="
+  activeFolder?.storageProvider === 'GoogleDrive' ||
+  activeFolder?.storageProvider === 'GooglePhotos'"
   [nodeId]="selectedFolderId"
   (fileUploaded)="reloadFiles()"
   (imageOpen)="openImage($event)"

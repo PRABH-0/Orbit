@@ -25,6 +25,7 @@ import { supabase } from '../supabase.client';
 import { UserStateService } from '../services/user-state.service';
 import { AuthService } from '../services/auth.service';
 import { GoogleDriveService } from '../services/google-drive.service';
+import { GooglePhotosService } from '../services/google-photos.service';
 
 @Component({
   selector: 'app-canvas',
@@ -75,6 +76,7 @@ export class Canvas implements OnInit, AfterViewInit {
   showModelData = false;
   cacheBuster = Date.now();
   constructor(
+    private googlePhotosService: GooglePhotosService,
     private directoryService: DirectoryService,
     private fileService: FileService,
     private sanitizer: DomSanitizer,
@@ -136,6 +138,23 @@ loadDirectories() {
           storageProvider: 'GoogleDrive'
         });
       }
+      // 🔥 Google Photos virtual folder
+// const hasPhotos = this.directories.some(
+//   d => d.storageProvider === 'GooglePhotos'
+// );
+
+// if (!hasPhotos) {
+//   this.directories.push({
+//     id: 'google-photos',
+//     name: 'Google Photos',
+//     x: 2900,
+//     y: 2500,
+//     parentId: null,
+//     isOpen: false,
+//     isVirtual: true,
+//     storageProvider: 'GooglePhotos'
+//   });
+// }
     }
   });
 }
@@ -256,6 +275,13 @@ async logout() {
 }
 
   onHeaderFileSelected(event: Event) {
+    if (
+  this.activeFolder?.storageProvider === 'GoogleDrive' ||
+  this.activeFolder?.storageProvider === 'GooglePhotos'
+) {
+  console.warn("Upload disabled for cloud folders");
+  return;
+}
     if (!this.selectedFolderId) return;
 
     const input = event.target as HTMLInputElement;
@@ -403,7 +429,39 @@ async logout() {
         console.error("Google API error:", err);
       }
     });
+if (dir.storageProvider === 'GooglePhotos') {
 
+  console.log("Google Photos folder clicked");
+
+  this.setDataNodePosition(dir);
+
+  this.selectedFolderId = dir.id;
+  this.currentFolderName = "Google Photos";
+  this.activeFolder = dir;
+
+  this.googlePhotosService.getGooglePhotos()
+    .subscribe({
+      next: photos => {
+
+        this.selectedFolderItems = photos.map(p => ({
+          id: p.id,
+          fileName: p.name,
+          contentType: p.mimeType,
+          isGoogle: true,
+          thumbnail: p.thumbnail,
+          fullUrl: p.fullUrl,
+          isPhoto: true
+        }));
+
+        this.showModelData = true;
+      },
+      error: err => {
+        console.error("Google Photos API error:", err);
+      }
+    });
+
+  return;
+}
   return;
 }
 
@@ -585,7 +643,12 @@ async logout() {
 
   reloadFiles() {
     if (!this.selectedFolderId) return;
-
+ if (
+    this.activeFolder?.storageProvider === 'GoogleDrive' ||
+    this.activeFolder?.storageProvider === 'GooglePhotos'
+  ) {
+    return;
+  }
     const dir = this.directories.find((d) => d.id === this.selectedFolderId);
 
     this.fileService.getFilesByNode(this.selectedFolderId).subscribe({

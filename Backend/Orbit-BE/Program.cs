@@ -111,6 +111,7 @@ builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IGooglePhotosService, GooglePhotosService>();
 builder.Services.AddScoped<IFileService, Orbit_BE.Services.FileService>();
 //builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddMemoryCache(options =>

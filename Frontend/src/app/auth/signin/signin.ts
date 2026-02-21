@@ -23,7 +23,7 @@ export class Signin implements OnInit {
   password = '';
   confirmPassword = '';
   showPassword = false;
-  error = '';adminPin = '';
+  error = '';
 
 
   constructor(
@@ -41,30 +41,17 @@ async ngOnInit() {
 
 async googleLogin() {
 
-  // If user entered something in admin field
-  if (this.adminPin && this.adminPin !== environment.adminPin) {
-    alert('Invalid Admin PIN');
-    return; // stop login process
-  }
-
-  const isAdmin = this.adminPin === environment.adminPin;
-
   const { error } = await supabase.auth.signInWithOAuth({
-  provider: 'google',
-  options: {
-    redirectTo: window.location.origin + '/canvas',
-    scopes: 'openid email profile https://www.googleapis.com/auth/drive.readonly',
-  },
-});
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + '/canvas',
+      scopes: 'openid email profile https://www.googleapis.com/auth/drive.readonly',
+    },
+  });
 
   if (!error) {
     localStorage.setItem('isLoggedIn', 'true');
-
-    if (isAdmin) {
-      localStorage.setItem('role', 'admin');
-    } else {
-      localStorage.setItem('role', 'user');
-    }
+    localStorage.setItem('role', 'user'); // default role
   }
 }
 
