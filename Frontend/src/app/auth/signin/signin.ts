@@ -34,9 +34,12 @@ export class Signin implements OnInit {
 async ngOnInit() {
   const { data } = await supabase.auth.getSession();
 
-  if (data.session) {
+  if (!data.session) return;
+
+  // small delay to ensure session is fully ready
+  setTimeout(() => {
     this.router.navigateByUrl('/canvas');
-  }
+  }, 300);
 }
 
 async googleLogin() {
