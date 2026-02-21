@@ -11,7 +11,7 @@ declare const google: any;
 @Component({
   selector: 'app-signin',
   standalone: true,
-  imports: [FormsModule, NgStyle],
+  imports: [FormsModule],
   templateUrl: './signin.html',
   styleUrls: ['./signin.css'],
 })
@@ -45,13 +45,16 @@ async googleLogin() {
     provider: 'google',
     options: {
       redirectTo: window.location.origin + '/canvas',
-      scopes: 'openid email profile ',
+      scopes: `
+        openid email profile
+        https://www.googleapis.com/auth/drive.readonly
+      `,
     },
   });
 
   if (!error) {
     localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('role', 'user'); // default role
+    localStorage.setItem('role', 'user');
   }
 }
 

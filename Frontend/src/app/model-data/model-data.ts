@@ -7,7 +7,7 @@ import { GoogleDriveService } from '../services/google-drive.service';
 @Component({
   selector: 'app-model-data',
   standalone: true,
-  imports: [CommonModule,NgSwitch],
+  imports: [CommonModule],
   templateUrl: './model-data.html',
   styleUrl: './model-data.css',
 })
@@ -107,10 +107,13 @@ downloadGoogleFile(file: any) {
     `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
 
   this.googleDriveService
-    .downloadGoogleFile(url, providerToken!)
-    .subscribe(res => {
+  .downloadGoogleFile(url)
+  .subscribe({
+    next: (res) => {
 
-      const blob = res.body!;
+      if (!res || !res.body) return;
+
+      const blob = res.body;
       const objectUrl = URL.createObjectURL(blob);
 
       const a = document.createElement('a');
@@ -119,7 +122,11 @@ downloadGoogleFile(file: any) {
       a.click();
 
       URL.revokeObjectURL(objectUrl);
-    });
+    },
+    error: (err) => {
+      console.error('Google download failed', err);
+    }
+  });
 }
 
 handleGoogleFile(file: any) {
@@ -253,20 +260,27 @@ openGoogleFile(file: any) {
   const url =
     `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
 
-  this.googleDriveService.downloadGoogleFile(url, providerToken!)
-    .subscribe(res => {
+ this.googleDriveService
+  .downloadGoogleFile(url)
+  .subscribe({
+    next: (res) => {
 
-      const blob = res.body!;
+      if (!res || !res.body) return;
+
+      const blob = res.body;
       const objectUrl = URL.createObjectURL(blob);
 
-      this.imageOpen.emit({
-       type: this.detectType(file),
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = file.fileName;
+      a.click();
 
-        id: file.id,
-        url: objectUrl,
-        fileName: file.fileName
-      });
-    });
+      URL.revokeObjectURL(objectUrl);
+    },
+    error: (err) => {
+      console.error('Google download failed', err);
+    }
+  });
 }
 
 openText(file: any) {

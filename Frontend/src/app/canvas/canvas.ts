@@ -411,24 +411,30 @@ async logout() {
   this.currentFolderName = "Google Drive";
   this.activeFolder = dir;
 
-  this.googleDriveService.getGoogleDriveFiles()
-    .subscribe({
-      next: files => {
+this.googleDriveService.getGoogleDriveFiles()
+  .subscribe({
+    next: (files: any[] | undefined) => {
 
-        this.selectedFolderItems = files.map(f => ({
-          id: f.id,
-          fileName: f.name,
-          contentType: f.mimeType,
-          isGoogle: true,
-           thumbnail: f.thumbnail   
-        }));
-
-        this.showModelData = true;
-      },
-      error: err => {
-        console.error("Google API error:", err);
+      if (!files) {
+        this.selectedFolderItems = [];
+        return;
       }
-    });
+
+      this.selectedFolderItems = files.map(f => ({
+        id: f.id,
+        fileName: f.name,
+        contentType: f.mimeType,
+        isGoogle: true,
+        thumbnail: f.thumbnail
+      }));
+
+      this.showModelData = true;
+    },  // ✅ ← THIS COMMA WAS MISSING
+
+    error: (err) => {
+      console.error("Google API error:", err);
+    }
+  });
 if (dir.storageProvider === 'GooglePhotos') {
 
   console.log("Google Photos folder clicked");

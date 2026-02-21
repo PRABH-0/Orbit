@@ -25,9 +25,15 @@ namespace Orbit_BE.Controllers
             if (string.IsNullOrEmpty(token))
                 return Unauthorized("Missing Google token");
 
-            var files = await _googleDriveService.GetFilesAsync(token);
-
-            return Ok(files);
+            try
+            {
+                var files = await _googleDriveService.GetFilesAsync(token);
+                return Ok(files);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); // 🔥 show real error
+            }
         }
 
         // ==============================
