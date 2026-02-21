@@ -45,10 +45,8 @@ async googleLogin() {
     provider: 'google',
     options: {
       redirectTo: window.location.origin + '/canvas',
-      scopes: `
-        openid email profile
-        https://www.googleapis.com/auth/drive.readonly
-      `,
+      scopes:
+        'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly',
     },
   });
 
