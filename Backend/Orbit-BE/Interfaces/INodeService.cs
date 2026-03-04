@@ -11,7 +11,7 @@ namespace Orbit_BE.Interface
         Task<NodeDto?> GetNodeByIdAsync(Guid nodeId, string userId);
 
         Task<bool> UpdateNodePositionAsync(Guid nodeId, string userId, UpdateNodePositionDto dto);
-
+        Task<bool> RenameNodeAsync(Guid nodeId, string supabaseUserId, string newName);
         Task<bool> DeleteNodeAsync(Guid nodeId, string userId);
         Task<bool> UpdateOrCreateGoogleNodePositionAsync(
     string externalId,

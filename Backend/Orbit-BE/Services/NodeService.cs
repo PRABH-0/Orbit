@@ -199,6 +199,26 @@ namespace Orbit_BE.Services
                 CreatedAt = user.CreatedAt
             };
         }
+        public async Task<bool> RenameNodeAsync(Guid nodeId, string supabaseUserId, string newName)
+        {
+            var user = await GetOrCreateUserAsync(supabaseUserId);
+
+            var node = await _unitOfWork.Nodes.FirstOrDefaultAsync(n =>
+                n.Id == nodeId &&
+                n.UserId == user.Id &&
+                n.RecordState == "Active");
+
+            if (node == null)
+                return false;
+
+            node.Name = newName;
+            node.LastEditedTimestamp = DateTime.UtcNow;
+
+            _unitOfWork.Nodes.Update(node);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
         public async Task<bool> UpdateOrCreateGoogleNodePositionAsync(
     string externalId,
     string name,

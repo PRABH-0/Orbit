@@ -24,7 +24,7 @@ export class Header {
   @Output() addItem = new EventEmitter<void>();
   @Output() openProfile = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
-
+@Output() rename = new EventEmitter<void>();
 
   constructor(
     private authService: AuthService,

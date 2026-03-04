@@ -50,7 +50,8 @@ export class Canvas implements OnInit, AfterViewInit {
   selectedFolderItems: any[] = [];
   lastMovedFolder: any = null;
   activeFolder: any = null;
-
+isEditMode = false;
+editingFolder: any = null;
   dataNodePosition: { x: number; y: number } | null = null;
   selectedFile: {
   type: 'image' | 'pdf' | 'video' | 'audio' | 'text';
@@ -121,23 +122,23 @@ loadDirectories() {
       }));
 
       // 🔥 Check if GoogleDrive folder already exists in DB
-      const hasGoogle = this.directories.some(
-        d => d.storageProvider === 'GoogleDrive'
-      );
+      // const hasGoogle = this.directories.some(
+      //   d => d.storageProvider === 'GoogleDrive'
+      // );
 
       // 🔥 Only add virtual if not saved in DB
-      if (!hasGoogle) {
-        this.directories.push({
-          id: 'google-drive',
-          name: 'Google Drive',
-          x: 2700,
-          y: 2500,
-          parentId: null,
-          isOpen: false,
-          isVirtual: true,
-          storageProvider: 'GoogleDrive'
-        });
-      }
+      // if (!hasGoogle) {
+      //   this.directories.push({
+      //     id: 'google-drive',
+      //     name: 'Google Drive',
+      //     x: 2700,
+      //     y: 2500,
+      //     parentId: null,
+      //     isOpen: false,
+      //     isVirtual: true,
+      //     storageProvider: 'GoogleDrive'
+      //   });
+      // }
       // 🔥 Google Photos virtual folder
 // const hasPhotos = this.directories.some(
 //   d => d.storageProvider === 'GooglePhotos'
@@ -167,7 +168,21 @@ loadDirectories() {
     this.showProfile = false;
   }
 
+openEditFolderModal() {
+  if (!this.activeFolder) return;
 
+  this.isEditMode = true;
+  this.editingFolder = this.activeFolder;
+
+  this.draftFolder = {
+    name: this.activeFolder.name,
+    x: this.activeFolder.x,
+    y: this.activeFolder.y,
+    parentId: this.activeFolder.parentId
+  };
+
+  this.isAddFolderOpen = true;
+}
   payment() {
     this.router.navigate(['/payment']);
   }
@@ -238,29 +253,82 @@ loadDirectories() {
     this.isAddFolderOpen = true;
   }
 
-  saveAddFolder() {
-    if (!this.draftFolder) return;
+saveAddFolder() {
+  if (!this.draftFolder) return;
 
-    const payload = {
+// 🔥 EDIT MODE
+if (this.isEditMode && this.editingFolder) {
+
+  const id = this.editingFolder.id;
+
+  const nameChanged = this.draftFolder.name !== this.editingFolder.name;
+  const positionChanged =
+    this.draftFolder.x !== this.editingFolder.x ||
+    this.draftFolder.y !== this.editingFolder.y;
+
+  // API calls
+  if (nameChanged) {
+    this.directoryService
+      .renameDirectory(id, this.draftFolder.name)
+      .subscribe();
+  }
+
+  if (positionChanged) {
+    this.directoryService
+      .updatePosition(id, this.draftFolder.x, this.draftFolder.y)
+      .subscribe();
+  }
+
+  // 🔥 update folder inside directories array
+  const folderIndex = this.directories.findIndex(d => d.id === id);
+
+  if (folderIndex !== -1) {
+    this.directories[folderIndex] = {
+      ...this.directories[folderIndex],
       name: this.draftFolder.name,
       x: this.draftFolder.x,
-      y: this.draftFolder.y,
-      parentId: this.draftFolder.parentId,
-      basePath: null,
+      y: this.draftFolder.y
     };
-
-    this.directoryService.createDirectory(payload).subscribe({
-      next: (created) => {
-        Object.assign(this.draftFolder, created);
-        delete this.draftFolder.isDraft;
-        this.draftFolder = null;
-        this.isAddFolderOpen = false;
-      },
-      error: (err) => {
-        console.error('Create folder failed', err);
-      },
-    });
   }
+
+  // 🔥 update active folder
+  if (this.activeFolder) {
+    this.activeFolder = {
+      ...this.activeFolder,
+      name: this.draftFolder.name
+    };
+  }
+
+  // 🔥 update header
+  this.currentFolderName = this.draftFolder.name;
+
+  this.resetModal();
+  return;
+}
+
+  // 🔥 CREATE MODE (existing logic)
+  const payload = {
+    name: this.draftFolder.name,
+    x: this.draftFolder.x,
+    y: this.draftFolder.y,
+    parentId: this.draftFolder.parentId,
+    basePath: null,
+  };
+
+  this.directoryService.createDirectory(payload).subscribe({
+    next: (created) => {
+      Object.assign(this.draftFolder, created);
+      delete this.draftFolder.isDraft;
+      this.resetModal();
+    }
+  });
+}
+private resetModal() {
+  this.draftFolder = null;
+  this.isAddFolderOpen = false;
+  this.isEditMode = false;
+  this.editingFolder = null;
+}
   onAddItem() {
     // Upload to root if no folder selected
     if (!this.selectedFolderId) {
@@ -411,63 +479,63 @@ async logout() {
   this.currentFolderName = "Google Drive";
   this.activeFolder = dir;
 
-this.googleDriveService.getGoogleDriveFiles()
-  .subscribe({
-    next: (files: any[] | undefined) => {
+// this.googleDriveService.getGoogleDriveFiles()
+//   .subscribe({
+//     next: (files: any[] | undefined) => {
 
-      if (!files) {
-        this.selectedFolderItems = [];
-        return;
-      }
+//       if (!files) {
+//         this.selectedFolderItems = [];
+//         return;
+//       }
 
-      this.selectedFolderItems = files.map(f => ({
-        id: f.id,
-        fileName: f.name,
-        contentType: f.mimeType,
-        isGoogle: true,
-        thumbnail: f.thumbnail
-      }));
+//       this.selectedFolderItems = files.map(f => ({
+//         id: f.id,
+//         fileName: f.name,
+//         contentType: f.mimeType,
+//         isGoogle: true,
+//         thumbnail: f.thumbnail
+//       }));
 
-      this.showModelData = true;
-    },  // ✅ ← THIS COMMA WAS MISSING
+//       this.showModelData = true;
+//     },  // ✅ ← THIS COMMA WAS MISSING
 
-    error: (err) => {
-      console.error("Google API error:", err);
-    }
-  });
-if (dir.storageProvider === 'GooglePhotos') {
+//     error: (err) => {
+//       console.error("Google API error:", err);
+//     }
+//   });
+// if (dir.storageProvider === 'GooglePhotos') {
 
-  console.log("Google Photos folder clicked");
+//   console.log("Google Photos folder clicked");
 
-  this.setDataNodePosition(dir);
+//   this.setDataNodePosition(dir);
 
-  this.selectedFolderId = dir.id;
-  this.currentFolderName = "Google Photos";
-  this.activeFolder = dir;
+//   this.selectedFolderId = dir.id;
+//   this.currentFolderName = "Google Photos";
+//   this.activeFolder = dir;
 
-  this.googlePhotosService.getGooglePhotos()
-    .subscribe({
-      next: photos => {
+//   this.googlePhotosService.getGooglePhotos()
+//     .subscribe({
+//       next: photos => {
 
-        this.selectedFolderItems = photos.map(p => ({
-          id: p.id,
-          fileName: p.name,
-          contentType: p.mimeType,
-          isGoogle: true,
-          thumbnail: p.thumbnail,
-          fullUrl: p.fullUrl,
-          isPhoto: true
-        }));
+//         this.selectedFolderItems = photos.map(p => ({
+//           id: p.id,
+//           fileName: p.name,
+//           contentType: p.mimeType,
+//           isGoogle: true,
+//           thumbnail: p.thumbnail,
+//           fullUrl: p.fullUrl,
+//           isPhoto: true
+//         }));
 
-        this.showModelData = true;
-      },
-      error: err => {
-        console.error("Google Photos API error:", err);
-      }
-    });
+//         this.showModelData = true;
+//       },
+//       error: err => {
+//         console.error("Google Photos API error:", err);
+//       }
+//     });
 
-  return;
-}
+//   return;
+// }
   return;
 }
 

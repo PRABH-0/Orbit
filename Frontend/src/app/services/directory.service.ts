@@ -23,6 +23,12 @@ export class DirectoryService {
   }) {
     return this.http.post<any>(this.baseUrl, data);
   }
+  renameDirectory(directoryId: string, name: string) {
+  return this.http.put(
+    `${this.baseUrl}/${directoryId}/rename`,
+    { name }
+  );
+}
 updateGooglePosition(payload: {
   externalId: string;
   name: string;

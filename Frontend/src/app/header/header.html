@@ -11,7 +11,11 @@
 
   <!-- TOP ROW -->
   <div class="right-top">
-    <div class="folder-name">[ {{ currentFolder }} ]</div>
+    <span class="del-bracket">[ </span>
+<span class="folder-name" (click)="rename.emit()">
+  {{ currentFolder }}
+</span>
+<span class="del-bracket"> ]</span>
 
     <div *ngIf="currentFolder!=='Root'">
 

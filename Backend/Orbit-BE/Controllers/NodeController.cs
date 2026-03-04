@@ -86,7 +86,18 @@ namespace Orbit_BE.Controllers
 
             return result ? Ok() : BadRequest();
         }
+        [HttpPut("{nodeId:guid}/rename")]
+        public async Task<IActionResult> RenameNode(Guid nodeId, RenameNodeDto dto)
+        {
+            var supabaseUserId = GetSupabaseUserId();
+            if (supabaseUserId == null) return Unauthorized();
 
+            var updated = await _nodeService.RenameNodeAsync(nodeId, supabaseUserId, dto.Name);
+
+            if (!updated) return NotFound();
+
+            return NoContent();
+        }
         [HttpDelete("{nodeId:guid}")]
         public async Task<IActionResult> DeleteNode(Guid nodeId)
         {

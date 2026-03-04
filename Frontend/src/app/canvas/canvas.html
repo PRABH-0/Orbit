@@ -4,6 +4,7 @@
   (addFolder)="onAddFolder()"
   (addItem)="onAddItem()"
   (delete)="onDeleteFolder()"
+  (rename)="openEditFolderModal()"
   (openProfile)="openUserMenu()">
 </app-header>
 
@@ -87,7 +88,7 @@
 <!-- ADD FOLDER MODAL -->
 <div class="add-folder-modal" *ngIf="isAddFolderOpen">
 
-  <h3>Add Folder</h3>
+ <h3>{{ isEditMode ? 'Edit Folder' : 'Add Folder' }}</h3>
 
   <label>
     Folder Name

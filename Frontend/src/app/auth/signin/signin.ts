@@ -47,9 +47,7 @@ async googleLogin() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/canvas',
-      scopes:
-        'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly',
+      redirectTo: window.location.origin + '/canvas'
     },
   });
 
