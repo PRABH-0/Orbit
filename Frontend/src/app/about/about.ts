@@ -7,7 +7,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { supabase } from '../supabase.client';
 import { AuthService } from '../services/auth.service';
 import { NgZone } from '@angular/core';
-
+import { Location } from '@angular/common';
 
 
 @Component({
@@ -23,7 +23,8 @@ export class About implements OnInit {
     private router: Router,
     private ngZone: NgZone,
     private feedbackService: FeedbackService,
-    private authService : AuthService
+    private authService : AuthService,
+    private location : Location
   ) {}
 
   showFeedback = false;
@@ -70,8 +71,8 @@ ngOnInit() {
     });
   }
 
-  backToSignin() {
-    this.router.navigate(['/signin']);
+  redirectToLastUrl() {
+    this.location.back()
   }
 }
 
