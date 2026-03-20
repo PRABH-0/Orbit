@@ -3,14 +3,14 @@ import { supabase } from '../supabase.client';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
-
+import { firstValueFrom } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
 private apiUrl = `${environment.apiBaseUrl}/auth`;
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient ,private router:Router) {}
 
   // =====================
   // LOGIN
@@ -63,11 +63,27 @@ async syncUser() {
   // =====================
   // GET CURRENT USER (api/auth/me)
   // =====================
-  async getCurrentUser() {
+async getCurrentUser() {
+  try {
     const headers = await this.getAuthHeaders();
-    return this.http.get(`${this.apiUrl}/me`, { headers }).toPromise();
-  }
 
+    const response = await firstValueFrom(
+      this.http.get(`${this.apiUrl}/me`, { headers })
+    );
+
+    return response;
+
+  } catch (error: any) {
+    console.error('API /me failed:', error);
+
+    // ✅ If 500 error → clear localStorage
+    if (error.status === 500) {
+      localStorage.clear();
+    }
+
+    throw error;
+  }
+}
   // =====================
   // LOGOUT (Backend optional)
   // =====================
