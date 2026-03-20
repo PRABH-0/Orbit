@@ -8,5 +8,6 @@ html, body {
 }
 * {
   font-family: 'IBM Plex Mono', monospace;
+ -webkit-tap-highlight-color: transparent;
   line-height: 1.6;
 }

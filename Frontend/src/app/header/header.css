@@ -12,6 +12,9 @@
   justify-content: space-between;
 
   padding: 0 20px;
+  flex-wrap: nowrap;
+
+  padding: 8px 12px;
 }
 
 /* LEFT */
@@ -74,7 +77,36 @@
   align-items: center;
   gap: 10px;
 }
+@media (max-width: 768px) {
 
+  .header {
+    padding: 6px 10px;
+  }
+
+  .username {
+    font-size: 12px;
+  }
+
+  .folder-name {
+    font-size: 11px;
+  }
+
+}
+.header-left {
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.folder-name {
+  font-size: 13px;
+  color: #94a3b8;
+}
 /* Keep buttons aligned right */
 .header-button {
   display: flex;
