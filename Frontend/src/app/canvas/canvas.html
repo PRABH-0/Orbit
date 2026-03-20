@@ -111,6 +111,31 @@
   </div>
 
 </div>
+<!-- DELETE FOLDER MODAL -->
+<div class="add-folder-modal" *ngIf="isDeleteModalOpen">
+
+  <h3>Delete Folder</h3>
+
+  <p style="font-size: 12px; color: #cbd5f5;">
+    Are you sure you want to delete
+    <b>"{{ deleteTargetFolder?.name }}"</b> ?
+    <br /><br />
+    This action cannot be undone.
+  </p>
+
+  <div class="actions">
+    <button class="cancel" (click)="closeDeleteModal()">Cancel</button>
+
+    <button
+      class="save"
+      style="background: #dc2626"
+      (click)="confirmDeleteFolder()"
+    >
+      Delete
+    </button>
+  </div>
+
+</div>
 <div
   class="file-viewer-overlay"
   *ngIf="selectedFile"

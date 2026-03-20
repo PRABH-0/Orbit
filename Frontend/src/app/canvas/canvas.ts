@@ -63,7 +63,8 @@ editingFolder: any = null;
 } | null = null;
 
   profilePic: string | null = null;
-
+isDeleteModalOpen = false;
+deleteTargetFolder: any = null;
   isAddFolderOpen = false;
   draftFolder: any = null;
   showProfile = false;
@@ -111,7 +112,31 @@ console.log("Provider Token:", data.session?.provider_token);
   ngAfterViewInit() {
     this.update();
   }
+@HostListener('touchstart', ['$event'])
+onTouchStart(e: TouchEvent) {
+  this.isDragging = true;
+  const touch = e.touches[0];
 
+  this.startX = touch.clientX - this.x;
+  this.startY = touch.clientY - this.y;
+}
+
+@HostListener('touchmove', ['$event'])
+onTouchMove(e: TouchEvent) {
+  if (!this.isDragging) return;
+
+  const touch = e.touches[0];
+
+  this.x = touch.clientX - this.startX;
+  this.y = touch.clientY - this.startY;
+
+  this.update();
+}
+
+@HostListener('touchend')
+onTouchEnd() {
+  this.isDragging = false;
+}
 loadDirectories() {
   this.directoryService.getDirectories().subscribe({
     next: (data) => {
@@ -190,42 +215,41 @@ openEditFolderModal() {
     this.router.navigate(['about']);
   }
   onDeleteFolder() {
-    if (!this.selectedFolderId || !this.activeFolder) return;
+  if (!this.selectedFolderId || !this.activeFolder) return;
 
-    const confirmed = confirm(`Delete folder "${this.activeFolder.name}" and all its contents?`);
+  this.deleteTargetFolder = this.activeFolder;
+  this.isDeleteModalOpen = true;
+}
+confirmDeleteFolder() {
+  if (!this.deleteTargetFolder) return;
 
-    if (!confirmed) return;
+  const folderId = this.deleteTargetFolder.id;
 
-    const folderId = this.selectedFolderId;
+  this.directoryService.deleteDirectory(folderId).subscribe({
+    next: () => {
+      this.directories = this.directories.filter(
+        d => d.id !== folderId && d.parentId !== folderId
+      );
 
-    this.directoryService.deleteDirectory(folderId).subscribe({
-      next: () => {
-        // 🔥 Remove folder + children from canvas
-        this.directories = this.directories.filter(
-          (d) => d.id !== folderId && d.parentId !== folderId,
-        );
+      this.closeModelData();
+      this.selectedFolderId = null;
+      this.selectedParentFolderId = null;
+      this.currentFolderName = null;
+      this.activeFolder = null;
 
-        // 🔥 Reset UI state
-        this.closeModelData();
-        this.selectedFolderId = null;
-        this.selectedParentFolderId = null;
-        this.currentFolderName = null;
-        this.activeFolder = null;
+      this.closeDeleteModal();
+    },
+    error: (err) => {
+      console.error('Delete failed', err);
+      this.closeDeleteModal();
+    }
+  });
+}
 
-        // 🔥 Close any open tree nodes
-        this.directories.forEach((d) => {
-          if (d.parentId === folderId) {
-            d.isOpen = false;
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Delete directory failed', err);
-        alert('Failed to delete folder');
-      },
-    });
-  }
-
+closeDeleteModal() {
+  this.isDeleteModalOpen = false;
+  this.deleteTargetFolder = null;
+}
   onAddFolder() {
     const parentId = this.selectedParentFolderId;
 

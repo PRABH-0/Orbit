@@ -10,7 +10,24 @@
 .viewport.dragging {
   cursor: grabbing;
 }
+@media (max-width: 768px) {
 
+  app-header {
+    width: 100%;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .header button {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+}
 /* ===== GRID ===== */
 .grid {
   position: absolute;
@@ -33,7 +50,9 @@
 .grid:active {
   cursor: grabbing;
 }
-
+.add-folder-modal .save:hover {
+  background-color: #b91c1c; /* darker red */
+}
 /* ===== CENTER NODE ===== */
 .center-circle {
   position: absolute;
