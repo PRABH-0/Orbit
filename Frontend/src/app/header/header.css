@@ -67,15 +67,21 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
-  margin-top: 10px;
-  padding: 6px 50px;
+  margin-top: 0;
+  padding: 0;
+  padding-right: 20px;
   border-radius: 6px;
 }
 /* TOP ROW (folder + delete) */
 .right-top {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.header-button {
+  display: flex;
+  gap: 6px;
 }
 @media (max-width: 768px) {
 
@@ -107,11 +113,7 @@
   font-size: 13px;
   color: #94a3b8;
 }
-/* Keep buttons aligned right */
-.header-button {
-  display: flex;
-  gap: 6px;
-}
+
 
 /* FOLDER NAME */
 .folder-name {
