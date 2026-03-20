@@ -86,17 +86,71 @@
 @media (max-width: 768px) {
 
   .header {
-    padding: 6px 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    padding: 6px 8px;
+    overflow: hidden;              /* prevent breaking */
   }
 
   .username {
     font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;       /* "Prabhjot..." if long */
+    max-width: 50%;                /* limit left width */
+  }
+
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-right: 10;
+    max-width: 60%;                /* keep right side controlled */
+    overflow: hidden;
+  }
+
+  .right-top {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .header-button {
+    display: flex;
+    gap: 3px;
   }
 
   .folder-name {
-    font-size: 11px;
+    font-size: 10px;
+    white-space: nowrap;
   }
 
+  .delete-action {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .add-folder-btn {
+    font-size: 8px;
+    padding: 2px 5px;
+    white-space: nowrap;
+  }
+
+  .bracket,
+.del-bracket {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  line-height: 1;
+  position: relative;
+  top: 1px; /* adjust: try 1px or 2px if needed */
+}
+.left .bracket{
+top : -5px;
+}
 }
 .header-left {
   font-size: 14px;

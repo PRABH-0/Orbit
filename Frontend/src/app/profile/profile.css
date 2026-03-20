@@ -38,3 +38,32 @@
     color: rgb(255, 23, 23);
     font-weight: 900;
 }
+@media (max-width: 768px) {
+
+  .profile-sidebar {
+    top: 46px;              /* match header height */
+    left: 10px;             /* align nicely on small screen */
+    min-width: 140px;
+    padding: 8px 0;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  .profile-item {
+    padding: 6px 12px;
+    white-space: nowrap;    /* prevent breaking */
+  }
+
+  .button-text {
+    font-size: 12px;
+  }
+
+  .logout {
+    font-size: 12px;
+  }
+
+  .bracket {
+    font-size: 12px;
+  }
+}
