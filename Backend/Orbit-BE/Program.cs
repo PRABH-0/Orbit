@@ -57,18 +57,28 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.Configure<SupabaseOptions>(
-    builder.Configuration.GetSection("Supabase"));
-//builder.Services.AddDbContext<DataContext>(options =>
-//    options.UseSqlServer(
-//        builder.Configuration.GetConnectionString("DefaultConnection")
-//    )
-//);
+builder.Services.Configure<AzureBlobOptions>(
+    builder.Configuration.GetSection("AzureBlob"));
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ).UseSnakeCaseNamingConvention()
+    options.UseSqlServer(
+    builder.Configuration.GetConnectionString("DefaultConnection"),
+    sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null
+        );
+    }
+)
 );
+//builder.Services.Configure<SupabaseOptions>(
+//    builder.Configuration.GetSection("Supabase"));
+//builder.Services.AddDbContext<DataContext>(options =>
+//    options.UseNpgsql(
+//        builder.Configuration.GetConnectionString("DefaultConnection")
+//    ).UseSnakeCaseNamingConvention()
+//);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -107,7 +117,8 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<INodeService, NodeService>();
-builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();
+//builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();
+builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
