@@ -47,7 +47,10 @@ async googleLogin() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/canvas'
+      redirectTo: window.location.origin + '/canvas',
+      queryParams: {
+        prompt: 'select_account'
+      }
     },
   });
 
