@@ -13,10 +13,15 @@ using Orbit_BE.Services.Interfaces;
 using Orbit_BE.UnitOfWork;
 using Stripe;
 using System.Text;
-
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+var keyVaultUrl = new Uri("https://orbit-keyvault-001.vault.azure.net/");
 
+builder.Configuration.AddAzureKeyVault(
+    keyVaultUrl,
+    new DefaultAzureCredential()
+);
 // =======================
 // Controllers
 // =======================
@@ -61,7 +66,7 @@ builder.Services.Configure<AzureBlobOptions>(
     builder.Configuration.GetSection("AzureBlob"));
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DefaultConnection"),
+    builder.Configuration["AzureSqlConnection"],
     sqlOptions =>
     {
         sqlOptions.EnableRetryOnFailure(
@@ -133,7 +138,7 @@ builder.Services.AddHttpClient();
 
 
 var app = builder.Build();
-
+Console.WriteLine(builder.Configuration["AzureSqlConnection"]);
 
 
 
