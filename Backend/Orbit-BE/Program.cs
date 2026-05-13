@@ -18,22 +18,18 @@ using Azure.Identity;
 var builder = WebApplication.CreateBuilder(args);
 var keyVaultUrl = new Uri("https://orbit-keyvault-001.vault.azure.net/");
 
-builder.Configuration.AddAzureKeyVault(
-    keyVaultUrl,
-    new DefaultAzureCredential()
-);
-// =======================
-// Controllers
-// =======================
+//builder.Configuration.AddAzureKeyVault(
+//    keyVaultUrl,
+//    new DefaultAzureCredential()
+//);
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     });
 
-// =======================
-// Swagger
-// =======================
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -96,11 +92,6 @@ builder.Services
         };
     });
 
-
-
-// =======================
-// ? CORS (SINGLE, CORRECT)
-// =======================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -112,9 +103,6 @@ builder.Services.AddCors(options =>
 });
 });
 
-// =======================
-// DI
-// =======================
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -147,7 +135,7 @@ StripeConfiguration.ApiKey =
 
 app.UseHttpsRedirection();
 
-app.UseDefaultFiles();   // 👈 must come BEFORE static files
+app.UseDefaultFiles();   
 app.UseStaticFiles();
 
 app.UseRouting();
