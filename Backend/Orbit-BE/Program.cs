@@ -97,7 +97,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200", "https://localhost:4200" , "https://orbit-api-rcpu.onrender.com") // Your Angular dev URL
+            .WithOrigins("http://localhost:4200", "https://localhost:4200" , "https://orbit-api-rcpu.onrender.com", "https://orbit-api-uat-c9fmacfxcpfzhjd0.centralindia-01.azurewebsites.net") // Your Angular dev URL
             .AllowAnyMethod()
             .AllowAnyHeader();
 });
