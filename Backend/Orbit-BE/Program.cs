@@ -62,7 +62,7 @@ builder.Services.Configure<AzureBlobOptions>(
     builder.Configuration.GetSection("AzureBlob"));
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(
-    builder.Configuration["AzureSqlConnection"],
+    builder.Configuration.GetConnectionString("DefaultConnection"),
     sqlOptions =>
     {
         sqlOptions.EnableRetryOnFailure(
@@ -124,11 +124,7 @@ builder.Services.AddMemoryCache(options =>
 });
 builder.Services.AddHttpClient();
 
-
 var app = builder.Build();
-Console.WriteLine(builder.Configuration["AzureSqlConnection"]);
-
-
 
 StripeConfiguration.ApiKey =
     builder.Configuration["Stripe:SecretKey"];
@@ -155,10 +151,10 @@ app.MapControllers();
 
 app.MapFallbackToFile("index.html");
 
-if (builder.Environment.IsProduction())
-{
-    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-    app.Urls.Add($"http://0.0.0.0:{port}");
-}
+//if (builder.Environment.IsProduction())
+//{
+//    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+//    app.Urls.Add($"http://0.0.0.0:{port}");
+//}
 
 app.Run();
