@@ -28,6 +28,13 @@ export class ModelData implements OnChanges {
   pageSize = 70;
   currentPage = 0;
 
+  width = 860;
+  height = 600;
+  readonly ASPECT_RATIO = 860 / 600;
+  minWidth = 716; // Ensures ~500px height to fit 5 rows
+  minHeight = 500;
+  isResizing = false;
+
   /** fileId → objectURL */
   imageCache = new Map<string, string>();
 
@@ -38,6 +45,48 @@ export class ModelData implements OnChanges {
     this.currentPage = 0;
     console.log("ITEMS RECEIVED:", this.items);
     this.preloadVisibleImages();
+  }
+
+  onResizeStart(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isResizing = true;
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startWidth = this.width;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!this.isResizing) return;
+
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      // Use the larger delta to drive the uniform resize
+      // This makes the resizing feel responsive to whichever direction the user drags most
+      const delta = Math.max(deltaX, deltaY * this.ASPECT_RATIO);
+
+      let newWidth = startWidth + delta;
+      let newHeight = newWidth / this.ASPECT_RATIO;
+
+      // Enforce minimums while maintaining exact ratio
+      if (newWidth < this.minWidth) {
+        newWidth = this.minWidth;
+        newHeight = newWidth / this.ASPECT_RATIO;
+      }
+
+      this.width = newWidth;
+      this.height = newHeight;
+    };
+
+    const onMouseUp = () => {
+      this.isResizing = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 
   get visibleItems(): any[] {

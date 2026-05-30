@@ -1,6 +1,8 @@
 <div
   class="data-node"
   [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
+  [style.width.px]="width"
+  [style.height.px]="height"
 >
 
   <div class="data-header">
@@ -113,6 +115,7 @@
 
 </div>
 
-
+<!-- Resize Handle -->
+<div class="resize-handle" (mousedown)="onResizeStart($event)"></div>
 
   </div>
