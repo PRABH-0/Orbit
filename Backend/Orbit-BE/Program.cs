@@ -12,8 +12,8 @@ using Orbit_BE.Services;
 using Orbit_BE.Services.Interfaces;
 using Orbit_BE.UnitOfWork;
 using Stripe;
-using System.Text;
-using Azure.Identity;
+//using System.Text;
+//using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var keyVaultUrl = new Uri("https://orbit-keyvault-001.vault.azure.net/");
@@ -58,28 +58,28 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.Configure<AzureBlobOptions>(
-    builder.Configuration.GetSection("AzureBlob"));
-builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DefaultConnection"),
-    sqlOptions =>
-    {
-        sqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(10),
-            errorNumbersToAdd: null
-        );
-    }
-)
-);
-//builder.Services.Configure<SupabaseOptions>(
-//    builder.Configuration.GetSection("Supabase"));
+//builder.Services.Configure<AzureBlobOptions>(
+//    builder.Configuration.GetSection("AzureBlob"));
 //builder.Services.AddDbContext<DataContext>(options =>
-//    options.UseNpgsql(
-//        builder.Configuration.GetConnectionString("DefaultConnection")
-//    ).UseSnakeCaseNamingConvention()
+//    options.UseSqlServer(
+//    builder.Configuration.GetConnectionString("DefaultConnection"),
+//    sqlOptions =>
+//    {
+//        sqlOptions.EnableRetryOnFailure(
+//            maxRetryCount: 5,
+//            maxRetryDelay: TimeSpan.FromSeconds(10),
+//            errorNumbersToAdd: null
+//        );
+//    }
+//)
 //);
+builder.Services.Configure<SupabaseOptions>(
+    builder.Configuration.GetSection("Supabase"));
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ).UseSnakeCaseNamingConvention()
+);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -110,8 +110,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IGoogleDriveService, GoogleDriveService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<INodeService, NodeService>();
-//builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();
-builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();
+//builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IEmailService, EmailService>();

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { of, Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class DirectoryService {
@@ -9,7 +10,7 @@ export class DirectoryService {
   constructor(private http: HttpClient) {}
 
   // Get all directories (nodes)
-  getDirectories() {
+  getDirectories(): Observable<any[]> {
     return this.http.get<any[]>(this.baseUrl);
   }
 
@@ -20,29 +21,36 @@ export class DirectoryService {
     y: number;
     parentId?: string | null;
     basePath?: string | null;
-  }) {
+  }): Observable<any> {
     return this.http.post<any>(this.baseUrl, data);
   }
-  renameDirectory(directoryId: string, name: string) {
-  return this.http.put(
-    `${this.baseUrl}/${directoryId}/rename`,
-    { name }
-  );
-}
-updateGooglePosition(payload: {
-  externalId: string;
-  name: string;
-  x: number;
-  y: number;
-}) {
-  return this.http.put(
-    `${this.baseUrl}/google/position`,
-    payload
-  );
-}
+
+  renameDirectory(directoryId: string, name: string): Observable<any> {
+    if (!directoryId || directoryId === 'undefined') return of(null);
+    return this.http.put(
+      `${this.baseUrl}/${directoryId}/rename`,
+      { name }
+    );
+  }
+
+  updateGooglePosition(payload: {
+    externalId: string;
+    name: string;
+    x: number;
+    y: number;
+  }): Observable<any> {
+    return this.http.put(
+      `${this.baseUrl}/google/position`,
+      payload
+    );
+  }
 
   // Update directory position
-  updatePosition(directoryId: string, x: number, y: number) {
+  updatePosition(directoryId: string, x: number, y: number): Observable<any> {
+    if (!directoryId || directoryId === 'undefined') {
+      console.error('DirectoryService: updatePosition blocked due to invalid ID');
+      return of(null);
+    }
     return this.http.put(
       `${this.baseUrl}/${directoryId}/position`,
       { x, y }
@@ -50,14 +58,16 @@ updateGooglePosition(payload: {
   }
 
   // Delete directory
-  deleteDirectory(directoryId: string) {
+  deleteDirectory(directoryId: string): Observable<any> {
+    if (!directoryId || directoryId === 'undefined') return of(null);
     return this.http.delete(
       `${this.baseUrl}/${directoryId}`
     );
   }
 
   // Get single directory
-  getDirectoryById(directoryId: string) {
+  getDirectoryById(directoryId: string): Observable<any> {
+    if (!directoryId || directoryId === 'undefined') return of(null);
     return this.http.get<any>(
       `${this.baseUrl}/${directoryId}`
     );

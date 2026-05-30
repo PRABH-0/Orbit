@@ -298,9 +298,13 @@ if (this.isEditMode && this.editingFolder) {
   }
 
   if (positionChanged) {
-    this.directoryService
-      .updatePosition(id, this.draftFolder.x, this.draftFolder.y)
-      .subscribe();
+    if (!id || id === 'undefined') {
+      console.warn('Cannot update position: folder ID is missing');
+    } else {
+      this.directoryService
+        .updatePosition(id, this.draftFolder.x, this.draftFolder.y)
+        .subscribe();
+    }
   }
 
   // 🔥 update folder inside directories array
@@ -462,7 +466,7 @@ async logout() {
         this.closeFileViewer();
         this.reloadFiles();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Delete failed', err);
       },
     });
@@ -564,7 +568,7 @@ async logout() {
 }
 
 
-  if (!dir || !dir.id) return;
+  if (!dir || !dir.id || dir.id === 'undefined') return;
 
   dir.isOpen = !dir.isOpen;
 
@@ -793,7 +797,15 @@ async logout() {
 onMouseUp() {
   this.isDragging = false;
 
-  if (!this.lastMovedFolder) return;
+  if (
+    !this.lastMovedFolder ||
+    this.lastMovedFolder.isDraft ||
+    !this.lastMovedFolder.id ||
+    this.lastMovedFolder.id === 'undefined'
+  ) {
+    this.lastMovedFolder = null;
+    return;
+  }
 
   const { id, x, y, isVirtual, name } = this.lastMovedFolder;
 

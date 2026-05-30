@@ -107,8 +107,8 @@
   </label>
 
   <div class="actions">
-    <button class="cancel" (click)="cancelAddFolder()">Cancel</button>
-    <button class="save" (click)="saveAddFolder()">Save</button>
+    <button class="cancel" (click)="$event.stopPropagation(); cancelAddFolder()">Cancel</button>
+    <button class="save" (click)="$event.stopPropagation(); saveAddFolder()">Save</button>
   </div>
 
 </div>
@@ -125,12 +125,12 @@
   </p>
 
   <div class="actions">
-    <button class="cancel" (click)="closeDeleteModal()">Cancel</button>
+    <button class="cancel" (click)="$event.stopPropagation(); closeDeleteModal()">Cancel</button>
 
     <button
       class="save"
       style="background: #dc2626"
-      (click)="confirmDeleteFolder()"
+      (click)="$event.stopPropagation(); confirmDeleteFolder()"
     >
       Delete
     </button>

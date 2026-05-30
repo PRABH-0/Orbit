@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnChanges, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule, NgFor, NgIf ,NgSwitch} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FileService } from '../services/file.service';
 import { environment } from '../../environments/environment';
 import { GoogleDriveService } from '../services/google-drive.service';
@@ -17,13 +17,13 @@ export class ModelData implements OnChanges {
   @Input() y!: number;
   @Input() title: string | null = '';
   @Input() items: any[] = [];
-@Input() isGoogleFolder: boolean = false;
+  @Input() isGoogleFolder: boolean = false;
   @Output() closeNode = new EventEmitter<void>();
   @Output() imageOpen = new EventEmitter<any>();
-@Input() nodeId!: string | null; // 🔥 important
-@Output() fileUploaded = new EventEmitter<void>();
+  @Input() nodeId!: string | null; // 🔥 important
+  @Output() fileUploaded = new EventEmitter<void>();
 
-@ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   pageSize = 70;
   currentPage = 0;
@@ -31,12 +31,12 @@ export class ModelData implements OnChanges {
   /** fileId → objectURL */
   imageCache = new Map<string, string>();
 
-  constructor(private fileService: FileService , private googleDriveService :GoogleDriveService) {}
-videoThumbnailCache = new Map<string, string>();
+  constructor(private fileService: FileService, private googleDriveService: GoogleDriveService) { }
+  videoThumbnailCache = new Map<string, string>();
 
   ngOnChanges() {
     this.currentPage = 0;
-     console.log("ITEMS RECEIVED:", this.items);
+    console.log("ITEMS RECEIVED:", this.items);
     this.preloadVisibleImages();
   }
 
@@ -47,340 +47,336 @@ videoThumbnailCache = new Map<string, string>();
 
   openInNewTab(file: any) {
 
-  const url = `${environment.apiBaseUrl}/File/${file.id}/view`;
+    const url = `${environment.apiBaseUrl}/File/${file.id}/view`;
 
-  window.open(url, '_blank');
-}
-getMime(file: any): string {
-  return (file.mimeType || file.contentType || '').toLowerCase();
-}
-isGoogleFile(file: any): boolean {
-  return file.isGoogle === true;
-}
-
-isAudio(file: any): boolean {
-  const type = file.contentType || file.mimeType;
-  return type?.startsWith('audio/');
-}
-
-isImage(file: any): boolean {
-  const type = file.contentType || file.mimeType;
-  return type?.startsWith('image/');
-}
-
-getLocalImageUrl(file: any): string | null {
-  return this.getImageUrl(file.id);
-}
-
-getFileType(file: any): string {
-
-  const mime = this.getMime(file);
-
-  if (mime === 'application/vnd.google-apps.folder')
-    return 'folder';
-
-  if (mime.startsWith('image/'))
-    return 'image';
-
-  if (mime.startsWith('video/')) {
-    return this.videoThumbnailCache.has(file.id)
-      ? 'video'
-      : 'video-fallback';
+    window.open(url, '_blank');
+  }
+  getMime(file: any): string {
+    return (file.mimeType || file.contentType || '').toLowerCase();
+  }
+  isGoogleFile(file: any): boolean {
+    return file.isGoogle === true;
   }
 
-  if (mime.startsWith('audio/'))
-    return 'audio';
+  isAudio(file: any): boolean {
+    const type = file.contentType || file.mimeType;
+    return type?.startsWith('audio/');
+  }
 
-  if (mime === 'application/pdf' ||
+  isImage(file: any): boolean {
+    const type = file.contentType || file.mimeType;
+    return type?.startsWith('image/');
+  }
+
+  getLocalImageUrl(file: any): string | null {
+    return this.getImageUrl(file.id);
+  }
+
+  getFileType(file: any): string {
+
+    const mime = this.getMime(file);
+
+    if (mime === 'application/vnd.google-apps.folder')
+      return 'folder';
+
+    if (mime.startsWith('image/'))
+      return 'image';
+
+    if (mime.startsWith('video/')) {
+      return this.videoThumbnailCache.has(file.id)
+        ? 'video'
+        : 'video-fallback';
+    }
+
+    if (mime.startsWith('audio/'))
+      return 'audio';
+
+    if (mime === 'application/pdf' ||
       mime.startsWith('application/vnd.google-apps'))
-    return 'pdf';
+      return 'pdf';
 
-  return 'default';
-}
+    return 'default';
+  }
 
-downloadGoogleFile(file: any) {
+  downloadGoogleFile(file: any) {
+    const url =
+      `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
 
-  const providerToken =
-    localStorage.getItem('google_provider_token');
+    this.googleDriveService
+      .downloadGoogleFile(url)
+      .subscribe({
+        next: (res: any) => {
 
-  const url =
-    `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
+          if (!res || !res.body) return;
 
-  this.googleDriveService
-  .downloadGoogleFile(url)
-  .subscribe({
-    next: (res) => {
+          const blob = res.body;
+          const objectUrl = URL.createObjectURL(blob);
 
-      if (!res || !res.body) return;
+          const a = document.createElement('a');
+          a.href = objectUrl;
+          a.download = file.fileName;
+          a.click();
 
-      const blob = res.body;
-      const objectUrl = URL.createObjectURL(blob);
+          URL.revokeObjectURL(objectUrl);
+        },
+        error: (err: any) => {
+          console.error('Google download failed', err);
+        }
+      });
+  }
 
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = file.fileName;
-      a.click();
+  handleGoogleFile(file: any) {
 
-      URL.revokeObjectURL(objectUrl);
-    },
-    error: (err) => {
-      console.error('Google download failed', err);
+    const type = this.detectType(file);
+
+    if (type === 'other') {
+
+      const confirmDownload = confirm(
+        `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
+      );
+
+      if (confirmDownload) {
+        this.downloadGoogleFile(file);
+      }
+
+      return;
     }
-  });
-}
 
-handleGoogleFile(file: any) {
+    // only previewable files download blob
+    this.openGoogleFile(file);
+  }
 
-  const type = this.detectType(file);
+  openFile(file: any) {
 
-  if (type === 'other') {
+    if (file.isGoogle) {
+      this.handleGoogleFile(file);
+      return;
+    }
+    if (file.isPhoto) {
+      this.imageOpen.emit({
+        type: 'image',
+        id: file.id,
+        url: file.fullUrl,
+        fileName: file.fileName
+      });
+      return;
+    }
 
-    const confirmDownload = confirm(
-      `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
+    const type = this.detectType(file);
+
+    if (type === 'other') {
+
+      const confirmDownload = confirm(
+        `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
+      );
+
+      if (confirmDownload) {
+        this.download(file);
+      }
+
+      return;
+    }
+
+    switch (type) {
+      case 'image':
+        this.openImage(file);
+        break;
+
+      case 'pdf':
+        this.openPdf(file);
+        break;
+
+      case 'video':
+        this.openVideo(file);
+        break;
+
+      case 'audio':
+        this.openAudio(file);
+        break;
+
+      case 'text':
+        this.openText(file);
+        break;
+    }
+  }
+
+
+  isText(file: any): boolean {
+    return (
+      file.contentType?.startsWith('text/') ||
+      /\.(txt|js|ts|tsx|json|html|css|md)$/i.test(file.fileName)
     );
+  }
 
-    if (confirmDownload) {
-      this.downloadGoogleFile(file);
+  detectType(file: any): 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'other' {
+
+    const mime = file.contentType?.toLowerCase() || '';
+    const name = file.fileName?.toLowerCase() || '';
+
+    // 🔥 GOOGLE DOCS → treat as PDF
+    if (mime.startsWith('application/vnd.google-apps')) {
+      return 'pdf';
     }
 
-    return;
-  }
-
-  // only previewable files download blob
-  this.openGoogleFile(file);
-}
-
-openFile(file: any) {
-
-  if (file.isGoogle) {
-    this.handleGoogleFile(file);
-    return;
-  }
-  if (file.isPhoto) {
-  this.imageOpen.emit({
-    type: 'image',
-    id: file.id,
-    url: file.fullUrl,
-    fileName: file.fileName
-  });
-  return;
-}
-
-  const type = this.detectType(file);
-
-  if (type === 'other') {
-
-    const confirmDownload = confirm(
-      `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
-    );
-
-    if (confirmDownload) {
-      this.download(file);
-    }
-
-    return;
-  }
-
-  switch (type) {
-    case 'image':
-      this.openImage(file);
-      break;
-
-    case 'pdf':
-      this.openPdf(file);
-      break;
-
-    case 'video':
-      this.openVideo(file);
-      break;
-
-    case 'audio':
-      this.openAudio(file);
-      break;
-
-    case 'text':
-      this.openText(file);
-      break;
-  }
-}
-
-
-isText(file: any): boolean {
-  return (
-    file.contentType?.startsWith('text/') ||
-    /\.(txt|js|ts|tsx|json|html|css|md)$/i.test(file.fileName)
-  );
-}
-
-detectType(file: any): 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'other' {
-
-  const mime = file.contentType?.toLowerCase() || '';
-  const name = file.fileName?.toLowerCase() || '';
-
-  // 🔥 GOOGLE DOCS → treat as PDF
-  if (mime.startsWith('application/vnd.google-apps')) {
-    return 'pdf';
-  }
-
-  if (mime.startsWith('image/') ||
+    if (mime.startsWith('image/') ||
       /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name)) {
-    return 'image';
-  }
+      return 'image';
+    }
 
-  if (mime === 'application/pdf' || name.endsWith('.pdf')) {
-    return 'pdf';
-  }
+    if (mime === 'application/pdf' || name.endsWith('.pdf')) {
+      return 'pdf';
+    }
 
-  if (mime.startsWith('video/') ||
+    if (mime.startsWith('video/') ||
       /\.(mp4|webm|ogg|mov)$/i.test(name)) {
-    return 'video';
-  }
+      return 'video';
+    }
 
-  if (mime.startsWith('audio/') ||
+    if (mime.startsWith('audio/') ||
       /\.(mp3|wav|aac|flac)$/i.test(name)) {
-    return 'audio';
+      return 'audio';
+    }
+
+    if (
+      mime.startsWith('text/') ||
+      /\.(txt|js|ts|json|html|css|md)$/i.test(name)
+    ) {
+      return 'text';
+    }
+
+    return 'other';
   }
 
-  if (
-    mime.startsWith('text/') ||
-    /\.(txt|js|ts|json|html|css|md)$/i.test(name)
-  ) {
-    return 'text';
+  openGoogleFile(file: any) {
+
+    const url =
+      `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
+
+    this.googleDriveService
+      .downloadGoogleFile(url)
+      .subscribe({
+        next: (res: any) => {
+
+          if (!res || !res.body) return;
+
+          const blob = res.body;
+          const objectUrl = URL.createObjectURL(blob);
+
+          const type = this.detectType(file);
+
+          this.imageOpen.emit({
+            type: type,
+            id: file.id,
+            url: objectUrl,
+            fileName: file.fileName
+          });
+        },
+        error: (err: any) => {
+          console.error('Google preview failed', err);
+        }
+      });
   }
 
-  return 'other';
-}
-
-openGoogleFile(file: any) {
-
-  const url =
-    `${environment.apiBaseUrl}/google-drive/file/${file.id}`;
-
-  this.googleDriveService
-    .downloadGoogleFile(url)
-    .subscribe({
-      next: (res) => {
-
-        if (!res || !res.body) return;
-
-        const blob = res.body;
-        const objectUrl = URL.createObjectURL(blob);
-
-        const type = this.detectType(file);
-
-        this.imageOpen.emit({
-          type: type,
-          id: file.id,
-          url: objectUrl,
-          fileName: file.fileName
+  openText(file: any) {
+    this.fileService.downloadFile(file.id).subscribe({
+      next: (res: any) => {
+        const blob = res.body!;
+        blob.text().then((text: string) => {
+          this.imageOpen.emit({
+            type: 'text',
+            id: file.id,
+            fileName: file.fileName,
+            content: text
+          });
         });
       },
-      error: (err) => {
-        console.error('Google preview failed', err);
+      error: (err: any) => {
+        console.error('Text preview failed', err);
       }
     });
-}
+  }
 
-openText(file: any) {
-  this.fileService.downloadFile(file.id).subscribe({
-    next: res => {
-      const blob = res.body!;
-      blob.text().then(text => {
-        this.imageOpen.emit({
-          type: 'text',
-          id: file.id,
-          fileName: file.fileName,
-          content: text
-        });
-      });
-    },
-    error: err => {
-      console.error('Text preview failed', err);
-    }
-  });
-}
+  openPdf(file: any) {
+    this.imageOpen.emit({
+      type: 'pdf',
+      id: file.id,
+      url: this.getStreamUrl(file.id),  // ✅ FIXED
+      fileName: file.fileName
+    });
+  }
 
-openPdf(file: any) {
-  this.imageOpen.emit({
-    type: 'pdf',
-    id: file.id,
-    url: this.getStreamUrl(file.id),  // ✅ FIXED
-    fileName: file.fileName
-  });
-}
+  getStreamUrl(fileId: string): string {
+    return `${environment.apiBaseUrl}/File/${fileId}/view`;
+  }
+  openVideo(file: any) {
+    this.imageOpen.emit({
+      type: 'video',
+      id: file.id,
+      url: this.getStreamUrl(file.id),
+      fileName: file.fileName
+    });
+  }
 
-getStreamUrl(fileId: string): string {
-  return `${environment.apiBaseUrl}/File/${fileId}/view`;
-}
-openVideo(file: any) {
-  this.imageOpen.emit({
-    type: 'video',
-    id: file.id,
-    url: this.getStreamUrl(file.id),
-    fileName: file.fileName
-  });
-}
+  openAudio(file: any) {
+    this.imageOpen.emit({
+      type: 'audio',
+      id: file.id,
+      url: this.getStreamUrl(file.id),
+      fileName: file.fileName
+    });
+  }
+  isFolder(file: any): boolean {
+    return this.getMime(file) === 'application/vnd.google-apps.folder';
+  }
+  isPreviewable(file: any): boolean {
+    const type = this.detectType(file);
+    return type !== 'other';
+  }
 
-openAudio(file: any) {
-  this.imageOpen.emit({
-    type: 'audio',
-    id: file.id,
-    url: this.getStreamUrl(file.id),
-    fileName: file.fileName
-  });
-}
-isFolder(file: any): boolean {
-  return this.getMime(file) === 'application/vnd.google-apps.folder';
-}
-isPreviewable(file: any): boolean {
-  const type = this.detectType(file);
-  return type !== 'other';
-}
-
-isGoogleDoc(file: any): boolean {
-  return this.getMime(file).startsWith('application/vnd.google-apps');
-}
+  isGoogleDoc(file: any): boolean {
+    return this.getMime(file).startsWith('application/vnd.google-apps');
+  }
 
 
 
-isVideo(file: any): boolean {
-  return this.getMime(file).startsWith('video/');
-}
+  isVideo(file: any): boolean {
+    return this.getMime(file).startsWith('video/');
+  }
 
 
 
-isPdf(file: any): boolean {
-  return this.getMime(file) === 'application/pdf';
-}
+  isPdf(file: any): boolean {
+    return this.getMime(file) === 'application/pdf';
+  }
 
 
-getFileIcon(file: any): string {
+  getFileIcon(file: any): string {
 
-  if (this.isFolder(file)) return '📁';
-  if (this.isVideo(file)) return '🎬';
-  if (this.isPdf(file)) return '📄';
-  if (this.isAudio(file)) return '🎵';
-  if (this.isGoogleDoc(file)) return '📘';
+    if (this.isFolder(file)) return '📁';
+    if (this.isVideo(file)) return '🎬';
+    if (this.isPdf(file)) return '📄';
+    if (this.isAudio(file)) return '🎵';
+    if (this.isGoogleDoc(file)) return '📘';
 
-  return '📦';
-}
-
-
- preloadVisibleImages() {
-  for (const file of this.visibleItems) {
-if (file.isGoogle) continue; // IMPORTANT
+    return '📦';
+  }
 
 
+  preloadVisibleImages() {
+    for (const file of this.visibleItems) {
+      if (file.isGoogle) continue; // IMPORTANT
 
-    if (!this.imageCache.has(file.id)) {
-      this.loadImage(file.id);
+
+
+      if (!this.imageCache.has(file.id)) {
+        this.loadImage(file.id);
+      }
     }
   }
-}
 
   loadImage(fileId: string) {
     this.fileService.downloadFile(fileId).subscribe({
-      next: res => {
+      next: (res: any) => {
         const cache = res.headers.get('x-cache');
         console.log(`FILE ${fileId} CACHE →`, cache); // HIT / MISS
 
@@ -388,7 +384,7 @@ if (file.isGoogle) continue; // IMPORTANT
         const url = URL.createObjectURL(blob);
         this.imageCache.set(fileId, url);
       },
-      error: err => {
+      error: (err: any) => {
         console.error('Image load failed', err);
       }
     });
@@ -398,80 +394,80 @@ if (file.isGoogle) continue; // IMPORTANT
     return this.imageCache.get(fileId) ?? null;
   }
 
- openImage(file: any) {
-  this.imageOpen.emit({
-    type: 'image',
-    id: file.id,
-    url: this.getImageUrl(file.id),
-    fileName: file.fileName
-  });
-}
-
-
-
-
-triggerFileInput(event: MouseEvent) {
-  event.stopPropagation();
-  this.fileInput.nativeElement.click();
-}
-
-download(file: any) {
-  this.fileService.downloadFile(file.id).subscribe(res => {
-    const blob = res.body!;
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = file.fileName;
-    a.click();
-
-    URL.revokeObjectURL(url);
-  });
-}
-delete(file: any) {
-  if (!confirm('Delete this file?')) return;
-
-  this.fileService.deleteFile(file.id).subscribe({
-    next: () => {
-      this.imageCache.delete(file.id);
-      this.fileUploaded.emit(); // refresh list
-    },
-    error: err => {
-      console.error('Delete failed', err);
-    }
-  });
-}
-
-onFileSelected(event: Event) {
-  if (this.isGoogleFolder) {
-  console.warn("Upload not allowed for cloud folder");
-  return;
-}
-  if (!this.nodeId) {
-    console.warn('Upload blocked: nodeId is null');
-    return;
+  openImage(file: any) {
+    this.imageOpen.emit({
+      type: 'image',
+      id: file.id,
+      url: this.getImageUrl(file.id),
+      fileName: file.fileName
+    });
   }
 
-  const input = event.target as HTMLInputElement;
-  if (!input.files || input.files.length === 0) return;
 
-  const file = input.files[0];
 
-  this.fileService.uploadFile(this.nodeId, file).subscribe({
-    next: () => {
-      console.log('File uploaded successfully');
 
-      // reset input (important)
-      input.value = '';
+  triggerFileInput(event: MouseEvent) {
+    event.stopPropagation();
+    this.fileInput.nativeElement.click();
+  }
 
-      // tell parent to refresh files
-      this.fileUploaded.emit();
-    },
-    error: err => {
-      console.error('Upload failed', err);
+  download(file: any) {
+    this.fileService.downloadFile(file.id).subscribe((res: any) => {
+      const blob = res.body!;
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.fileName;
+      a.click();
+
+      URL.revokeObjectURL(url);
+    });
+  }
+  delete(file: any) {
+    if (!confirm('Delete this file?')) return;
+
+    this.fileService.deleteFile(file.id).subscribe({
+      next: () => {
+        this.imageCache.delete(file.id);
+        this.fileUploaded.emit(); // refresh list
+      },
+      error: (err: any) => {
+        console.error('Delete failed', err);
+      }
+    });
+  }
+
+  onFileSelected(event: Event) {
+    if (this.isGoogleFolder) {
+      console.warn("Upload not allowed for cloud folder");
+      return;
     }
-  });
-}
+    if (!this.nodeId) {
+      console.warn('Upload blocked: nodeId is null');
+      return;
+    }
+
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    this.fileService.uploadFile(this.nodeId, file).subscribe({
+      next: () => {
+        console.log('File uploaded successfully');
+
+        // reset input (important)
+        input.value = '';
+
+        // tell parent to refresh files
+        this.fileUploaded.emit();
+      },
+      error: (err: any) => {
+        console.error('Upload failed', err);
+      }
+    });
+  }
 
   close() {
     this.closeNode.emit();
