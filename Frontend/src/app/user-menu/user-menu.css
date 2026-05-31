@@ -1,4 +1,4 @@
-.profile-sidebar {
+.user-menu-sidebar {
   position: absolute;
   top: 50px;       /* 🔥 header height */
   left: 20px;      /* aligns with username */
@@ -14,33 +14,35 @@
 }
 
 /* MENU ITEM */
-.profile-item {
+.menu-item {
   padding: 6px 20px;
 }
 
 /* reuse existing styles */
-.profile-item .button-text:hover {
+.menu-item .button-text:hover {
   text-decoration-line: underline;
   text-decoration-thickness: 3px;
   text-underline-offset: 2px;
   cursor: pointer;
 }
 
-.button-text{
-    color: white;
-    font-weight: 600;
+.button-text {
+  color: white;
+  font-weight: 600;
 }
-.bracket{
-    color: white;
-    font-weight: 800;
-}
-.logout{
-    color: rgb(255, 23, 23);
-    font-weight: 900;
-}
-@media (max-width: 768px) {
 
-  .profile-sidebar {
+.bracket {
+  color: white;
+  font-weight: 800;
+}
+
+.logout {
+  color: rgb(255, 23, 23);
+  font-weight: 900;
+}
+
+@media (max-width: 768px) {
+  .user-menu-sidebar {
     top: 46px;              /* match header height */
     left: 10px;             /* align nicely on small screen */
     min-width: 140px;
@@ -50,7 +52,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.6);
   }
 
-  .profile-item {
+  .menu-item {
     padding: 6px 12px;
     white-space: nowrap;    /* prevent breaking */
   }

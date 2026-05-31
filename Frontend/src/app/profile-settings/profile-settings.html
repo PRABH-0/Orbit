@@ -1,0 +1,95 @@
+<h2 class="orbit-title">
+  <span class="bracket">[</span>
+  <button class="orbit-btn" (click)="redirectToLastUrl()">Orbit</button>
+  <span class="bracket">]</span>
+</h2>
+
+<div class="about-container">
+  <div class="grid-bg"></div>
+
+  <div class="about-content">
+    <h1 class="about-title">User Profile</h1>
+    <div class="content-line"></div>
+
+    <div class="profile-header">
+      <div class="avatar-container">
+        <img [src]="profilePic" alt="Profile" class="profile-avatar" />
+      </div>
+      <div class="profile-info">
+        <h2>{{ username }}</h2>
+        <p>
+          This is your <span class="u">private profile page</span> where you can manage your identity and preferences within Orbit.
+        </p>
+      </div>
+    </div>
+
+    <div class="feedback-form">
+      <h2 class="section-subtitle">Account Details</h2>
+      
+      <label>Email Address</label>
+      <input
+        type="email"
+        [value]="email"
+        name="email"
+        readonly
+        class="readonly-input"
+      />
+
+      <label>Username</label>
+      <input
+        type="text"
+        [value]="username"
+        name="username"
+        readonly
+        class="readonly-input"
+      />
+
+      <div class="storage-section">
+        <h2 class="section-subtitle">Storage Usage</h2>
+        <div class="storage-info">
+          <span>{{ storageUsed }} of {{ storageLimit }} used</span>
+          <span>{{ storagePercentage }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="storagePercentage"></div>
+        </div>
+        <p class="storage-hint">Need more space? Upgrade your plan in the payments portal.</p>
+      </div>
+    </div>
+
+    <div class="bottom-info">
+      <p>
+        Your <span class="u">security</span> is important to us. All profile changes are synchronized across your devices. 
+        Please ensure your username remains professional if you intend to share folders in the future.
+      </p>
+    </div>
+
+    <!-- FOOTER (Matching About Page) -->
+    <footer class="about-footer">
+      <div class="content-line"></div>
+
+      <div class="footer-content">
+        <div>
+          <strong>Identity</strong><br />
+          {{ email }}
+        </div>
+
+        <div>
+          <strong>Status</strong><br />
+          Verified Account
+        </div>
+
+        <div>
+          <strong>Joined</strong><br />
+          v1.0 (Early Access)
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        © 2026 Orbit. Settings Portal.
+      </div>
+    </footer>
+
+    <div class="bottom-space"></div>
+  </div>
+</div>

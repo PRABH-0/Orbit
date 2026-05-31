@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FileService } from '../services/file.service';
 import { environment } from '../../environments/environment';
 import { GoogleDriveService } from '../services/google-drive.service';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 
 @Component({
   selector: 'app-model-data',
@@ -38,6 +39,10 @@ export class ModelData implements OnChanges {
   /** fileId → objectURL */
   imageCache = new Map<string, string>();
 
+  isDraggingOver = false;
+  isUploading = false;
+  uploadProgress = 0;
+
   constructor(private fileService: FileService, private googleDriveService: GoogleDriveService) { }
   videoThumbnailCache = new Map<string, string>();
 
@@ -45,6 +50,74 @@ export class ModelData implements OnChanges {
     this.currentPage = 0;
     console.log("ITEMS RECEIVED:", this.items);
     this.preloadVisibleImages();
+  }
+
+  // =========================
+  // DRAG & DROP
+  // =========================
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.isGoogleFolder) return;
+    this.isDraggingOver = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingOver = false;
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingOver = false;
+
+    if (this.isGoogleFolder) return;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.uploadFiles(Array.from(files));
+    }
+  }
+
+  async uploadFiles(files: File[]) {
+    if (!this.nodeId) return;
+    
+    this.isUploading = true;
+    this.uploadProgress = 0;
+
+    let totalUploaded = 0;
+    const totalFiles = files.length;
+
+    for (let i = 0; i < totalFiles; i++) {
+      const file = files[i];
+      try {
+        await new Promise<void>((resolve, reject) => {
+          this.fileService.uploadFile(this.nodeId!, file).subscribe({
+            next: (event: HttpEvent<any>) => {
+              if (event.type === HttpEventType.UploadProgress) {
+                const fileProgress = event.total ? Math.round((event.loaded / event.total) * 100) : 0;
+                // Calculate overall progress
+                this.uploadProgress = Math.round(((i / totalFiles) * 100) + (fileProgress / totalFiles));
+              } else if (event.type === HttpEventType.Response) {
+                resolve();
+              }
+            },
+            error: (err) => {
+              console.error(`Failed to upload ${file.name}`, err);
+              reject(err);
+            }
+          });
+        });
+      } catch (err) {
+        // Continue with next file even if one fails
+      }
+    }
+
+    this.isUploading = false;
+    this.uploadProgress = 0;
+    this.fileUploaded.emit();
   }
 
   onResizeStart(event: MouseEvent) {
@@ -503,14 +576,16 @@ export class ModelData implements OnChanges {
     const file = input.files[0];
 
     this.fileService.uploadFile(this.nodeId, file).subscribe({
-      next: () => {
-        console.log('File uploaded successfully');
+      next: (event: HttpEvent<any>) => {
+        if (event.type === HttpEventType.Response) {
+          console.log('File uploaded successfully');
 
-        // reset input (important)
-        input.value = '';
+          // reset input (important)
+          input.value = '';
 
-        // tell parent to refresh files
-        this.fileUploaded.emit();
+          // tell parent to refresh files
+          this.fileUploaded.emit();
+        }
       },
       error: (err: any) => {
         console.error('Upload failed', err);

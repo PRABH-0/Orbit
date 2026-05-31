@@ -22,7 +22,7 @@ export class Header {
   // ===== Outputs =====
   @Output() addFolder = new EventEmitter<void>();
   @Output() addItem = new EventEmitter<void>();
-  @Output() openProfile = new EventEmitter<void>();
+  @Output() openMenu = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
 @Output() rename = new EventEmitter<void>();
 

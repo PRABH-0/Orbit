@@ -3,7 +3,31 @@
   [style.transform]="'translate(' + x + 'px,' + y + 'px)'"
   [style.width.px]="width"
   [style.height.px]="height"
+  [class.drag-over]="isDraggingOver"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
 >
+
+  <!-- DRAG OVER OVERLAY -->
+  <div class="drag-overlay" *ngIf="isDraggingOver">
+    <div class="drag-msg">
+      <span class="bracket">[ </span>
+      <span class="username">Drop files to upload</span>
+      <span class="bracket"> ]</span>
+    </div>
+  </div>
+
+  <!-- UPLOADING PROGRESS OVERLAY -->
+  <div class="upload-overlay" *ngIf="isUploading">
+    <div class="upload-box">
+      <div class="upload-spinner"></div>
+      <div class="upload-text">Uploading... {{ uploadProgress }}%</div>
+      <div class="progress-track">
+        <div class="progress-bar-fill" [style.width.%]="uploadProgress"></div>
+      </div>
+    </div>
+  </div>
 
   <div class="data-header">
   <span class="title">{{ title }}</span>

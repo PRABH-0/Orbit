@@ -6,6 +6,11 @@ import { LoaderService } from '../services/loader.service';
 export const loaderInterceptor: HttpInterceptorFn = (req, next) => {
 
   const loader = inject(LoaderService);
+  
+  if (req.headers.has('X-Skip-Loader')) {
+    return next(req);
+  }
+
   loader.show();
 
   return next(req).pipe(

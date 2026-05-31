@@ -18,7 +18,7 @@ import { Edge } from '../edge/edge';
 import { ModelData } from '../model-data/model-data';
 import { DirectoryService } from '../services/directory.service';
 import { FileService } from '../services/file.service';
-import { Profile } from '../profile/profile';
+import { UserMenu } from '../user-menu/user-menu';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { supabase } from '../supabase.client';
@@ -27,10 +27,12 @@ import { AuthService } from '../services/auth.service';
 import { GoogleDriveService } from '../services/google-drive.service';
 import { GooglePhotosService } from '../services/google-photos.service';
 
+import { HttpEvent, HttpEventType } from '@angular/common/http';
+
 @Component({
   selector: 'app-canvas',
   standalone: true,
-  imports: [Header, Directory, Profile, Edge, ModelData, FormsModule, NgFor, NgIf, CommonModule],
+  imports: [Header, Directory, UserMenu, Edge, ModelData, FormsModule, NgFor, NgIf, CommonModule],
   templateUrl: './canvas.html',
   styleUrl: './canvas.css',
 })
@@ -62,12 +64,12 @@ editingFolder: any = null;
   fileName?: string;
 } | null = null;
 
-  profilePic: string | null = null;
+  avatarUrl: string | null = null;
 isDeleteModalOpen = false;
 deleteTargetFolder: any = null;
   isAddFolderOpen = false;
   draftFolder: any = null;
-  showProfile = false;
+  showUserMenu = false;
   rootOpen = false;
   selectedFileId: string | null = null;
   private isDragging = false;
@@ -95,7 +97,7 @@ async ngOnInit() {
     this.router.navigate(['/signin']);
     return;
   }
-this.profilePic = user.profilePictureUrl;
+this.avatarUrl = user.profilePictureUrl;
 
   this.userState.setUser(user);
   this.loadDirectories();
@@ -185,12 +187,12 @@ loadDirectories() {
   });
 }
 
-  openUserMenu() {
-    this.showProfile = !this.showProfile;
+  toggleUserMenu() {
+    this.showUserMenu = !this.showUserMenu;
   }
 
-  closeProfile() {
-    this.showProfile = false;
+  closeUserMenu() {
+    this.showUserMenu = false;
   }
 
 openEditFolderModal() {
@@ -210,6 +212,9 @@ openEditFolderModal() {
 }
   payment() {
     this.router.navigate(['/payment']);
+  }
+  profilePage() {
+    this.router.navigate(['/profile']);
   }
   aboutpage() {
     this.router.navigate(['about']);
@@ -386,20 +391,22 @@ async logout() {
     const file = input.files[0];
 
     this.fileService.uploadFile(this.selectedFolderId, file).subscribe({
-      next: () => {
-        console.log('File uploaded from header');
+      next: (event: HttpEvent<any>) => {
+        if (event.type === HttpEventType.Response) {
+          console.log('File uploaded from header');
 
-        input.value = '';
+          input.value = '';
 
-        // reload files
-        this.reloadFiles();
+          // reload files
+          this.reloadFiles();
 
-        // auto-open model-data if first file
-        if (!this.showModelData) {
-          const dir = this.directories.find((d) => d.id === this.selectedFolderId);
-          if (dir) {
-            this.setDataNodePosition(dir);
-            this.showModelData = true;
+          // auto-open model-data if first file
+          if (!this.showModelData) {
+            const dir = this.directories.find((d) => d.id === this.selectedFolderId);
+            if (dir) {
+              this.setDataNodePosition(dir);
+              this.showModelData = true;
+            }
           }
         }
       },

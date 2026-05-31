@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -21,9 +21,16 @@ export class FileService {
     formData.append('nodeId', nodeId);
     formData.append('file', file);
 
+    const headers = new HttpHeaders().set('X-Skip-Loader', 'true');
+
     return this.http.post<any>(
       `${this.baseUrl}/upload`,
-      formData
+      formData,
+      {
+        headers,
+        reportProgress: true,
+        observe: 'events'
+      }
     );
   }
 

@@ -1,30 +1,38 @@
-import { NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-profile',
+  selector: 'app-user-menu',
+  standalone: true,
   imports: [],
-  templateUrl: './profile.html',
-  styleUrl: './profile.css',
+  templateUrl: './user-menu.html',
+  styleUrl: './user-menu.css',
 })
-export class Profile {
+export class UserMenu {
   @Input() username: string | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
   @Output() payment = new EventEmitter<void>();
   @Output() about = new EventEmitter<void>();
+  @Output() profile = new EventEmitter<void>();
 
-
-  closeProfile() {
+  closeMenu() {
     this.close.emit();
   }
-aboutpage(){
-this.about.emit();
-}
+
+  aboutPage() {
+    this.about.emit();
+  }
+
+  profilePage() {
+    this.profile.emit();
+  }
+
+
   logoutUser() {
     this.logout.emit();
   }
-  paymentpage(){
+
+  paymentPage() {
     this.payment.emit();
   }
 }

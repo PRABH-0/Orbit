@@ -6,7 +6,7 @@
   (addItem)="onAddItem()"
   (delete)="onDeleteFolder()"
   (rename)="openEditFolderModal()"
-  (openProfile)="openUserMenu()">
+  (openMenu)="toggleUserMenu()">
 </app-header>
 
 <input
@@ -15,18 +15,19 @@
   hidden
   (change)="onHeaderFileSelected($event)"
 />
-<app-profile
-  *ngIf="showProfile"
+<app-user-menu
+  *ngIf="showUserMenu"
   [username]="username"
-  (close)="closeProfile()"
+  (close)="closeUserMenu()"
   (logout)="logout()"
+  (profile)="profilePage()"
   (about)="aboutpage()"
   (payment)="payment()">
-</app-profile>
+</app-user-menu>
   <div
     class="canvas-blur-overlay"
-    *ngIf="showProfile"
-    (click)="closeProfile()">
+    *ngIf="showUserMenu"
+    (click)="closeUserMenu()">
   </div>
 <div class="grid" #grid>
 
@@ -50,7 +51,7 @@
     (click)="toggleRoot()">
    <img
   class="user-avatar"
-  [src]="profilePic"
+  [src]="avatarUrl"
   alt="User"
 />
 

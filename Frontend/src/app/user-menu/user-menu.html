@@ -1,30 +1,28 @@
-<div class="profile-sidebar">
+<div class="user-menu-sidebar">
 
-    <div class="profile-item" (click)="closeProfile()">
+  <div class="menu-item" (click)="closeMenu()">
     <span class="bracket">[ </span>
     <span class="button-text close">close</span>
     <span class="bracket"> ]</span>
   </div>
 
-<!-- <div class="profile-item" (click)="paymentpage()">
+  <div class="menu-item" (click)="profilePage()">
     <span class="bracket">[ </span>
-    <span class="button-text close">plans</span>
+    <span class="button-text">profile</span>
     <span class="bracket"> ]</span>
-  </div> -->
+  </div>
 
-  <div class="profile-item" (click)="aboutpage()">
+  <div class="menu-item" (click)="aboutPage()">
     <span class="bracket">[ </span>
-    <span class="button-text close">about</span>
+    <span class="button-text">about</span>
     <span class="bracket"> ]</span>
   </div>
 
   <!-- LOGOUT -->
-  <div class="profile-item" (click)="logoutUser()">
+  <div class="menu-item" (click)="logoutUser()">
     <span class="bracket">[ </span>
     <span class="button-text logout">Logout</span>
     <span class="bracket"> ]</span>
   </div>
-
-  
 
 </div>
