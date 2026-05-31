@@ -28,6 +28,9 @@ import { GoogleDriveService } from '../services/google-drive.service';
 import { GooglePhotosService } from '../services/google-photos.service';
 
 import { HttpEvent, HttpEventType } from '@angular/common/http';
+import { LoaderService } from '../services/loader.service';
+import { ToastService } from '../services/toast.service';
+import { DialogService } from '../services/dialog.service';
 
 @Component({
   selector: 'app-canvas',
@@ -102,6 +105,9 @@ deleteTargetFolder: any = null;
     public auth : AuthService,
     private googleDriveService: GoogleDriveService,
     private router: Router,
+    private loaderService: LoaderService,
+    private toastService: ToastService,
+    private dialogService: DialogService
   ) {}
 
 async ngOnInit() {
@@ -257,9 +263,11 @@ confirmDeleteFolder() {
       this.activeFolder = null;
 
       this.closeDeleteModal();
+      this.toastService.success('Folder deleted');
     },
     error: (err) => {
       console.error('Delete failed', err);
+      this.toastService.error('Delete failed');
       this.closeDeleteModal();
     }
   });
@@ -313,7 +321,9 @@ if (this.isEditMode && this.editingFolder) {
   if (nameChanged) {
     this.directoryService
       .renameDirectory(id, this.draftFolder.name)
-      .subscribe();
+      .subscribe(() => {
+        this.toastService.success('Folder renamed');
+      });
   }
 
   if (positionChanged) {
@@ -367,6 +377,11 @@ if (this.isEditMode && this.editingFolder) {
       Object.assign(this.draftFolder, created);
       delete this.draftFolder.isDraft;
       this.resetModal();
+      this.toastService.success('Folder created');
+    },
+    error: (err) => {
+      console.error('Create failed', err);
+      this.toastService.error('Create failed');
     }
   });
 }
@@ -404,10 +419,12 @@ async logout() {
 
     const file = input.files[0];
 
+    this.loaderService.show();
     this.fileService.uploadFile(this.selectedFolderId, file).subscribe({
       next: (event: HttpEvent<any>) => {
         if (event.type === HttpEventType.Response) {
           console.log('File uploaded from header');
+          this.loaderService.hide();
 
           input.value = '';
 
@@ -426,6 +443,7 @@ async logout() {
       },
       error: (err) => {
         console.error('Header upload failed', err);
+        this.loaderService.hide();
       },
     });
   }
@@ -477,18 +495,21 @@ async logout() {
     return match ? match[1] : null;
   }
 
-  deleteFile() {
+  async deleteFile() {
     if (!this.selectedFile) return;
 
-    if (!confirm('Delete this file?')) return;
+    const confirmed = await this.dialogService.confirm('Delete File', 'Are you sure you want to delete this file?');
+    if (!confirmed) return;
 
     this.fileService.deleteFile(this.selectedFile.id).subscribe({
       next: () => {
         this.closeFileViewer();
         this.reloadFiles();
+        this.toastService.success('File deleted');
       },
       error: (err: any) => {
         console.error('Delete failed', err);
+        this.toastService.error('Delete failed');
       },
     });
   }
@@ -1016,6 +1037,99 @@ onMouseUp() {
   });
 }
 
+
+  getBreadcrumbs() {
+    const crumbs: any[] = [];
+    const displayName = this.userState.username || this.username || 'User';
+
+    crumbs.push({
+      id: null,
+      name: displayName,
+      isRoot: true
+    });
+
+    if (!this.selectedFolderId || this.selectedFolderId === 'ROOT') {
+      return crumbs;
+    }
+
+    const path: any[] = [];
+    let currentId: string | null = this.selectedFolderId;
+    let safetyCounter = 0;
+
+    while (currentId && safetyCounter < 100) {
+      const folder = this.directories.find(d => d.id === currentId);
+      if (!folder) break;
+      path.unshift({
+        id: folder.id,
+        name: folder.name,
+        isRoot: false
+      });
+      currentId = folder.parentId;
+      safetyCounter++;
+    }
+
+    return [...crumbs, ...path];
+  }
+
+  selectFolderFromBreadcrumb(crumb: any) {
+    if (crumb.isRoot) {
+      this.rootOpen = true;
+      this.selectedParentFolderId = null;
+      this.selectedFolderId = null;
+      this.activeFolder = null;
+      this.currentFolderName = 'Root';
+      this.showModelData = false;
+      this.dataNodePosition = null;
+      this.selectedFolderItems = [];
+      return;
+    }
+
+    const dir = this.directories.find(d => d.id === crumb.id);
+    if (!dir) return;
+
+    // Ensure all parents are open
+    let currentParentId = dir.parentId;
+    let safety = 0;
+    while (currentParentId && safety < 100) {
+      const parent = this.directories.find(d => d.id === currentParentId);
+      if (parent) {
+        parent.isOpen = true;
+        currentParentId = parent.parentId;
+      } else {
+        break;
+      }
+      safety++;
+    }
+
+    this.rootOpen = true;
+    dir.isOpen = true; // Ensure target is open too
+
+    this.selectedFolderId = dir.id;
+    this.selectedParentFolderId = dir.id;
+    this.currentFolderName = dir.name;
+    this.activeFolder = dir;
+
+    // Load files
+    this.showModelData = false;
+    this.dataNodePosition = null;
+    this.selectedFolderItems = [];
+    this.selectedFile = null;
+
+    this.fileService.getFilesByNode(dir.id).subscribe({
+      next: (files) => {
+        this.selectedFolderItems = files ?? [];
+        if (files && files.length > 0) {
+          this.setDataNodePosition(dir);
+          this.showModelData = true;
+        }
+      },
+      error: () => {
+        this.selectedFolderItems = [];
+        this.showModelData = false;
+        this.dataNodePosition = null;
+      },
+    });
+  }
 
   private update() {
     this.grid.nativeElement.style.transform = `translate(${this.x}px, ${this.y}px)`;

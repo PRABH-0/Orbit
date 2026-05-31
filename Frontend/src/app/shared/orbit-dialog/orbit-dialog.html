@@ -1,0 +1,49 @@
+<div class="dialog-backdrop" *ngIf="config">
+  <div class="dialog-panel" [class.loading]="config.type === 'loading'">
+    
+    <div class="dialog-header">
+      [ {{ (config.title || config.type).toUpperCase() }} ]
+    </div>
+
+    <div class="dialog-content">
+      <p class="dialog-message" *ngIf="config.message">{{ config.message }}</p>
+
+      <div class="prompt-container" *ngIf="config.type === 'prompt'">
+        <input #promptInput
+               type="text" 
+               class="orbit-input" 
+               [(ngModel)]="promptValue" 
+               (keyup.enter)="confirm()"
+               (keyup.escape)="cancel()">
+      </div>
+
+      <div class="loader-container" *ngIf="config.type === 'loading'">
+        <div class="dual-orbit-loader">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+            <circle cx="50" cy="50" r="40" class="ring"></circle>
+            <g class="orbit-cw">
+              <circle cx="50" cy="10" r="4" class="dot"></circle>
+            </g>
+            <g class="orbit-ccw">
+              <circle cx="50" cy="90" r="5" class="dot"></circle>
+            </g>
+            <circle cx="50" cy="50" r="8" class="core"></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions" *ngIf="config.type !== 'loading'">
+      <button class="orbit-btn secondary" 
+              *ngIf="config.type === 'confirm' || config.type === 'prompt'"
+              (click)="cancel()">
+        [ <span class="btn-text">Cancel</span> ]
+      </button>
+      
+      <button class="orbit-btn primary" (click)="confirm()">
+        [ <span class="btn-text">{{ config.type === 'alert' ? 'Close' : (config.type === 'confirm' ? 'Confirm' : 'Submit') }}</span> ]
+      </button>
+    </div>
+
+  </div>
+</div>

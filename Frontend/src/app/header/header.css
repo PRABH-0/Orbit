@@ -212,3 +212,95 @@ top : -5px;
   border-color: #6b7280;
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ================= BREADCRUMBS DESIGN SYSTEM ================= */
+.center-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  user-select: none;
+  max-width: 45%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.crumb-name {
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0 2px;
+}
+
+/* Current folder (last segment) styling - high contrast with bold underline */
+.breadcrumb-item.current .crumb-name {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration-line: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 2px;
+}
+
+.breadcrumb-separator {
+  color: #475569;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+/* Mobile Responsive Stacking */
+@media (max-width: 768px) {
+  .header {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    gap: 8px;
+    padding: 8px 12px !important;
+  }
+  
+  .left {
+    order: 1;
+  }
+  
+  .right {
+    order: 2;
+    max-width: 70% !important;
+    display: flex;
+    flex-direction: row-reverse !important;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .right-top {
+    gap: 0px !important;
+  }
+
+  .header-button {
+    gap: 6px !important;
+  }
+
+  .center-breadcrumbs {
+    position: static !important;
+    transform: none !important;
+    order: 3;
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: center;
+    padding: 6px 0 2px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .breadcrumb-separator {
+    padding: 0 2px;
+  }
+}

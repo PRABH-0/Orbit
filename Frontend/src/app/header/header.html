@@ -1,44 +1,49 @@
 <header class="header">
+  
+  <!-- LEFT BRANDING / USER MENU TRIGGER -->
   <div class="left">
     <span class="bracket">[ </span> 
-    <span class="username clickable" (click)="openMenu.emit()">
-  {{ userState.username}}
-</span>
+    <span class="username clickable" (click)="openMenu.emit()">Orbit</span>
     <span class="bracket"> ]</span>
   </div>
 
-<div class="right" *ngIf="currentFolder">
+  <!-- CENTER BREADCRUMBS -->
+  <div class="center-breadcrumbs" *ngIf="breadcrumbs && breadcrumbs.length > 0">
+    <ng-container *ngFor="let crumb of breadcrumbs; let last = last; let first = first">
+      <div class="breadcrumb-item" [class.current]="last" [class.previous]="!last">
+        <span class="crumb-name" 
+              [title]="getFullPathToolTip(crumb)">
+          {{ truncateName(crumb.name, last) }}
+        </span>
+      </div>
+      <span class="breadcrumb-separator" *ngIf="!last"> &gt; </span>
+    </ng-container>
+  </div>
 
-  <!-- TOP ROW -->
-  <div class="right-top">
-    <span class="del-bracket">[ </span>
-<span class="folder-name" (click)="rename.emit()">
-  {{ currentFolder }}
-</span>
-<span class="del-bracket"> ]</span>
-
-    <div *ngIf="currentFolder!=='Root'">
-
-      <span  class="del-bracket">[ </span>
-      <span class="delete-action clickable"(click)="delete.emit()">
-        Delete
-      </span>
-      <span class="del-bracket"> ]</span>
+  <!-- RIGHT ACTION GROUP -->
+  <div class="right" *ngIf="currentFolder">
+    
+    <!-- TOP ROW (DELETE ACTION) -->
+    <div class="right-top">
+      <div *ngIf="currentFolder !== 'Root'">
+        <span class="del-bracket">[ </span>
+        <span class="delete-action clickable" (click)="delete.emit()">
+          Delete
+        </span>
+        <span class="del-bracket"> ]</span>
+      </div>
     </div>
+
+    <!-- BOTTOM ROW (ADD BUTTONS) -->
+    <div class="header-button">
+      <button class="add-folder-btn" *ngIf="currentFolder !== 'Root'" (click)="addItem.emit()">
+        ＋ Add Item
+      </button>
+      <button class="add-folder-btn" (click)="addFolder.emit()">
+        ＋ Add Folder
+      </button>
+    </div>
+
   </div>
-
-  <!-- BUTTON ROW -->
-  <div class="header-button">
-    <button class="add-folder-btn"  *ngIf="currentFolder!=='Root'" (click)="addItem.emit()">
-      ＋ Add Item
-    </button>
-
-    <button class="add-folder-btn" (click)="addFolder.emit()">
-      ＋ Add Folder
-    </button>
-  </div>
-
-</div>
-
   
 </header>

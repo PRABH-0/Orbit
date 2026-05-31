@@ -8,6 +8,7 @@ import { supabase } from '../supabase.client';
 import { AuthService } from '../services/auth.service';
 import { NgZone } from '@angular/core';
 import { Location } from '@angular/common';
+import { ToastService } from '../services/toast.service';
 
 
 @Component({
@@ -24,7 +25,8 @@ export class About implements OnInit {
     private ngZone: NgZone,
     private feedbackService: FeedbackService,
     private authService : AuthService,
-    private location : Location
+    private location : Location,
+    private toastService: ToastService
   ) {}
 
   showFeedback = false;
@@ -58,14 +60,14 @@ ngOnInit() {
 
     this.feedbackService.sendFeedback(payload).subscribe({
       next: () => {
-        alert('✅ Feedback sent successfully');
+        this.toastService.success('Feedback sent successfully');
         this.feedbackMessage = '';
         this.isSending = false;
         this.closeFeedback();
       },
       error: (err) => {
         console.error(err);
-        alert('❌ Failed to send feedback');
+        this.toastService.error('Failed to send feedback');
         this.isSending = false;
       }
     });

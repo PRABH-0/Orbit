@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { supabase } from '../../supabase.client';
 import { environment } from '../../../environments/environment';
+import { ToastService } from '../../services/toast.service';
 
 declare const google: any;
 
@@ -28,7 +29,8 @@ export class Signin implements OnInit {
 
   constructor(
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {}
 
 async ngOnInit() {
@@ -95,7 +97,7 @@ async googleLogin() {
     this.isRegister = false;
     this.password = '';
     this.confirmPassword = '';
-    alert('Check your email to confirm your account');
+    this.toastService.info('Check your email to confirm your account');
   }
 }
 

@@ -4,6 +4,8 @@ import { FileService } from '../services/file.service';
 import { environment } from '../../environments/environment';
 import { GoogleDriveService } from '../services/google-drive.service';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
+import { ToastService } from '../services/toast.service';
+import { DialogService } from '../services/dialog.service';
 
 @Component({
   selector: 'app-model-data',
@@ -43,7 +45,12 @@ export class ModelData implements OnChanges {
   isUploading = false;
   uploadProgress = 0;
 
-  constructor(private fileService: FileService, private googleDriveService: GoogleDriveService) { }
+  constructor(
+    private fileService: FileService, 
+    private googleDriveService: GoogleDriveService,
+    private toastService: ToastService,
+    private dialogService: DialogService
+  ) { }
   videoThumbnailCache = new Map<string, string>();
 
   ngOnChanges() {
@@ -247,13 +254,14 @@ export class ModelData implements OnChanges {
       });
   }
 
-  handleGoogleFile(file: any) {
+  async handleGoogleFile(file: any) {
 
     const type = this.detectType(file);
 
     if (type === 'other') {
 
-      const confirmDownload = confirm(
+      const confirmDownload = await this.dialogService.confirm(
+        'Preview Unavailable',
         `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
       );
 
@@ -268,7 +276,7 @@ export class ModelData implements OnChanges {
     this.openGoogleFile(file);
   }
 
-  openFile(file: any) {
+  async openFile(file: any) {
 
     if (file.isGoogle) {
       this.handleGoogleFile(file);
@@ -290,7 +298,8 @@ export class ModelData implements OnChanges {
 
     if (type === 'other') {
 
-      const confirmDownload = confirm(
+      const confirmDownload = await this.dialogService.confirm(
+        'Preview Unavailable',
         `This file type cannot be previewed.\n\nDo you want to download "${file.fileName}"?`
       );
 
@@ -560,23 +569,26 @@ export class ModelData implements OnChanges {
       URL.revokeObjectURL(url);
     });
   }
-  delete(file: any) {
-    if (!confirm('Delete this file?')) return;
+  async delete(file: any) {
+    const confirmed = await this.dialogService.confirm('Delete File', `Are you sure you want to delete "${file.fileName}"?`);
+    if (!confirmed) return;
 
     this.fileService.deleteFile(file.id).subscribe({
       next: () => {
         this.imageCache.delete(file.id);
         this.fileUploaded.emit(); // refresh list
+        this.toastService.success('File deleted');
       },
       error: (err: any) => {
         console.error('Delete failed', err);
+        this.toastService.error('Delete failed');
       }
     });
   }
 
   onFileSelected(event: Event) {
     if (this.isGoogleFolder) {
-      console.warn("Upload not allowed for cloud folder");
+      this.toastService.warning("Upload not allowed for cloud folder");
       return;
     }
     if (!this.nodeId) {
@@ -593,6 +605,7 @@ export class ModelData implements OnChanges {
       next: (event: HttpEvent<any>) => {
         if (event.type === HttpEventType.Response) {
           console.log('File uploaded successfully');
+          this.toastService.success('File uploaded');
 
           // reset input (important)
           input.value = '';
@@ -603,6 +616,7 @@ export class ModelData implements OnChanges {
       },
       error: (err: any) => {
         console.error('Upload failed', err);
+        this.toastService.error('Upload failed');
       }
     });
   }

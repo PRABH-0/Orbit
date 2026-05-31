@@ -1,0 +1,13 @@
+<div class="toast-container">
+  <div *ngFor="let toast of toasts$ | async" 
+       class="toast-item" 
+       [class]="toast.type"
+       (click)="remove(toast.id)">
+    <div class="toast-header">
+      [ {{ toast.type.toUpperCase() }} ]
+    </div>
+    <div class="toast-body">
+      {{ toast.message }}
+    </div>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { PaymentService } from '../services/payment.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-payment',
@@ -10,7 +11,11 @@ import { PaymentService } from '../services/payment.service';
 })
 export class Payment {
 
- constructor(private paymentService: PaymentService,private router:Router) {}
+ constructor(
+   private paymentService: PaymentService,
+   private router:Router,
+   private toastService: ToastService
+ ) {}
 
 purchase(plan: 'pro' | 'ultra') {
   this.paymentService.createPayment(plan).subscribe({
@@ -22,10 +27,10 @@ purchase(plan: 'pro' | 'ultra') {
         res.paymentId,
         'fake_gateway_payment_id'
       ).subscribe(() => {
-        alert('Payment successful 🎉 Storage upgraded!');
+        this.toastService.success('Payment successful! Storage upgraded.');
       });
     },
-    error: () => alert('Payment failed')
+    error: () => this.toastService.error('Payment failed')
   });
 }
 
