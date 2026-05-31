@@ -279,7 +279,9 @@ export class ModelData implements OnChanges {
         type: 'image',
         id: file.id,
         url: file.fullUrl,
-        fileName: file.fileName
+        fileName: file.fileName,
+        size: file.size,
+        lastModified: file.createdAt
       });
       return;
     }
@@ -390,7 +392,9 @@ export class ModelData implements OnChanges {
             type: type,
             id: file.id,
             url: objectUrl,
-            fileName: file.fileName
+            fileName: file.fileName,
+            size: file.size,
+            lastModified: file.createdAt
           });
         },
         error: (err: any) => {
@@ -408,7 +412,9 @@ export class ModelData implements OnChanges {
             type: 'text',
             id: file.id,
             fileName: file.fileName,
-            content: text
+            content: text,
+            size: file.size,
+            lastModified: file.createdAt
           });
         });
       },
@@ -423,7 +429,9 @@ export class ModelData implements OnChanges {
       type: 'pdf',
       id: file.id,
       url: this.getStreamUrl(file.id),  // ✅ FIXED
-      fileName: file.fileName
+      fileName: file.fileName,
+      size: file.size,
+      lastModified: file.createdAt
     });
   }
 
@@ -435,7 +443,9 @@ export class ModelData implements OnChanges {
       type: 'video',
       id: file.id,
       url: this.getStreamUrl(file.id),
-      fileName: file.fileName
+      fileName: file.fileName,
+      size: file.size,
+      lastModified: file.createdAt
     });
   }
 
@@ -444,7 +454,9 @@ export class ModelData implements OnChanges {
       type: 'audio',
       id: file.id,
       url: this.getStreamUrl(file.id),
-      fileName: file.fileName
+      fileName: file.fileName,
+      size: file.size,
+      lastModified: file.createdAt
     });
   }
   isFolder(file: any): boolean {
@@ -521,7 +533,9 @@ export class ModelData implements OnChanges {
       type: 'image',
       id: file.id,
       url: this.getImageUrl(file.id),
-      fileName: file.fileName
+      fileName: file.fileName,
+      size: file.size,
+      lastModified: file.createdAt
     });
   }
 

@@ -56,13 +56,27 @@ isEditMode = false;
 editingFolder: any = null;
   dataNodePosition: { x: number; y: number } | null = null;
   selectedFile: {
-  type: 'image' | 'pdf' | 'video' | 'audio' | 'text';
-  id: string;
-  url?: string;
-  safeUrl?: SafeUrl;
-  content?: string;
-  fileName?: string;
-} | null = null;
+    type: 'image' | 'pdf' | 'video' | 'audio' | 'text';
+    id: string;
+    url?: string;
+    safeUrl?: SafeUrl;
+    content?: string;
+    fileName?: string;
+    size?: number;
+    lastModified?: string;
+    storageProvider?: string;
+  } | null = null;
+
+  // Unified File Viewer State
+  zoomLevel = 1.0;
+  panX = 0;
+  panY = 0;
+  isViewerPanning = false;
+  viewerPanStartX = 0;
+  viewerPanStartY = 0;
+  showSidebar = true;
+  isLoading = false;
+  textLines: string[] = [];
 
   avatarUrl: string | null = null;
 isDeleteModalOpen = false;
@@ -727,19 +741,181 @@ async logout() {
   }
 
   openImage(payload: any) {
-  if (payload.type === 'text') {
-    this.selectedFile = payload;
-    return;
+    this.isLoading = true;
+    this.resetZoom();
+
+    if (payload.type === 'text') {
+      this.textLines = payload.content ? payload.content.split('\n') : [];
+      this.selectedFile = {
+        ...payload,
+        storageProvider: this.activeFolder?.storageProvider || 'Local'
+      };
+      this.isLoading = false;
+      return;
+    }
+
+    if (payload.type === 'pdf') {
+      payload.safeUrl =
+        this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
+    }
+
+    this.selectedFile = {
+      ...payload,
+      storageProvider: this.activeFolder?.storageProvider || 'Local'
+    };
   }
 
- if (payload.type === 'pdf') {
-    payload.safeUrl =
-      this.sanitizer.bypassSecurityTrustResourceUrl(payload.url);
+  // =========================
+  // FILE PREVIEW ZOOM / PAN / SIDEBAR / LOAD HELPERS
+  // =========================
+  onMediaLoaded() {
+    this.isLoading = false;
   }
 
-  // ❌ NO sanitizer for audio/video
-  this.selectedFile = payload;
-}
+  toggleSidebar() {
+    this.showSidebar = !this.showSidebar;
+  }
+
+  zoomIn() {
+    this.zoomLevel = Math.min(5.0, this.zoomLevel + 0.25);
+  }
+
+  zoomOut() {
+    this.zoomLevel = Math.max(0.1, this.zoomLevel - 0.25);
+    if (this.zoomLevel <= 1.0) {
+      this.panX = 0;
+      this.panY = 0;
+    }
+  }
+
+  resetZoom() {
+    this.zoomLevel = 1.0;
+    this.panX = 0;
+    this.panY = 0;
+  }
+
+  onViewerImageWheel(event: WheelEvent) {
+    event.preventDefault();
+    const zoomFactor = 0.05;
+    const direction = event.deltaY < 0 ? 1 : -1;
+    this.zoomLevel = Math.max(0.1, Math.min(5.0, this.zoomLevel + direction * zoomFactor));
+    if (this.zoomLevel <= 1.0) {
+      this.panX = 0;
+      this.panY = 0;
+    }
+  }
+
+  onViewerImageDblClick() {
+    if (this.zoomLevel > 1.0) {
+      this.resetZoom();
+    } else {
+      this.zoomLevel = 2.5;
+    }
+  }
+
+  onViewerImageMouseDown(event: MouseEvent) {
+    if (this.zoomLevel <= 1.0) return;
+    this.isViewerPanning = true;
+    this.viewerPanStartX = event.clientX - this.panX;
+    this.viewerPanStartY = event.clientY - this.panY;
+    event.preventDefault();
+  }
+
+  onViewerImageMouseMove(event: MouseEvent) {
+    if (!this.isViewerPanning) return;
+    this.panX = event.clientX - this.viewerPanStartX;
+    this.panY = event.clientY - this.viewerPanStartY;
+    event.preventDefault();
+  }
+
+  onViewerImageMouseUp() {
+    this.isViewerPanning = false;
+  }
+
+  onViewerImageTouchStart(event: TouchEvent) {
+    if (this.zoomLevel <= 1.0 || event.touches.length === 0) return;
+    this.isViewerPanning = true;
+    const touch = event.touches[0];
+    this.viewerPanStartX = touch.clientX - this.panX;
+    this.viewerPanStartY = touch.clientY - this.panY;
+  }
+
+  onViewerImageTouchMove(event: TouchEvent) {
+    if (!this.isViewerPanning || event.touches.length === 0) return;
+    const touch = event.touches[0];
+    this.panX = touch.clientX - this.viewerPanStartX;
+    this.panY = touch.clientY - this.viewerPanStartY;
+  }
+
+  onViewerImageTouchEnd() {
+    this.isViewerPanning = false;
+  }
+
+  formatBytes(bytes: number | undefined): string {
+    if (bytes === undefined || bytes === null || isNaN(bytes)) return 'Unknown Size';
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  formatDate(dateStr: string | undefined): string {
+    if (!dateStr) return 'Unknown Date';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return 'Unknown Date';
+      return date.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return 'Unknown Date';
+    }
+  }
+
+  getFriendlyType(fileName: string | undefined): string {
+    if (!fileName) return 'Unknown Document';
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+      case 'svg':
+        return `${ext.toUpperCase()} Image`;
+      case 'pdf':
+        return 'PDF Document';
+      case 'mp4':
+      case 'webm':
+      case 'ogg':
+      case 'mov':
+        return `${ext.toUpperCase()} Video`;
+      case 'mp3':
+      case 'wav':
+      case 'aac':
+      case 'flac':
+        return `${ext.toUpperCase()} Audio`;
+      case 'json':
+        return 'JSON Document';
+      case 'js':
+      case 'ts':
+      case 'tsx':
+      case 'html':
+      case 'css':
+        return `${ext.toUpperCase()} Source File`;
+      case 'md':
+        return 'Markdown Document';
+      case 'txt':
+        return 'Text Document';
+      default:
+        return 'Document File';
+    }
+  }
 
   closeFileViewer() {
     this.selectedFile = null;

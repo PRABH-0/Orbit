@@ -142,64 +142,161 @@
   class="file-viewer-overlay"
   *ngIf="selectedFile"
   (click)="closeFileViewer()"
-><!-- FILE NAME -->
-<div
-  class="file-name"
-  (click)="$event.stopPropagation()"
 >
-  {{ selectedFile.fileName }}
-</div>
+  <div class="file-viewer-modal" (click)="$event.stopPropagation()">
+    
+    <!-- MODAL HEADER -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="file-icon">{{ selectedFile.type === 'image' ? '🖼️' : selectedFile.type === 'pdf' ? '📄' : selectedFile.type === 'video' ? '🎬' : selectedFile.type === 'audio' ? '🎵' : '📝' }}</span>
+        <span class="file-name-text" [title]="selectedFile.fileName">{{ selectedFile.fileName }}</span>
+      </div>
 
-  <!-- TOOLBAR -->
-  <div class="file-toolbar" (click)="$event.stopPropagation()">
-    <button (click)="downloadFile()">⬇</button>
-    <button (click)="deleteFile()">🗑</button>
-    <button (click)="closeFileViewer()">✕</button>
-  </div>
+      <!-- ZOOM CONTROLS (ONLY FOR IMAGES) -->
+      <div class="zoom-controls-container" *ngIf="selectedFile.type === 'image' && !isLoading">
+        <button class="zoom-btn" (click)="zoomOut()" title="Zoom Out" [disabled]="zoomLevel <= 0.1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <span class="zoom-level-text">{{ (zoomLevel * 100) | number:'1.0-0' }}%</span>
+        <button class="zoom-btn" (click)="zoomIn()" title="Zoom In" [disabled]="zoomLevel >= 5.0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="zoom-btn reset-btn" (click)="resetZoom()" title="Reset Zoom" *ngIf="zoomLevel !== 1.0 || panX !== 0 || panY !== 0">
+          Reset
+        </button>
+      </div>
 
-  <!-- CENTERED CONTENT -->
-  <div class="file-viewer-content" (click)="$event.stopPropagation()">
+      <div class="modal-header-right">
+        <!-- DOWNLOAD -->
+        <button class="modal-action-btn" (click)="downloadFile()" title="Download">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <!-- DELETE -->
+        <button class="modal-action-btn danger" (click)="deleteFile()" title="Delete">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </button>
+        <!-- TOGGLE INFO SIDEBAR -->
+        <button class="modal-action-btn" [class.active]="showSidebar" (click)="toggleSidebar()" title="Toggle Details">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </button>
+        <div class="modal-divider"></div>
+        <!-- CLOSE -->
+        <button class="modal-action-btn close" (click)="closeFileViewer()" title="Close">
+          ✕
+        </button>
+      </div>
+    </div>
 
-    <!-- IMAGE -->
-    <!-- IMAGE -->
-<div *ngIf="selectedFile.type === 'image'" class="image-wrapper">
-  <img
-    [src]="selectedFile.url"
-    class="file-media"
-  />
-</div>
+    <!-- MODAL BODY -->
+    <div class="modal-body-container">
+      
+      <!-- MAIN PREVIEW PANEL -->
+      <div class="viewer-main-content">
+        
+        <!-- SKELETON LOADER -->
+        <div class="viewer-skeleton-container" *ngIf="isLoading">
+          <div class="skeleton-shimmer"></div>
+          <div class="skeleton skeleton-media"></div>
+        </div>
 
+        <!-- FILE PREVIEWS -->
+        <div class="viewer-render-area" [class.hidden]="isLoading">
+          
+          <!-- IMAGE (WITH ZOOM & PAN) -->
+          <div *ngIf="selectedFile.type === 'image'" class="image-zoom-viewport"
+               (wheel)="onViewerImageWheel($event)">
+            <img [src]="selectedFile.url" 
+                 class="viewer-image-element"
+                 [style.transform]="'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoomLevel + ')'"
+                 [style.cursor]="zoomLevel > 1.0 ? (isViewerPanning ? 'grabbing' : 'grab') : 'default'"
+                 [style.transition]="isViewerPanning ? 'none' : 'transform 0.15s ease-out'"
+                 (mousedown)="onViewerImageMouseDown($event)"
+                 (mousemove)="onViewerImageMouseMove($event)"
+                 (mouseup)="onViewerImageMouseUp()"
+                 (mouseleave)="onViewerImageMouseUp()"
+                 (touchstart)="onViewerImageTouchStart($event)"
+                 (touchmove)="onViewerImageTouchMove($event)"
+                 (touchend)="onViewerImageTouchEnd()"
+                 (dblclick)="onViewerImageDblClick()"
+                 (load)="onMediaLoaded()" />
+          </div>
 
-    <!-- VIDEO -->
-    <video
-      *ngIf="selectedFile.type === 'video'"
-      controls
-      class="file-media"
-    >
-      <source [src]="selectedFile.url" />
-    </video>
-    <!-- TEXT / CODE VIEWER -->
-<pre
-  *ngIf="selectedFile.type === 'text'"
-  class="code-viewer"
->
-{{ selectedFile.content }}
-</pre>
+          <!-- VIDEO -->
+          <div *ngIf="selectedFile.type === 'video'" class="video-preview-container">
+            <video controls class="viewer-video-element" (loadedmetadata)="onMediaLoaded()">
+              <source [src]="selectedFile.url" />
+            </video>
+          </div>
 
+          <!-- PDF -->
+          <div *ngIf="selectedFile.type === 'pdf'" class="pdf-preview-container">
+            <iframe [src]="selectedFile.safeUrl" type="application/pdf" class="viewer-pdf-element" (load)="onMediaLoaded()"></iframe>
+          </div>
 
-    <!-- PDF -->
-    <iframe
-  *ngIf="selectedFile.type === 'pdf'"
-  [src]="selectedFile.safeUrl" type="application/pdf"
-  class="file-media pdf">
-</iframe>
+          <!-- AUDIO -->
+          <div *ngIf="selectedFile.type === 'audio'" class="audio-preview-container">
+            <div class="audio-player-card">
+              <div class="audio-disc-animation">
+                <div class="audio-disc-inner">
+                  <div class="audio-disc-center"></div>
+                </div>
+              </div>
+              <div class="audio-title">{{ selectedFile.fileName }}</div>
+              <audio controls class="viewer-audio-element" (loadedmetadata)="onMediaLoaded()">
+                <source [src]="selectedFile.url" type="audio/mpeg" />
+              </audio>
+            </div>
+          </div>
 
-<div *ngIf="selectedFile.type === 'audio'" class="audio-wrapper">
-  <audio controls>
-    <source [src]="selectedFile.url" type="audio/mpeg" />
+          <!-- TEXT / CODE -->
+          <div *ngIf="selectedFile.type === 'text'" class="text-preview-container viewer-scrollbar">
+            <div class="code-editor-layout">
+              <div class="code-gutter">
+                <div *ngFor="let line of textLines; let idx = index" class="gutter-line-number">{{ idx + 1 }}</div>
+              </div>
+              <pre class="code-body-pre"><code class="code-body-element">{{ selectedFile.content }}</code></pre>
+            </div>
+          </div>
 
-  </audio>
-</div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR DETAILS DRAWER -->
+      <div class="viewer-details-sidebar" *ngIf="showSidebar" [class.slide-in]="showSidebar">
+        <h3 class="sidebar-section-title">Properties</h3>
+        
+        <div class="sidebar-file-meta-header">
+          <div class="sidebar-large-icon">{{ selectedFile.type === 'image' ? '🖼️' : selectedFile.type === 'pdf' ? '📄' : selectedFile.type === 'video' ? '🎬' : selectedFile.type === 'audio' ? '🎵' : '📝' }}</div>
+          <div class="sidebar-file-name" [title]="selectedFile.fileName">{{ selectedFile.fileName }}</div>
+        </div>
+
+        <hr class="sidebar-divider" />
+
+        <div class="sidebar-info-group">
+          <div class="info-row">
+            <span class="info-label">Type</span>
+            <span class="info-value">{{ getFriendlyType(selectedFile.fileName) }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Size</span>
+            <span class="info-value">{{ formatBytes(selectedFile.size) }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Modified</span>
+            <span class="info-value">{{ formatDate(selectedFile.lastModified) }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Storage</span>
+            <span class="info-value highlight">{{ selectedFile.storageProvider || 'Local' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
 
   </div>
 </div>
