@@ -11,22 +11,45 @@ touch-action: none;
   cursor: grabbing;
 }
 @media (max-width: 768px) {
-
-  app-header {
-    width: 100%;
-  }
-
   .header {
+    height: auto;
+    padding: 10px;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 6px;
+    justify-content: center;
+    gap: 12px;
   }
 
-  .header button {
-    font-size: 12px;
-    padding: 6px;
+  .center-breadcrumbs {
+    position: static;
+    transform: none;
+    max-width: 100%;
+    width: 100%;
+    justify-content: center;
+    order: 3; /* Move breadcrumbs below branding */
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
 
+  .add-folder-modal {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90% !important;
+    max-width: 320px !important;
+    animation: orbit-fade-in 0.2s ease-out;
+  }
+
+  .viewport {
+    /* Ensure scrolling is disabled but dragging works */
+    overflow: hidden;
+  }
+}
+
+@keyframes orbit-fade-in {
+  from { opacity: 0; transform: translate(-50%, -45%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
 }
 /* ===== GRID ===== */
 .grid {
@@ -108,6 +131,127 @@ img {
   opacity: 0.8;
 }
 
+/* ================= FOLDER DETAILS SIDEBAR ================= */
+
+.folder-details-sidebar {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 320px;
+  max-height: calc(100vh - 100px);
+  background: rgba(10, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  z-index: 1200;
+  font-family: 'IBM Plex Mono', monospace;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.folder-details-sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 10px;
+}
+
+.sidebar-header .close-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sidebar-header .close-btn:hover {
+  color: #ffffff;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.info-value {
+  font-size: 13px;
+  color: #e2e8f0;
+  word-break: break-all;
+}
+
+.info-value.technical {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.action-btn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.action-btn.danger {
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.action-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
 /* ================= ADD FOLDER MODAL ================= */
 
 .add-folder-modal {
@@ -153,6 +297,48 @@ img {
   font-weight: 500;
   margin-bottom: 10px;
   color: #cbd5f5;
+}
+
+.position-row {
+  display: flex;
+  gap: 12px;
+}
+
+.position-row label {
+  flex: 1;
+}
+
+/* ---------- EDIT DETAILS ---------- */
+.edit-details-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 10px;
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.detail-label {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.detail-value {
+  color: #e2e8f0;
+}
+
+.detail-value.technical {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  opacity: 0.8;
 }
 
 /* ---------- INPUTS ---------- */
@@ -228,6 +414,34 @@ img {
 
 .add-folder-modal .save:hover {
   background-color: #1c356b;
+}
+
+.add-folder-modal .delete-btn {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-folder-modal .delete-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.add-folder-modal .spacer {
+  flex: 1;
 }
 
 /* ---------- ANIMATION ---------- */

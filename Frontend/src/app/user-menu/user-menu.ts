@@ -14,6 +14,7 @@ export class UserMenu {
   @Output() payment = new EventEmitter<void>();
   @Output() about = new EventEmitter<void>();
   @Output() profile = new EventEmitter<void>();
+  @Output() feedback = new EventEmitter<void>();
 
   closeMenu() {
     this.close.emit();
@@ -21,6 +22,10 @@ export class UserMenu {
 
   aboutPage() {
     this.about.emit();
+  }
+
+  feedbackPage() {
+    this.feedback.emit();
   }
 
   profilePage() {

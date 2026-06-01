@@ -110,26 +110,23 @@ deleteTargetFolder: any = null;
     private dialogService: DialogService
   ) {}
 
-async ngOnInit() {
-  const user: any = await this.auth.syncUser();
+  async ngOnInit() {
+    const user: any = await this.auth.syncUser();
 
-  if (!user) {
-    this.router.navigate(['/signin']);
-    return;
+    if (!user) {
+      this.router.navigate(['/signin']);
+      return;
+    }
+    this.avatarUrl = user.profilePictureUrl;
+
+    this.userState.setUser(user);
+    this.loadDirectories();
+    const { data } = await supabase.auth.getSession();
+    localStorage.setItem(
+      'google_provider_token',
+      data.session?.provider_token!
+    );
   }
-this.avatarUrl = user.profilePictureUrl;
-
-  this.userState.setUser(user);
-  this.loadDirectories();
-  const { data } = await supabase.auth.getSession();
-  localStorage.setItem(
-  'google_provider_token',
-  data.session?.provider_token!
-);
-console.log("Provider Token:", data.session?.provider_token);
-
-
-}
 
   ngAfterViewInit() {
     this.update();
@@ -216,7 +213,9 @@ loadDirectories() {
   }
 
 openEditFolderModal() {
-  if (!this.activeFolder) return;
+  if (!this.activeFolder) {
+    return;
+  }
 
   this.isEditMode = true;
   this.editingFolder = this.activeFolder;
@@ -239,12 +238,51 @@ openEditFolderModal() {
   aboutpage() {
     this.router.navigate(['about']);
   }
-  onDeleteFolder() {
-  if (!this.selectedFolderId || !this.activeFolder) return;
+  feedbackPage() {
+    this.router.navigate(['about'], { queryParams: { feedback: 'true' } });
+  }
 
-  this.deleteTargetFolder = this.activeFolder;
-  this.isDeleteModalOpen = true;
-}
+  onFolderSettings() {
+    if (this.currentFolderName === 'Root' || !this.selectedFolderId) {
+      return;
+    }
+
+    if (!this.activeFolder) {
+      this.activeFolder = this.directories.find(d => d.id === this.selectedFolderId);
+    }
+
+    if (!this.activeFolder) {
+      return;
+    }
+
+    this.openEditFolderModal();
+  }
+
+  closeFolderSidebar() {
+
+  }
+
+  getParentName(): string {
+    if (!this.activeFolder?.parentId) return 'Root';
+    const parent = this.directories.find(d => d.id === this.activeFolder.parentId);
+    return parent ? parent.name : 'Unknown';
+  }
+
+  async onDeleteFolder() {
+    if (!this.selectedFolderId || !this.activeFolder) return;
+
+ // Close sidebar first
+
+    const confirmed = await this.dialogService.confirm(
+      'Delete Folder',
+      `Are you sure you want to delete "${this.activeFolder.name}"?\n\nThis action cannot be undone.`
+    );
+
+    if (confirmed) {
+      this.deleteTargetFolder = this.activeFolder;
+      this.confirmDeleteFolder();
+    }
+  }
 confirmDeleteFolder() {
   if (!this.deleteTargetFolder) return;
 
@@ -263,7 +301,8 @@ confirmDeleteFolder() {
       this.activeFolder = null;
 
       this.closeDeleteModal();
-      this.toastService.success('Folder deleted');
+      this.resetModal();
+      this.toastService.success('Folder Deleted Successfully');
     },
     error: (err) => {
       console.error('Delete failed', err);
@@ -322,7 +361,7 @@ if (this.isEditMode && this.editingFolder) {
     this.directoryService
       .renameDirectory(id, this.draftFolder.name)
       .subscribe(() => {
-        this.toastService.success('Folder renamed');
+        this.toastService.success('Folder Renamed Successfully');
       });
   }
 
@@ -377,7 +416,7 @@ if (this.isEditMode && this.editingFolder) {
       Object.assign(this.draftFolder, created);
       delete this.draftFolder.isDraft;
       this.resetModal();
-      this.toastService.success('Folder created');
+      this.toastService.success('Folder Created Successfully');
     },
     error: (err) => {
       console.error('Create failed', err);
@@ -505,7 +544,7 @@ async logout() {
       next: () => {
         this.closeFileViewer();
         this.reloadFiles();
-        this.toastService.success('File deleted');
+        this.toastService.success('File Deleted Successfully');
       },
       error: (err: any) => {
         console.error('Delete failed', err);
@@ -1072,6 +1111,7 @@ onMouseUp() {
   }
 
   selectFolderFromBreadcrumb(crumb: any) {
+ // Close sidebar on navigation
     if (crumb.isRoot) {
       this.rootOpen = true;
       this.selectedParentFolderId = null;

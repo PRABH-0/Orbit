@@ -1,233 +1,58 @@
 .header {
-  height: 46px;
+  height: 40px; /* Reduced from 46px */
   width: 100%;
 
   position: sticky;
   top: 0;
   left: 0;
   z-index: 1000;
- /* pointer-events: none; */
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 20px;
+  padding: 0 12px;
   flex-wrap: nowrap;
-
-  padding: 8px 12px;
+  background: rgba(4, 5, 8, 0.4);
+  backdrop-filter: blur(8px);
 }
 
 /* LEFT */
 .username {
   display: inline-block;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 14px; /* Reduced */
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
   letter-spacing: 0.3px;
 }
-.username:hover{
+
+.username:hover {
   text-decoration-line: underline;
-  text-decoration-thickness: 3px; 
+  text-decoration-thickness: 2px; 
   text-underline-offset: 2px;
   cursor: pointer;
 }
-/* DELETE ACTION */
-.delete-action {
-  display: inline-block;
-  font-size: 13px;                 /* smaller than username */
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  padding-top: 4px;
-  color: #ef4444;                  /* red-500 */
-  cursor: pointer;
-}
 
-.delete-action:hover {
-  text-decoration-line: underline;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 2px;
-
-  color: #f87171;                  /* lighter red on hover */
-}
-
-.bracket{
+.bracket {
   font-weight: 800;
   color: #ffffff;
 }
-.del-bracket{
-  font-weight: 800;
-  font-size: 12px;
-  color: #ffffff;
-}
-/* RIGHT CONTAINER */
-.right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  margin-top: 0;
-  padding: 0;
-  padding-right: 20px;
-  border-radius: 6px;
-}
-/* TOP ROW (folder + delete) */
-.right-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-.header-button {
-  display: flex;
-  gap: 6px;
-}
-@media (max-width: 768px) {
-
-  .header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-    padding: 6px 8px;
-    overflow: hidden;              /* prevent breaking */
-  }
-
-  .username {
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;       /* "Prabhjot..." if long */
-    max-width: 50%;                /* limit left width */
-  }
-
-  .right {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding-right: 10;
-    max-width: 60%;                /* keep right side controlled */
-    overflow: hidden;
-  }
-
-  .right-top {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    overflow: hidden;
-  }
-
-  .header-button {
-    display: flex;
-    gap: 3px;
-  }
-
-  .folder-name {
-    font-size: 10px;
-    white-space: nowrap;
-  }
-
-  .delete-action {
-    font-size: 9px;
-    white-space: nowrap;
-  }
-
-  .add-folder-btn {
-    font-size: 8px;
-    padding: 2px 5px;
-    white-space: nowrap;
-  }
-
-  .bracket,
-.del-bracket {
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
-  line-height: 1;
-  position: relative;
-  top: 1px; /* adjust: try 1px or 2px if needed */
-}
-.left .bracket{
-top : -5px;
-}
-}
-.header-left {
-  font-size: 14px;
-  color: #e5e7eb;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.folder-name {
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-
-/* FOLDER NAME */
-.folder-name {
-  display: inline-block;
-  font-size: 13px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  padding-top: 4px;
-
-  color: #e5e7eb;
-  cursor: pointer;
-}
-
-/* Hover effect like Delete */
-.folder-name:hover {
-  text-decoration-line: underline;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 2px;
-}
-/* ADD FOLDER BUTTON */
-.add-folder-btn {
-  font-size: 11px;
-  padding: 4px 10px;
-
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  margin-left: 6px;
-  background: transparent;
-  color: #9ca3af;
-
-  border: 1px dashed #374151;
-  border-radius: 4px;
-
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.add-folder-btn:hover {
-  color: #ffffff;
-  border-color: #6b7280;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-/* ================= BREADCRUMBS DESIGN SYSTEM ================= */
+/* ================= BREADCRUMBS & COMMAND CLUSTER ================= */
 .center-breadcrumbs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1001;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  letter-spacing: 0.3px;
+  font-size: 12px; /* Smaller */
+  letter-spacing: 0.2px;
   user-select: none;
-  max-width: 45%;
-  overflow: hidden;
+  max-width: 75%;
+  overflow: visible;
   white-space: nowrap;
 }
 
@@ -239,68 +64,129 @@ top : -5px;
 .crumb-name {
   color: #ffffff;
   font-weight: 600;
-  padding: 0 2px;
+  padding: 0 1px;
 }
 
-/* Current folder (last segment) styling - high contrast with bold underline */
+.crumb-name.clickable {
+  cursor: pointer;
+}
+
+.crumb-name.clickable:hover .crumb-text {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+/* Current folder */
 .breadcrumb-item.current .crumb-name {
   color: #ffffff;
   font-weight: 700;
-  text-decoration-line: underline;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 2px;
 }
 
 .breadcrumb-separator {
   color: #475569;
   font-weight: 600;
-  padding: 0 4px;
+  padding: 0 2px;
 }
 
-/* Mobile Responsive Stacking */
+/* COMMAND CLUSTER */
+.command-cluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cluster-plus {
+  font-size: 20px; /* Scaled down */
+  font-weight: 300;
+  color: #ffffff;
+  line-height: 1;
+  padding-bottom: 1px;
+}
+
+.cluster-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cluster-action {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; /* Tighter */
+  color: #ffffff;
+}
+
+.action-text {
+  transition: all 0.1s ease;
+  white-space: pre;
+}
+
+.cluster-action:hover .action-text {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.bracket {
+  color: #ffffff;
+  opacity: 0.7;
+}
+
+/* Mobile Responsive - TIGHT TOP ALIGNMENT */
 @media (max-width: 768px) {
   .header {
-    flex-wrap: wrap !important;
+    flex-direction: column !important;
     height: auto !important;
-    gap: 8px;
-    padding: 8px 12px !important;
+    padding: 4px 10px !important;
+    gap: 2px !important;
+    align-items: center !important;
   }
   
   .left {
-    order: 1;
-  }
-  
-  .right {
     order: 2;
-    max-width: 70% !important;
-    display: flex;
-    flex-direction: row-reverse !important;
-    align-items: center;
-    gap: 8px;
+    margin-top: 4px;
+    opacity: 0.8;
   }
 
-  .right-top {
-    gap: 0px !important;
-  }
-
-  .header-button {
-    gap: 6px !important;
+  .username {
+    font-size: 11px;
   }
 
   .center-breadcrumbs {
     position: static !important;
     transform: none !important;
-    order: 3;
     width: 100% !important;
     max-width: 100% !important;
-    justify-content: center;
-    padding: 6px 0 2px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 11px;
-    gap: 4px;
+    justify-content: center !important;
+    order: 1; /* MOVE TO VERY TOP */
+    font-size: 10px; /* SMALLER */
+    gap: 2px;
+    padding: 0;
   }
 
   .breadcrumb-separator {
-    padding: 0 2px;
+    padding: 0 1px;
+  }
+
+  .command-cluster {
+    margin-left: 8px;
+    padding-left: 8px;
+    gap: 8px;
+  }
+
+  .cluster-plus {
+    font-size: 16px;
+  }
+
+  .cluster-actions {
+    flex-direction: row; /* Horizontal actions on mobile to save height */
+    gap: 8px;
   }
 }

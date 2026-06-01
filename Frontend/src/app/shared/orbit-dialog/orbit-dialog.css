@@ -3,46 +3,50 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
-  z-index: 2000000;
+  z-index: 2000002; /* Above toast */
   display: flex;
-  align-items: flex-start; /* Aligns to top */
+  align-items: flex-start;
   justify-content: center;
-  padding-top: 50px; /* Offset from top */
-  animation: fadeIn 0.2s ease-out forwards;
+  padding-top: 10px; /* 10px gap from top */
+  animation: orbit-fade-in 0.2s ease-out forwards;
 }
 
 .dialog-panel {
   width: 90%;
-  max-width: 400px;
-  background: #0a0f18;
+  max-width: 450px;
+  background: rgba(10, 15, 25, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: orbit-slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   overflow: hidden;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 .dialog-header {
   padding: 10px 16px;
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: #94a3b8;
+  color: #ffffff;
   text-align: center;
 }
 
 .dialog-content {
-  padding: 20px 16px;
+  padding: 24px 20px;
   text-align: center;
 }
 
 .dialog-message {
   font-size: 14px;
-  color: #e5e7eb;
+  color: #ffffff;
   margin: 0;
   white-space: pre-wrap;
+  line-height: 1.6;
 }
 
 .prompt-container {
@@ -67,10 +71,10 @@
 }
 
 .dialog-actions {
-  padding: 12px 16px;
+  padding: 16px 20px;
   display: flex;
-  justify-content: center; /* Center buttons */
-  gap: 12px;
+  justify-content: center;
+  gap: 20px;
   background: rgba(255, 255, 255, 0.02);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -78,50 +82,40 @@
 .orbit-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #ffffff;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 4px;
+  padding: 8px 12px;
   transition: all 0.2s;
-  text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 2px;
-}
-
-.orbit-btn:hover {
-  color: #ffffff;
+  gap: 4px;
 }
 
 .btn-text {
-  text-decoration: none;
+  transition: all 0.1s ease;
 }
 
 .orbit-btn:hover .btn-text {
-  text-decoration-line: underline;
+  text-decoration: underline;
   text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
 }
 
-/* Primary action - Red text */
-.orbit-btn.primary .btn-text {
+/* Primary action (Confirm) - Red text */
+.orbit-btn.primary {
   color: #ef4444; /* Orbit red */
 }
 
-.orbit-btn.primary:hover .btn-text {
-  color: #f87171; /* Brighter red on hover */
+.orbit-btn.primary:hover {
+  color: #f87171;
 }
 
-/* Secondary action - Default styling */
-.orbit-btn.secondary:hover .btn-text {
+/* Secondary action (Cancel) - White text (default) */
+.orbit-btn.secondary {
   color: #ffffff;
-}
-
-@keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
 }
 
 .loader-container {
@@ -137,14 +131,20 @@
 }
 
 /* Transitions */
-@keyframes fadeIn {
+@keyframes orbit-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+@keyframes orbit-slide-down {
+  from {
+    transform: translateY(-20px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 /* Loader Styles */
@@ -164,20 +164,20 @@
 
 .orbit-cw {
   transform-origin: center;
-  animation: spin-clockwise 1.2s linear infinite;
+  animation: orbit-spin-cw 1.2s linear infinite;
 }
 
 .orbit-ccw {
   transform-origin: center;
-  animation: spin-counter-clockwise 2.2s linear infinite;
+  animation: orbit-spin-ccw 2.2s linear infinite;
 }
 
-@keyframes spin-clockwise {
+@keyframes orbit-spin-cw {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-@keyframes spin-counter-clockwise {
+@keyframes orbit-spin-ccw {
   from { transform: rotate(360deg); }
   to { transform: rotate(0deg); }
 }

@@ -7,43 +7,55 @@
     <span class="bracket"> ]</span>
   </div>
 
-  <!-- CENTER BREADCRUMBS -->
+  <!-- CENTER BREADCRUMBS & ACTIONS -->
   <div class="center-breadcrumbs" *ngIf="breadcrumbs && breadcrumbs.length > 0">
-    <ng-container *ngFor="let crumb of breadcrumbs; let last = last; let first = first">
-      <div class="breadcrumb-item" [class.current]="last" [class.previous]="!last">
-        <span class="crumb-name" 
-              [title]="getFullPathToolTip(crumb)">
+  @for (crumb of breadcrumbs; track crumb.id; let last = $last) {
+
+    <div class="breadcrumb-item" [class.current]="last" [class.previous]="!last">
+      <span
+        class="crumb-name"
+        [class.clickable]="last && currentFolder !== 'Root'"
+        (click)="onBreadcrumbClick(crumb, last)"
+        [title]="getFullPathToolTip(crumb)"
+      >
+        @if (last && currentFolder !== 'Root') {
+          [ 
+        }
+
+        <span class="crumb-text">
           {{ truncateName(crumb.name, last) }}
         </span>
-      </div>
-      <span class="breadcrumb-separator" *ngIf="!last"> &gt; </span>
-    </ng-container>
-  </div>
 
-  <!-- RIGHT ACTION GROUP -->
-  <div class="right" *ngIf="currentFolder">
-    
-    <!-- TOP ROW (DELETE ACTION) -->
-    <div class="right-top">
-      <div *ngIf="currentFolder !== 'Root'">
-        <span class="del-bracket">[ </span>
-        <span class="delete-action clickable" (click)="delete.emit()">
-          Delete
-        </span>
-        <span class="del-bracket"> ]</span>
-      </div>
+        @if (last && currentFolder !== 'Root') {
+          ]
+        }
+      </span>
     </div>
 
-    <!-- BOTTOM ROW (ADD BUTTONS) -->
-    <div class="header-button">
-      <button class="add-folder-btn" *ngIf="currentFolder !== 'Root'" (click)="addItem.emit()">
-        ＋ Add Item
-      </button>
-      <button class="add-folder-btn" (click)="addFolder.emit()">
-        ＋ Add Folder
-      </button>
-    </div>
+    @if (!last) {
+      <span class="breadcrumb-separator">&gt;</span>
+    }
 
-  </div>
+    <!-- ACTIONS ATTACHED TO CURRENT FOLDER (COMMAND CLUSTER) -->
+    @if (last && currentFolder !== 'Root') {
+      <div class="command-cluster">
+        <div class="cluster-plus">+</div>
+        <div class="cluster-actions">
+          <div class="cluster-action" (click)="addItem.emit()">
+            <span class="bracket">[</span>
+            <span class="action-text"> Add Item </span>
+            <span class="bracket">]</span>
+          </div>
+          <div class="cluster-action" (click)="addFolder.emit()">
+            <span class="bracket">[</span>
+            <span class="action-text"> Add Folder </span>
+            <span class="bracket">]</span>
+          </div>
+        </div>
+      </div>
+    }
+
+  }
+</div>
   
 </header>

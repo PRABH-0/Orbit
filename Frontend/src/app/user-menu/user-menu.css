@@ -1,71 +1,101 @@
-.user-menu-sidebar {
+.user-menu-tree {
   position: absolute;
-  top: 50px;       /* 🔥 header height */
-  left: 20px;      /* aligns with username */
-
-  min-width: 160px;
-  padding: 12px 0;
-
-  border-top: 1px solid rgba(255, 255, 255, 0.719);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.719);
-
+  top: 50px;
+  left: 20px;
+  min-width: 140px;
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
   z-index: 1100;
   font-family: 'IBM Plex Mono', monospace;
+  animation: slideInDown 0.12s ease-out forwards;
 }
 
-/* MENU ITEM */
-.menu-item {
-  padding: 6px 20px;
+.tree-root-line {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  line-height: 1;
+  padding-left: 0;
+  margin-bottom: 2px;
+  font-weight: 700;
 }
 
-/* reuse existing styles */
-.menu-item .button-text:hover {
-  text-decoration-line: underline;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 2px;
+.tree-item {
+  height: 32px;
+  display: flex;
+  align-items: center;
   cursor: pointer;
+  white-space: nowrap;
+  gap: 0;
+  transition: all 0.2s ease;
 }
 
-.button-text {
-  color: white;
-  font-weight: 600;
+.tree-symbol {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  margin-right: 6px;
+  user-select: none;
+  font-weight: 700;
 }
 
-.bracket {
-  color: white;
-  font-weight: 800;
+.tree-label {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
 }
 
-.logout {
-  color: rgb(255, 23, 23);
+.hover-prefix {
+  width: 0;
+  opacity: 0;
+  display: inline-block;
+  overflow: hidden;
+  transition: all 0.15s ease;
+  white-space: pre;
+  color: #ffffff;
+}
+
+.tree-item:hover .tree-label {
+  color: #ffffff;
+}
+
+.tree-item:hover .label-text,
+.tree-item:hover .label-text span {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+
+.tree-item:hover .hover-prefix {
+  width: 14px;
+  opacity: 1;
+}
+
+.tree-label.logout {
+  color: #ef4444;
   font-weight: 900;
 }
 
+.tree-item:hover .tree-label.logout {
+  color: #f87171;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
-  .user-menu-sidebar {
-    top: 46px;              /* match header height */
-    left: 10px;             /* align nicely on small screen */
-    min-width: 140px;
-    padding: 8px 0;
-
-    border-top: 1px solid rgba(255, 255, 255, 0.6);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-  }
-
-  .menu-item {
-    padding: 6px 12px;
-    white-space: nowrap;    /* prevent breaking */
-  }
-
-  .button-text {
-    font-size: 12px;
-  }
-
-  .logout {
-    font-size: 12px;
-  }
-
-  .bracket {
-    font-size: 12px;
+  .user-menu-tree {
+    top: 46px;
+    left: 10px;
   }
 }

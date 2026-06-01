@@ -25,9 +25,16 @@ export class Header {
   @Output() addFolder = new EventEmitter<void>();
   @Output() addItem = new EventEmitter<void>();
   @Output() openMenu = new EventEmitter<void>();
-  @Output() delete = new EventEmitter<void>();
-  @Output() rename = new EventEmitter<void>();
+  @Output() folderSettings = new EventEmitter<void>();
   @Output() breadcrumbClick = new EventEmitter<any>();
+
+  onBreadcrumbClick(crumb: any, isLast: boolean) {
+    if (isLast && this.currentFolder !== 'Root') {
+      this.folderSettings.emit();
+    } else {
+      this.breadcrumbClick.emit(crumb);
+    }
+  }
 
   truncateName(name: string, isCurrent: boolean): string {
     const limit = isCurrent ? 20 : 12;

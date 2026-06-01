@@ -9,6 +9,7 @@ import { AuthService } from '../services/auth.service';
 import { NgZone } from '@angular/core';
 import { Location } from '@angular/common';
 import { ToastService } from '../services/toast.service';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -26,7 +27,8 @@ export class About implements OnInit {
     private feedbackService: FeedbackService,
     private authService : AuthService,
     private location : Location,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private route: ActivatedRoute
   ) {}
 
   showFeedback = false;
@@ -37,7 +39,12 @@ export class About implements OnInit {
 
 ngOnInit() {
   this.isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  console.log(this.isLoggedIn);
+  
+  this.route.queryParams.subscribe(params => {
+    if (params['feedback'] === 'true') {
+      this.openFeedback();
+    }
+  });
 }
 
   openFeedback() {
@@ -60,7 +67,7 @@ ngOnInit() {
 
     this.feedbackService.sendFeedback(payload).subscribe({
       next: () => {
-        this.toastService.success('Feedback sent successfully');
+        this.toastService.success('Feedback Sent Successfully');
         this.feedbackMessage = '';
         this.isSending = false;
         this.closeFeedback();

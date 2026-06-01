@@ -5,13 +5,12 @@
   [breadcrumbs]="getBreadcrumbs()"
   (addFolder)="onAddFolder()"
   (addItem)="onAddItem()"
-  (delete)="onDeleteFolder()"
-  (rename)="openEditFolderModal()"
+  (folderSettings)="onFolderSettings()"
   (openMenu)="toggleUserMenu()"
   (breadcrumbClick)="selectFolderFromBreadcrumb($event)">
-</app-header>
+  </app-header>
 
-<input
+  <input
   type="file"
   #headerFileInput
   hidden
@@ -24,6 +23,7 @@
   (logout)="logout()"
   (profile)="profilePage()"
   (about)="aboutpage()"
+  (feedback)="feedbackPage()"
   (payment)="payment()">
 </app-user-menu>
   <div
@@ -89,6 +89,7 @@
 
 
 </div>
+
 <!-- ADD FOLDER MODAL -->
 <div class="add-folder-modal" *ngIf="isAddFolderOpen">
 
@@ -99,44 +100,48 @@
     <input type="text" [(ngModel)]="draftFolder.name" />
   </label>
 
-  <label>
-    X Position
-    <input type="number" [(ngModel)]="draftFolder.x" />
-  </label>
-
-  <label>
-    Y Position
-    <input type="number" [(ngModel)]="draftFolder.y" />
-  </label>
-
-  <div class="actions">
-    <button class="cancel" (click)="$event.stopPropagation(); cancelAddFolder()">Cancel</button>
-    <button class="save" (click)="$event.stopPropagation(); saveAddFolder()">Save</button>
+  <div class="position-row">
+    <label>
+      X Position
+      <input type="number" [(ngModel)]="draftFolder.x" />
+    </label>
+  
+    <label>
+      Y Position
+      <input type="number" [(ngModel)]="draftFolder.y" />
+    </label>
   </div>
 
-</div>
-<!-- DELETE FOLDER MODAL -->
-<div class="add-folder-modal" *ngIf="isDeleteModalOpen">
-
-  <h3>Delete Folder</h3>
-
-  <p style="font-size: 12px; color: #cbd5f5;">
-    Are you sure you want to delete
-    <b>"{{ deleteTargetFolder?.name }}"</b> ?
-    <br /><br />
-    This action cannot be undone.
-  </p>
+  <!-- ADDITIONAL DETAILS (EDIT MODE ONLY) -->
+  <div class="edit-details-section" *ngIf="isEditMode && activeFolder">
+    <div class="detail-item">
+      <span class="detail-label">ID:</span>
+      <span class="detail-value technical">{{ activeFolder.id }}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Parent:</span>
+      <span class="detail-value">{{ getParentName() }}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">Items:</span>
+      <span class="detail-value">{{ selectedFolderItems.length }} Files</span>
+    </div>
+    <div class="detail-item" *ngIf="activeFolder.createdAt">
+      <span class="detail-label">Created:</span>
+      <span class="detail-value">{{ formatDate(activeFolder.createdAt) }}</span>
+    </div>
+  </div>
 
   <div class="actions">
-    <button class="cancel" (click)="$event.stopPropagation(); closeDeleteModal()">Cancel</button>
-
-    <button
-      class="save"
-      style="background: #dc2626"
-      (click)="$event.stopPropagation(); confirmDeleteFolder()"
-    >
+    <button 
+      class="delete-btn" 
+      *ngIf="isEditMode" 
+      (click)="$event.stopPropagation(); onDeleteFolder()">
       Delete
     </button>
+    <div class="spacer" *ngIf="isEditMode"></div>
+    <button class="cancel" (click)="$event.stopPropagation(); cancelAddFolder()">Cancel</button>
+    <button class="save" (click)="$event.stopPropagation(); saveAddFolder()">Save</button>
   </div>
 
 </div>

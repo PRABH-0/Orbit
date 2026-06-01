@@ -1,28 +1,23 @@
-<div class="user-menu-sidebar">
-
-  <div class="menu-item" (click)="closeMenu()">
-    <span class="bracket">[ </span>
-    <span class="button-text close">close</span>
-    <span class="bracket"> ]</span>
+<div class="user-menu-tree">
+  <div class="tree-root-line">│</div>
+  
+  <div class="tree-item" (click)="profilePage()">
+    <span class="tree-symbol">├─</span>
+    <span class="tree-label"><span class="hover-prefix">> </span><span class="label-text">Profile</span></span>
   </div>
 
-  <div class="menu-item" (click)="profilePage()">
-    <span class="bracket">[ </span>
-    <span class="button-text">profile</span>
-    <span class="bracket"> ]</span>
+  <div class="tree-item" (click)="aboutPage()">
+    <span class="tree-symbol">├─</span>
+    <span class="tree-label"><span class="hover-prefix">> </span><span class="label-text"><span>About</span> <span>Orbit</span></span></span>
   </div>
 
-  <div class="menu-item" (click)="aboutPage()">
-    <span class="bracket">[ </span>
-    <span class="button-text">about</span>
-    <span class="bracket"> ]</span>
+  <div class="tree-item" (click)="feedbackPage()">
+    <span class="tree-symbol">├─</span>
+    <span class="tree-label"><span class="hover-prefix">> </span><span class="label-text">Feedback</span></span>
   </div>
 
-  <!-- LOGOUT -->
-  <div class="menu-item" (click)="logoutUser()">
-    <span class="bracket">[ </span>
-    <span class="button-text logout">Logout</span>
-    <span class="bracket"> ]</span>
+  <div class="tree-item" (click)="logoutUser()">
+    <span class="tree-symbol">└─</span>
+    <span class="tree-label logout"><span class="hover-prefix">> </span><span class="label-text">Logout</span></span>
   </div>
-
 </div>

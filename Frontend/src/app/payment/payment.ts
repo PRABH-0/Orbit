@@ -27,7 +27,7 @@ purchase(plan: 'pro' | 'ultra') {
         res.paymentId,
         'fake_gateway_payment_id'
       ).subscribe(() => {
-        this.toastService.success('Payment successful! Storage upgraded.');
+        this.toastService.success('Payment Successful! Storage Upgraded.');
       });
     },
     error: () => this.toastService.error('Payment failed')

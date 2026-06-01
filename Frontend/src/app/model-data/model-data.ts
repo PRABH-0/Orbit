@@ -34,8 +34,8 @@ export class ModelData implements OnChanges {
   width = 860;
   height = 600;
   readonly ASPECT_RATIO = 860 / 600;
-  minWidth = 716; // Ensures ~500px height to fit 5 rows
-  minHeight = 500;
+  minWidth = 320; 
+  minHeight = 220;
   isResizing = false;
 
   /** fileId → objectURL */
@@ -50,7 +50,18 @@ export class ModelData implements OnChanges {
     private googleDriveService: GoogleDriveService,
     private toastService: ToastService,
     private dialogService: DialogService
-  ) { }
+  ) { 
+    this.adjustInitialSize();
+  }
+
+  private adjustInitialSize() {
+    const screenWidth = window.innerWidth;
+    if (screenWidth < 768) {
+      this.width = Math.min(screenWidth * 0.9, 400);
+      this.height = this.width / this.ASPECT_RATIO;
+    }
+  }
+
   videoThumbnailCache = new Map<string, string>();
 
   ngOnChanges() {
@@ -577,7 +588,7 @@ export class ModelData implements OnChanges {
       next: () => {
         this.imageCache.delete(file.id);
         this.fileUploaded.emit(); // refresh list
-        this.toastService.success('File deleted');
+        this.toastService.success('File Deleted Successfully');
       },
       error: (err: any) => {
         console.error('Delete failed', err);
@@ -605,7 +616,7 @@ export class ModelData implements OnChanges {
       next: (event: HttpEvent<any>) => {
         if (event.type === HttpEventType.Response) {
           console.log('File uploaded successfully');
-          this.toastService.success('File uploaded');
+          this.toastService.success('File Uploaded Successfully');
 
           // reset input (important)
           input.value = '';

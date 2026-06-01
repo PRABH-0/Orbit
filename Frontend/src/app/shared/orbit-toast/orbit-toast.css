@@ -1,9 +1,9 @@
 .toast-container {
   position: fixed;
-  top: 20px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000000;
+  z-index: 2000001; /* Above everything */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -13,22 +13,48 @@
 
 .toast-item {
   pointer-events: auto;
-  min-width: 240px;
-  max-width: 400px;
-  background: rgba(10, 15, 24, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 20px;
-  border-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  min-width: 320px;
+  max-width: 450px;
+  background: rgba(10, 15, 25, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0; /* Handled by internal sections */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
   cursor: pointer;
-  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  backdrop-filter: blur(8px);
+  animation: orbit-slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.toast-header {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #94a3b8;
   text-align: center;
 }
 
-@keyframes slideDown {
+.toast-body {
+  padding: 24px 20px;
+  color: #ffffff;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* SUCCESS STATE */
+.toast-item.success .toast-header {
+  color: #ffffff;
+}
+
+@keyframes orbit-slide-down {
   from {
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(-20px) scale(0.98);
     opacity: 0;
   }
   to {
@@ -38,10 +64,10 @@
 }
 
 .toast-item.out {
-  animation: fadeOut 0.3s forwards;
+  animation: orbit-fade-out 0.2s forwards;
 }
 
-@keyframes fadeOut {
+@keyframes orbit-fade-out {
   to {
     opacity: 0;
     transform: translateY(-10px);
