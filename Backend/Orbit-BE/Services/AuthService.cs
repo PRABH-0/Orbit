@@ -97,7 +97,7 @@ namespace Orbit_BE.Services
 
                 Console.WriteLine("Calling SaveChangesAsync...");
 
-                await _unitOfWork.SaveChangesAsync();
+                //await _unitOfWork.SaveChangesAsync();
 
                 Console.WriteLine("SaveChangesAsync SUCCESS");
 
