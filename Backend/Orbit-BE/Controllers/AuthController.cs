@@ -25,7 +25,9 @@ namespace Orbit_BE.Controllers
         {
             try
             {
-                var supabaseUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var supabaseUserId =
+    User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+    ?? User.FindFirst("sub")?.Value;
 
                 if (string.IsNullOrEmpty(supabaseUserId))
                     return Unauthorized();
