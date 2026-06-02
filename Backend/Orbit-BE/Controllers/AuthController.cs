@@ -44,7 +44,16 @@ namespace Orbit_BE.Controllers
                 });
             }
         }
-
+        [Authorize]
+        [HttpGet("claims")]
+        public IActionResult Claims()
+        {
+            return Ok(User.Claims.Select(c => new
+            {
+                c.Type,
+                c.Value
+            }));
+        }
         // =========================
         // HEALTH CHECK (NO AUTH)
         // =========================
