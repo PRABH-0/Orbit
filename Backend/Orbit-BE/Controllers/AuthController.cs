@@ -38,9 +38,10 @@ namespace Orbit_BE.Controllers
             {
                 return StatusCode(500, new
                 {
-                    error = ex.Message,
-                    innerError = ex.InnerException?.Message,
-                    stackTrace = ex.StackTrace
+                    Message = ex.Message,
+                    Inner = ex.InnerException?.Message,
+                    InnerInner = ex.InnerException?.InnerException?.Message,
+                    FullException = ex.ToString()
                 });
             }
         }

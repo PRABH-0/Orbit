@@ -22,61 +22,112 @@ namespace Orbit_BE.Services
 
         public async Task<UserDetilsResponseDto?> GetCurrentUserAsync(string supabaseUserId)
         {
-            var userId = Guid.Parse(supabaseUserId);
-
-            var email = GetEmailFromToken();
-            var fullName = GetFullNameFromToken();
-            var profilePicture = GetProfilePictureFromToken();
-
-            var username =
-                !string.IsNullOrEmpty(fullName)
-                    ? fullName
-                    : email?.Split('@')[0] ?? "User";
-
-            var user = await _unitOfWork.Users
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
+            try
             {
-                user = new User
+                Console.WriteLine("========== AUTH DEBUG START ==========");
+
+                Console.WriteLine($"supabaseUserId: {supabaseUserId}");
+
+                var userId = Guid.Parse(supabaseUserId);
+
+                var email = GetEmailFromToken();
+                var fullName = GetFullNameFromToken();
+                var profilePicture = GetProfilePictureFromToken();
+
+                Console.WriteLine($"Email: {email}");
+                Console.WriteLine($"FullName: {fullName}");
+                Console.WriteLine($"ProfilePicture: {profilePicture}");
+
+                var username =
+                    !string.IsNullOrEmpty(fullName)
+                        ? fullName
+                        : email?.Split('@')[0] ?? "User";
+
+                Console.WriteLine($"Username: {username}");
+
+                Console.WriteLine("Searching user in database...");
+
+                var user = await _unitOfWork.Users
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
+                Console.WriteLine(user == null
+                    ? "User NOT found"
+                    : $"User found: {user.Id}");
+
+                if (user == null)
                 {
-                    Id = userId,
-                    Username = username,
-                    ProfilePictureUrl = profilePicture,
-                    UserStatus = "Online",
-                    RecordState = "Active",
-                    CreatedAt = DateTime.UtcNow
+                    Console.WriteLine("Creating new user...");
+
+                    user = new User
+                    {
+                        Id = userId,
+                        Username = username,
+                        ProfilePictureUrl = profilePicture,
+                        UserStatus = "Online",
+                        RecordState = "Active",
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _unitOfWork.Users.AddAsync(user);
+
+                    Console.WriteLine("User added to DbContext");
+                }
+                else
+                {
+                    Console.WriteLine("Updating existing user...");
+
+                    Console.WriteLine($"Old Username: {user.Username}");
+                    Console.WriteLine($"Old Status: {user.UserStatus}");
+
+                    user.UserStatus = "Online";
+
+                    if (!string.IsNullOrEmpty(username))
+                        user.Username = username;
+
+                    if (!string.IsNullOrEmpty(profilePicture))
+                        user.ProfilePictureUrl = profilePicture;
+
+                    Console.WriteLine($"New Username: {user.Username}");
+                    Console.WriteLine($"New Status: {user.UserStatus}");
+
+                    _unitOfWork.Users.Update(user);
+
+                    Console.WriteLine("User marked as modified");
+                }
+
+                Console.WriteLine("Calling SaveChangesAsync...");
+
+                await _unitOfWork.SaveChangesAsync();
+
+                Console.WriteLine("SaveChangesAsync SUCCESS");
+
+                Console.WriteLine("========== AUTH DEBUG END ==========");
+
+                return new UserDetilsResponseDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = email,
+                    ProfilePictureUrl = user.ProfilePictureUrl,
+                    UserStatus = user.UserStatus,
+                    IsAdmin = user.IsAdmin,
+                    CreatedAt = user.CreatedAt
                 };
-
-                await _unitOfWork.Users.AddAsync(user);
             }
-            else
+            catch (Exception ex)
             {
-                user.UserStatus = "Online";
+                Console.WriteLine("========== AUTH ERROR ==========");
+                Console.WriteLine(ex.ToString());
 
-                // 🔥 Always keep name synced with Google
-                if (!string.IsNullOrEmpty(username))
-                    user.Username = username;
-
-                // 🔥 Always keep profile picture synced
-                if (!string.IsNullOrEmpty(profilePicture))
-                    user.ProfilePictureUrl = profilePicture;
-
-                _unitOfWork.Users.Update(user);
+                throw new Exception(
+                    $"AUTH DEBUG ERROR\n" +
+                    $"Message: {ex.Message}\n" +
+                    $"Inner: {ex.InnerException?.Message}\n" +
+                    $"InnerInner: {ex.InnerException?.InnerException?.Message}\n" +
+                    $"StackTrace: {ex.StackTrace}",
+                    ex
+                );
             }
-
-            await _unitOfWork.SaveChangesAsync();
-
-            return new UserDetilsResponseDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = email,
-                ProfilePictureUrl = user.ProfilePictureUrl,
-                UserStatus = user.UserStatus,
-                IsAdmin = user.IsAdmin,
-                CreatedAt = user.CreatedAt
-            };
         }
 
         // =============================
