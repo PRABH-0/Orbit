@@ -9,53 +9,113 @@
 
   <!-- CENTER BREADCRUMBS & ACTIONS -->
   <div class="center-breadcrumbs" *ngIf="breadcrumbs && breadcrumbs.length > 0">
-  @for (crumb of breadcrumbs; track crumb.id; let last = $last) {
-
-    <div class="breadcrumb-item" [class.current]="last" [class.previous]="!last">
-      <span
-        class="crumb-name"
-        [class.clickable]="last && currentFolder !== 'Root'"
-        (click)="onBreadcrumbClick(crumb, last)"
-        [title]="getFullPathToolTip(crumb)"
-      >
-        @if (last && currentFolder !== 'Root') {
-          [ 
-        }
-
-        <span class="crumb-text">
-          {{ truncateName(crumb.name, last) }}
+    
+    <!-- START BREADCRUMBS -->
+    @for (crumb of visibleStart; track crumb.id; let last = $last) {
+      <div class="breadcrumb-item" [class.current]="last && visibleEnd.length === 0" [class.previous]="!(last && visibleEnd.length === 0)">
+        <span
+          class="crumb-name"
+          [class.clickable]="(last && visibleEnd.length === 0) && currentFolder !== 'Root'"
+          (click)="onBreadcrumbClick(crumb, last && visibleEnd.length === 0)"
+          [title]="getFullPathToolTip(crumb)"
+        >
+          @if ((last && visibleEnd.length === 0) && currentFolder !== 'Root') { [ }
+          <span class="crumb-text">{{ truncateName(crumb.name, last && visibleEnd.length === 0) }}</span>
+          @if ((last && visibleEnd.length === 0) && currentFolder !== 'Root') { ] }
         </span>
+      </div>
 
-        @if (last && currentFolder !== 'Root') {
-          ]
+      @if (!last || hiddenBreadcrumbs.length > 0 || visibleEnd.length > 0) {
+        <span class="breadcrumb-separator">&gt;</span>
+      }
+
+      <!-- ACTIONS ATTACHED TO CURRENT FOLDER (if no hidden/end) -->
+      @if (last && visibleEnd.length === 0 && currentFolder !== 'Root') {
+        <div class="command-cluster">
+          <div class="cluster-plus">+</div>
+          <div class="cluster-actions">
+            <div class="cluster-action" (click)="addItem.emit()">
+              <span class="bracket">[</span>
+              <span class="action-text"> Add Item </span>
+              <span class="bracket">]</span>
+            </div>
+            <div class="cluster-action" (click)="addFolder.emit()">
+              <span class="bracket">[</span>
+              <span class="action-text"> Add Folder </span>
+              <span class="bracket">]</span>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- OVERFLOW DROPDOWN -->
+    @if (hiddenBreadcrumbs.length > 0) {
+      <div class="breadcrumb-overflow" 
+           (mouseenter)="isOverflowHovered = true" 
+           (mouseleave)="isOverflowHovered = false">
+        <span class="overflow-trigger">[ ... ]</span>
+        
+        @if (isOverflowHovered) {
+          <div class="overflow-dropdown">
+            @for (crumb of hiddenBreadcrumbs; track crumb.id; let lastHidden = $last) {
+              <div class="breadcrumb-item previous">
+                <span
+                  class="crumb-name clickable"
+                  (click)="onBreadcrumbClick(crumb, false)"
+                  [title]="getFullPathToolTip(crumb)"
+                >
+                  <span class="crumb-text">{{ crumb.name }}</span>
+                </span>
+              </div>
+              @if (!lastHidden) {
+                <span class="breadcrumb-separator">&gt;</span>
+              }
+            }
+          </div>
         }
-      </span>
-    </div>
-
-    @if (!last) {
+      </div>
       <span class="breadcrumb-separator">&gt;</span>
     }
 
-    <!-- ACTIONS ATTACHED TO CURRENT FOLDER (COMMAND CLUSTER) -->
-    @if (last && currentFolder !== 'Root') {
-      <div class="command-cluster">
-        <div class="cluster-plus">+</div>
-        <div class="cluster-actions">
-          <div class="cluster-action" (click)="addItem.emit()">
-            <span class="bracket">[</span>
-            <span class="action-text"> Add Item </span>
-            <span class="bracket">]</span>
-          </div>
-          <div class="cluster-action" (click)="addFolder.emit()">
-            <span class="bracket">[</span>
-            <span class="action-text"> Add Folder </span>
-            <span class="bracket">]</span>
+    <!-- END BREADCRUMBS -->
+    @for (crumb of visibleEnd; track crumb.id; let last = $last) {
+      <div class="breadcrumb-item" [class.current]="last" [class.previous]="!last">
+        <span
+          class="crumb-name"
+          [class.clickable]="last && currentFolder !== 'Root'"
+          (click)="onBreadcrumbClick(crumb, last)"
+          [title]="getFullPathToolTip(crumb)"
+        >
+          @if (last && currentFolder !== 'Root') { [ }
+          <span class="crumb-text">{{ truncateName(crumb.name, last) }}</span>
+          @if (last && currentFolder !== 'Root') { ] }
+        </span>
+      </div>
+
+      @if (!last) {
+        <span class="breadcrumb-separator">&gt;</span>
+      }
+
+      <!-- ACTIONS ATTACHED TO CURRENT FOLDER -->
+      @if (last && currentFolder !== 'Root') {
+        <div class="command-cluster">
+          <div class="cluster-plus">+</div>
+          <div class="cluster-actions">
+            <div class="cluster-action" (click)="addItem.emit()">
+              <span class="bracket">[</span>
+              <span class="action-text"> Add Item </span>
+              <span class="bracket">]</span>
+            </div>
+            <div class="cluster-action" (click)="addFolder.emit()">
+              <span class="bracket">[</span>
+              <span class="action-text"> Add Folder </span>
+              <span class="bracket">]</span>
+            </div>
           </div>
         </div>
-      </div>
+      }
     }
-
-  }
-</div>
+  </div>
   
 </header>

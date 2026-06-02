@@ -40,7 +40,9 @@ import { DialogService } from '../services/dialog.service';
   styleUrl: './canvas.css',
 })
 export class Canvas implements OnInit, AfterViewInit {
-  @ViewChild('grid', { static: true }) grid!: ElementRef<HTMLDivElement>;
+  @ViewChild('gridBackground', { static: true }) gridBackground!: ElementRef<HTMLDivElement>;
+  @ViewChild('canvasContent', { static: true }) canvasContent!: ElementRef<HTMLDivElement>;
+  @ViewChild('edgesGroup', { static: true }) edgesGroup!: ElementRef<SVGGElement>;
   @ViewChild('headerFileInput') headerFileInput!: ElementRef<HTMLInputElement>;
 
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
@@ -92,8 +94,8 @@ deleteTargetFolder: any = null;
   private isDragging = false;
   private startX = 0;
   private startY = 0;
-  private x = -2500;
-  private y = -2500;
+  private x = 0;
+  private y = 0;
   showModelData = false;
   cacheBuster = Date.now();
   constructor(
@@ -108,7 +110,11 @@ deleteTargetFolder: any = null;
     private loaderService: LoaderService,
     private toastService: ToastService,
     private dialogService: DialogService
-  ) {}
+  ) {
+    // Initial centering of the 2500, 2500 point
+    this.x = (window.innerWidth / 2) - 2500;
+    this.y = (window.innerHeight / 2) - 2500;
+  }
 
   async ngOnInit() {
     const user: any = await this.auth.syncUser();
@@ -1172,6 +1178,14 @@ onMouseUp() {
   }
 
   private update() {
-    this.grid.nativeElement.style.transform = `translate(${this.x}px, ${this.y}px)`;
+    if (this.canvasContent) {
+      this.canvasContent.nativeElement.style.transform = `translate(${this.x}px, ${this.y}px)`;
+    }
+    if (this.edgesGroup) {
+      this.edgesGroup.nativeElement.setAttribute('transform', `translate(${this.x}, ${this.y})`);
+    }
+    if (this.gridBackground) {
+      this.gridBackground.nativeElement.style.backgroundPosition = `${this.x}px ${this.y}px`;
+    }
   }
 }

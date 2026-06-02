@@ -89,6 +89,83 @@
   padding: 0 2px;
 }
 
+/* OVERFLOW */
+.breadcrumb-overflow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.overflow-trigger {
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.1s ease;
+  padding: 0 4px;
+}
+
+.overflow-trigger:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.overflow-dropdown {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: max-content;
+  max-width: 500px;
+  background: rgba(10, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  z-index: 1200;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: orbitPopupFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes orbitPopupFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.overflow-dropdown .breadcrumb-item {
+  display: inline-flex;
+}
+
+.overflow-dropdown .crumb-name.clickable:hover .crumb-text {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  font-weight: 700;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* COMMAND CLUSTER */
 .command-cluster {
   display: flex;

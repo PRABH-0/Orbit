@@ -51,72 +51,47 @@ touch-action: none;
   from { opacity: 0; transform: translate(-50%, -45%); }
   to { opacity: 1; transform: translate(-50%, -50%); }
 }
-/* ===== GRID ===== */
-.grid {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5000px;
-  height: 5000px;
+/* ===== GRID / BACKGROUND ===== */
+.grid-background {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
 
   background-image:
-    linear-gradient(rgba(120, 140, 170, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 140, 170, 0.15) 1px, transparent 1px);
+    linear-gradient(rgba(120, 140, 170, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 140, 170, 0.12) 1px, transparent 1px);
   background-size: 20px 20px;
+  will-change: background-position;
+}
 
-  transform-origin: center;
+/* ===== CANVAS CONTENT CONTAINER ===== */
+.canvas-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
   will-change: transform;
+}
 
-  z-index: 1;
+/* ===== EDGES / CONNECTIONS SVG ===== */
+.edges-svg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.edges-group {
+  will-change: transform;
 }
 
 .grid:active {
   cursor: grabbing;
-}
-.add-folder-modal .save:hover {
-  background-color: #b91c1c; /* darker red */
-}
-/* ===== CENTER NODE ===== */
-.center-circle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 60px;
-  height: 60px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-
-  border: 1px solid rgba(140, 180, 240, 0.35);
-  box-shadow: 0 0 6px rgba(140, 180, 240, 0.25);
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-  z-index: 20;
-}
-.user-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;   /* 🔥 THIS IS THE KEY */
-  border-radius: 50%;
-  display: block;
-}
-.center-circle img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* ===== EDGES ===== */
-.edges {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 5;
 }
 
 /* ===== GLOBAL IMAGE BEHAVIOR ===== */
@@ -454,14 +429,6 @@ img {
     opacity: 1;
     transform: translateX(0);
   }
-}
-.edges {
-  position: absolute;
-  inset: 0;
-  width: 5000px;
-  height: 5000px;
-  pointer-events: none;
-  z-index: 1;
 }
 /* ================= FILE PREVIEW / VIEWER REDESIGN ================= */
 

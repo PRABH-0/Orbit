@@ -1,5 +1,5 @@
 import { NgIf, NgFor } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -10,7 +10,7 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header {
+export class Header implements OnChanges {
 
   // ===== Inputs =====
   @Input() currentFolder: string | null = null;
@@ -27,6 +27,44 @@ export class Header {
   @Output() openMenu = new EventEmitter<void>();
   @Output() folderSettings = new EventEmitter<void>();
   @Output() breadcrumbClick = new EventEmitter<any>();
+
+  // ===== Breadcrumb Overflow State =====
+  visibleStart: any[] = [];
+  visibleEnd: any[] = [];
+  hiddenBreadcrumbs: any[] = [];
+  isOverflowHovered = false;
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['breadcrumbs']) {
+      this.updateBreadcrumbs();
+    }
+  }
+
+  updateBreadcrumbs() {
+    if (!this.breadcrumbs || this.breadcrumbs.length === 0) {
+      this.visibleStart = [];
+      this.visibleEnd = [];
+      this.hiddenBreadcrumbs = [];
+      return;
+    }
+
+    // Threshold for collapsing: 
+    // If we have more than 7 items, we collapse the middle.
+    // Example: 1 > 2 > 3 > 4 > 5 > 6 > 7 (Show all)
+    // 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 (Collapse: 1 > 2 > 3 > [ ... ] > 6 > 7 > 8)
+    if (this.breadcrumbs.length <= 7) {
+      this.visibleStart = this.breadcrumbs;
+      this.visibleEnd = [];
+      this.hiddenBreadcrumbs = [];
+    } else {
+      // Keep first 3
+      this.visibleStart = this.breadcrumbs.slice(0, 3);
+      // Keep last 3 (including current)
+      this.visibleEnd = this.breadcrumbs.slice(-3);
+      // Everything else is hidden
+      this.hiddenBreadcrumbs = this.breadcrumbs.slice(3, -3);
+    }
+  }
 
   onBreadcrumbClick(crumb: any, isLast: boolean) {
     if (isLast && this.currentFolder !== 'Root') {
