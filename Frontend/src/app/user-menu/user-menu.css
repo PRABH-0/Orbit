@@ -33,7 +33,7 @@
 .tree-symbol {
   color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
-  margin-right: 6px;
+  margin-right: 0;
   user-select: none;
   font-weight: 700;
 }
@@ -47,14 +47,30 @@
   align-items: center;
 }
 
-.hover-prefix {
-  width: 0;
+.menu-symbol {
+  width: 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.menu-symbol::before {
+  content: '>';
+  position: absolute;
+  left: 0;
   opacity: 0;
-  display: inline-block;
-  overflow: hidden;
-  transition: all 0.15s ease;
-  white-space: pre;
-  color: #ffffff;
+  transition: opacity 0.2s ease;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.tree-item:hover .menu-symbol::before {
+  opacity: 1;
+}
+
+.menu-symbol::after {
+  display: none;
 }
 
 .tree-item:hover .tree-label {
@@ -66,11 +82,6 @@
   text-decoration: underline;
   text-decoration-thickness: 3px;
   text-underline-offset: 4px;
-}
-
-.tree-item:hover .hover-prefix {
-  width: 14px;
-  opacity: 1;
 }
 
 .tree-label.logout {

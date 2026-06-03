@@ -98,6 +98,11 @@ deleteTargetFolder: any = null;
   private y = 0;
   showModelData = false;
   cacheBuster = Date.now();
+  isRootOffScreen = false;
+  isPanningToHome = false;
+  canvasScale = 1.0;
+  private animationFrameId: number | null = null;
+
   constructor(
     private googlePhotosService: GooglePhotosService,
     private directoryService: DirectoryService,
@@ -139,6 +144,7 @@ deleteTargetFolder: any = null;
   }
 @HostListener('touchstart', ['$event'])
 onTouchStart(e: TouchEvent) {
+  this.cancelPanningAnimation();
   this.isDragging = true;
   const touch = e.touches[0];
 
@@ -1023,12 +1029,96 @@ async logout() {
     this.showModelData = false;
   }
 
+  cancelPanningAnimation() {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    this.isPanningToHome = false;
+  }
+
+  @HostListener('wheel', ['$event'])
+  onCanvasWheel(e: WheelEvent) {
+    if ((e.target as HTMLElement).closest('.model-data, .add-folder-modal, .file-viewer-overlay, .user-menu')) {
+      return;
+    }
+    e.preventDefault();
+    this.cancelPanningAnimation();
+
+    const zoomFactor = 0.08;
+    const direction = e.deltaY < 0 ? 1 : -1;
+    const oldScale = this.canvasScale;
+    
+    this.canvasScale = Math.max(0.2, Math.min(3.0, this.canvasScale + direction * zoomFactor * this.canvasScale));
+    
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    
+    this.x = mouseX - (mouseX - this.x) * (this.canvasScale / oldScale);
+    this.y = mouseY - (mouseY - this.y) * (this.canvasScale / oldScale);
+    
+    this.update();
+  }
+
+  goHome() {
+    this.cancelPanningAnimation();
+    this.isPanningToHome = true;
+
+    const startX = this.x;
+    const startY = this.y;
+    const startScale = this.canvasScale;
+
+    const targetX = (window.innerWidth / 2) - 2500;
+    const targetY = (window.innerHeight / 2) - 2500;
+    const targetScale = 1.0;
+
+    const duration = 1800; // 1.8 seconds flight
+    const startTime = performance.now();
+
+    const animate = (now: number) => {
+      if (!this.isPanningToHome) return;
+
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1.0);
+
+      const t = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+
+      this.x = startX + (targetX - startX) * t;
+      this.y = startY + (targetY - startY) * t;
+      this.canvasScale = startScale + (targetScale - startScale) * t;
+
+      this.update();
+
+      if (progress < 1.0) {
+        this.animationFrameId = requestAnimationFrame(animate);
+      } else {
+        this.animationFrameId = null;
+        this.isPanningToHome = false;
+
+        this.rootOpen = true;
+        this.selectedParentFolderId = null;
+        this.selectedFolderId = null;
+        this.activeFolder = null;
+        this.currentFolderName = 'Root';
+        this.showModelData = false;
+        this.dataNodePosition = null;
+        this.selectedFolderItems = [];
+        this.selectedFile = null;
+
+        this.update();
+      }
+    };
+
+    this.animationFrameId = requestAnimationFrame(animate);
+  }
+
   // =========================
   // CANVAS DRAG
   // =========================
   @HostListener('mousedown', ['$event'])
   onMouseDown(e: MouseEvent) {
     if ((e.target as HTMLElement).closest('.folder-directory')) return;
+    this.cancelPanningAnimation();
     this.isDragging = true;
     this.startX = e.clientX - this.x;
     this.startY = e.clientY - this.y;
@@ -1178,14 +1268,33 @@ onMouseUp() {
   }
 
   private update() {
+    this.checkRootVisibility();
+
     if (this.canvasContent) {
-      this.canvasContent.nativeElement.style.transform = `translate(${this.x}px, ${this.y}px)`;
+      this.canvasContent.nativeElement.style.transform = `translate(${this.x}px, ${this.y}px) scale(${this.canvasScale})`;
     }
     if (this.edgesGroup) {
-      this.edgesGroup.nativeElement.setAttribute('transform', `translate(${this.x}, ${this.y})`);
+      this.edgesGroup.nativeElement.setAttribute('transform', `translate(${this.x}, ${this.y}) scale(${this.canvasScale})`);
     }
     if (this.gridBackground) {
       this.gridBackground.nativeElement.style.backgroundPosition = `${this.x}px ${this.y}px`;
+      this.gridBackground.nativeElement.style.backgroundSize = `${20 * this.canvasScale}px ${20 * this.canvasScale}px`;
     }
+  }
+
+  private checkRootVisibility() {
+    const rootX = this.x + 2500 * this.canvasScale;
+    const rootY = this.y + 2500 * this.canvasScale;
+    
+    // Check if (2500, 2500) is within viewport bounds with some padding
+    const padding = 50;
+    const isVisible = (
+      rootX >= -padding && 
+      rootX <= window.innerWidth + padding &&
+      rootY >= -padding && 
+      rootY <= window.innerHeight + padding
+    );
+
+    this.isRootOffScreen = !isVisible;
   }
 }

@@ -430,6 +430,90 @@ img {
     transform: translateX(0);
   }
 }
+
+/* ================= CANVAS CONTROLS ================= */
+.canvas-controls {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.control-btn {
+  width: 44px;
+  height: 44px;
+  background: rgba(13, 17, 23, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn:hover {
+  background: rgba(30, 41, 59, 0.9);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.control-btn:active {
+  transform: translateY(0);
+}
+
+.control-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.control-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.control-btn.whitish {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #0f172a;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2), 0 8px 30px rgba(0, 0, 0, 0.4);
+  animation: popIn 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49);
+}
+
+.control-btn.whitish:hover {
+  background: #ffffff;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3), 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.5) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .canvas-controls {
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .control-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 /* ================= FILE PREVIEW / VIEWER REDESIGN ================= */
 
 .file-viewer-overlay {

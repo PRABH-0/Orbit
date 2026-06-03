@@ -20,7 +20,7 @@
 .username {
   display: inline-block;
   color: #ffffff;
-  font-size: 14px; /* Reduced */
+  font-size: 16px;
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -36,6 +36,7 @@
 .bracket {
   font-weight: 800;
   color: #ffffff;
+  font-size: 16px;
 }
 
 /* ================= BREADCRUMBS & COMMAND CLUSTER ================= */
@@ -232,8 +233,8 @@
     opacity: 0.8;
   }
 
-  .username {
-    font-size: 11px;
+  .username, .bracket {
+    font-size: 13px;
   }
 
   .center-breadcrumbs {
