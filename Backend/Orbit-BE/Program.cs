@@ -151,10 +151,10 @@ app.MapControllers();
 
 app.MapFallbackToFile("index.html");
 
-//if (builder.Environment.IsProduction())
-//{
-//    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-//    app.Urls.Add($"http://0.0.0.0:{port}");
-//}
+if (builder.Environment.IsProduction())
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    app.Urls.Add($"http://0.0.0.0:{port}");
+}
 
 app.Run();

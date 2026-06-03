@@ -1,6 +1,6 @@
 # Orbit: A Futuristic Spatial File Management System
 
-Orbit is a high-performance, canvas-based visual file explorer that reimagines traditional hierarchical file management as a dynamic, interconnected spatial experience. Built with **Angular 21** and **Supabase**, it replaces the standard list-and-grid paradigm with an infinite 2D workspace where files and folders exist as interactive nodes.
+Orbit is a high-performance, canvas-based visual file explorer that reimagines traditional hierarchical file management as a dynamic, interconnected spatial experience. Built with **Angular 21**,**Dotnet** and **Supabase**, it replaces the standard list-and-grid paradigm with an infinite 2D workspace where files and folders exist as interactive nodes.
 
 ---
 

@@ -15,13 +15,13 @@
       <div class="breadcrumb-item" [class.current]="last && visibleEnd.length === 0" [class.previous]="!(last && visibleEnd.length === 0)">
         <span
           class="crumb-name"
-          [class.clickable]="(last && visibleEnd.length === 0) && currentFolder !== 'Root'"
+          [class.clickable]="!(last && visibleEnd.length === 0) || (!crumb.isRoot && currentFolder !== 'Root')"
           (click)="onBreadcrumbClick(crumb, last && visibleEnd.length === 0)"
           [title]="getFullPathToolTip(crumb)"
         >
-          @if ((last && visibleEnd.length === 0) && currentFolder !== 'Root') { [ }
+          @if (shouldShowBrackets(crumb, last && visibleEnd.length === 0)) { [ }
           <span class="crumb-text">{{ truncateName(crumb.name, last && visibleEnd.length === 0) }}</span>
-          @if ((last && visibleEnd.length === 0) && currentFolder !== 'Root') { ] }
+          @if (shouldShowBrackets(crumb, last && visibleEnd.length === 0)) { ] }
         </span>
       </div>
 
@@ -30,20 +30,24 @@
       }
 
       <!-- ACTIONS ATTACHED TO CURRENT FOLDER (if no hidden/end) -->
-      @if (last && visibleEnd.length === 0 && currentFolder !== 'Root') {
+      @if ((last && visibleEnd.length === 0) && (crumb.isRoot ? rootOpen : true)) {
         <div class="command-cluster">
-          <div class="cluster-plus">+</div>
-          <div class="cluster-actions">
-            <div class="cluster-action" (click)="addItem.emit()">
-              <span class="bracket">[</span>
-              <span class="action-text"> Add Item </span>
-              <span class="bracket">]</span>
+          <div class="action-dropdown-trigger" title="Add content">
+            <span class="bracket">[</span><span class="plus-sign">+</span><span class="bracket">]</span>
+          </div>
+          <div class="action-dropdown-menu">
+            <div class="dropdown-item" (click)="addFolder.emit()">
+              <span class="dropdown-bracket">[</span>
+              <span class="dropdown-item-text">Add Folder</span>
+              <span class="dropdown-bracket">]</span>
             </div>
-            <div class="cluster-action" (click)="addFolder.emit()">
-              <span class="bracket">[</span>
-              <span class="action-text"> Add Folder </span>
-              <span class="bracket">]</span>
-            </div>
+            @if (!crumb.isRoot) {
+              <div class="dropdown-item" (click)="addItem.emit()">
+                <span class="dropdown-bracket">[</span>
+                <span class="dropdown-item-text">Add Item</span>
+                <span class="dropdown-bracket">]</span>
+              </div>
+            }
           </div>
         </div>
       }
@@ -83,13 +87,13 @@
       <div class="breadcrumb-item" [class.current]="last" [class.previous]="!last">
         <span
           class="crumb-name"
-          [class.clickable]="last && currentFolder !== 'Root'"
+          [class.clickable]="!last || (!crumb.isRoot && currentFolder !== 'Root')"
           (click)="onBreadcrumbClick(crumb, last)"
           [title]="getFullPathToolTip(crumb)"
         >
-          @if (last && currentFolder !== 'Root') { [ }
+          @if (shouldShowBrackets(crumb, last)) { [ }
           <span class="crumb-text">{{ truncateName(crumb.name, last) }}</span>
-          @if (last && currentFolder !== 'Root') { ] }
+          @if (shouldShowBrackets(crumb, last)) { ] }
         </span>
       </div>
 
@@ -98,20 +102,24 @@
       }
 
       <!-- ACTIONS ATTACHED TO CURRENT FOLDER -->
-      @if (last && currentFolder !== 'Root') {
+      @if (last && (crumb.isRoot ? rootOpen : true)) {
         <div class="command-cluster">
-          <div class="cluster-plus">+</div>
-          <div class="cluster-actions">
-            <div class="cluster-action" (click)="addItem.emit()">
-              <span class="bracket">[</span>
-              <span class="action-text"> Add Item </span>
-              <span class="bracket">]</span>
+          <div class="action-dropdown-trigger" title="Add content">
+            <span class="bracket">[</span><span class="plus-sign">+</span><span class="bracket">]</span>
+          </div>
+          <div class="action-dropdown-menu">
+            <div class="dropdown-item" (click)="addFolder.emit()">
+              <span class="dropdown-bracket">[</span>
+              <span class="dropdown-item-text">Add Folder</span>
+              <span class="dropdown-bracket">]</span>
             </div>
-            <div class="cluster-action" (click)="addFolder.emit()">
-              <span class="bracket">[</span>
-              <span class="action-text"> Add Folder </span>
-              <span class="bracket">]</span>
-            </div>
+            @if (!crumb.isRoot) {
+              <div class="dropdown-item" (click)="addItem.emit()">
+                <span class="dropdown-bracket">[</span>
+                <span class="dropdown-item-text">Add Item</span>
+                <span class="dropdown-bracket">]</span>
+              </div>
+            }
           </div>
         </div>
       }

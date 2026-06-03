@@ -20,6 +20,8 @@ export class Header implements OnChanges {
   @Input() showActions = true;
   @Input() userState : any;
   @Input() breadcrumbs: any[] = [];
+  @Input() rootOpen = false;
+  @Input() selectedFolderId: string | null = null;
   
   // ===== Outputs =====
   @Output() addFolder = new EventEmitter<void>();
@@ -33,6 +35,7 @@ export class Header implements OnChanges {
   visibleEnd: any[] = [];
   hiddenBreadcrumbs: any[] = [];
   isOverflowHovered = false;
+
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['breadcrumbs']) {
@@ -86,6 +89,14 @@ export class Header implements OnChanges {
     if (index === -1) return '';
     return this.breadcrumbs.slice(0, index + 1).map(c => c.name).join(' > ');
   }
+
+  shouldShowBrackets(crumb: any, isActive: boolean): boolean {
+    if (crumb.isRoot) {
+      return !!this.rootOpen && !this.selectedFolderId;
+    }
+    return isActive;
+  }
+
 
   constructor(
     private authService: AuthService,
