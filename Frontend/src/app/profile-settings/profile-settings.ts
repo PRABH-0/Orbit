@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { UserStateService } from '../services/user-state.service';
 import { AuthService } from '../services/auth.service';
-import { supabase } from '../supabase.client';
+import { ProfileService, ProfileResponse } from '../services/profile.service';
 
 @Component({
   selector: 'app-profile-settings',
@@ -15,40 +15,86 @@ import { supabase } from '../supabase.client';
   styleUrl: './profile-settings.css'
 })
 export class ProfileSettings implements OnInit {
+  // User Info
   username: string = '';
   email: string = '';
   profilePic: string = '';
-  storageUsed: string = '0 MB';
+  createdAt: string = '';
+  userStatus: string = 'Offline';
+  isAdmin: boolean = false;
+
+  // Storage
+  storageUsed: string = '0 Bytes';
   storageLimit: string = '100 MB';
   storagePercentage: number = 0;
-  isUpdating = false;
+
+  // Stats
+  totalFolders: number = 0;
+  totalFiles: number = 0;
+  planName: string = 'Free';
+
+  // UI State
+  isLoading = true;
+  hasError = false;
 
   constructor(
     private router: Router,
     private location: Location,
     public userState: UserStateService,
-    private authService: AuthService
+    private authService: AuthService,
+    private profileService: ProfileService
   ) {}
 
   async ngOnInit() {
+    // First ensure user is authenticated
     const user: any = await this.authService.syncUser();
-    if (user) {
-      this.username = user.username || '';
-      this.email = user.email || '';
-      this.profilePic = user.profilePictureUrl || '';
-      
-      // Assuming these fields might be present in the backend user object
-      // or providing defaults if not.
-      const used = user.storageUsed || 0; // in bytes or MB
-      const limit = user.storageLimit || 104857600; // default 100MB in bytes
-
-      this.storageUsed = this.formatBytes(used);
-      this.storageLimit = this.formatBytes(limit);
-      this.storagePercentage = Math.min(Math.round((used / limit) * 100), 100);
+    if (!user) {
+      this.router.navigate(['/signin']);
+      return;
     }
+
+    // Then fetch full profile from the new API
+    this.loadProfile();
   }
 
-  formatBytes(bytes: number, decimals = 2) {
+  loadProfile() {
+    this.isLoading = true;
+    this.hasError = false;
+
+    this.profileService.getProfile().subscribe({
+      next: (profile: ProfileResponse) => {
+        // User Info
+        this.username = profile.username || '';
+        this.email = profile.email || '';
+        this.profilePic = profile.profilePictureUrl || '';
+        this.createdAt = profile.createdAt;
+        this.userStatus = profile.userStatus;
+        this.isAdmin = profile.isAdmin;
+
+        // Storage
+        this.storageUsed = this.formatBytes(profile.storage.usedBytes);
+        this.storageLimit = this.formatBytes(profile.storage.totalBytes);
+        this.storagePercentage = Math.min(
+          Math.round(profile.storage.usagePercentage),
+          100
+        );
+
+        // Stats
+        this.totalFolders = profile.stats.totalFolders;
+        this.totalFiles = profile.stats.totalFiles;
+        this.planName = profile.stats.planName;
+
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Profile load failed:', err);
+        this.hasError = true;
+        this.isLoading = false;
+      }
+    });
+  }
+
+  formatBytes(bytes: number, decimals = 2): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
@@ -57,7 +103,21 @@ export class ProfileSettings implements OnInit {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
+  formatDate(dateString: string): string {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
   redirectToLastUrl() {
     this.location.back();
+  }
+
+  navigateToPayment() {
+    this.router.navigate(['/payment']);
   }
 }

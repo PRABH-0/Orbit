@@ -55,6 +55,39 @@
         </div>
         <p class="storage-hint">Need more space? Upgrade your plan in the payments portal.</p>
       </div>
+
+      <!-- ACCOUNT STATS SECTION -->
+      <div class="stats-section">
+        <h2 class="section-subtitle">Account Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-bracket">[</span>
+            <div class="stat-body">
+              <span class="stat-val">{{ totalFolders }}</span>
+              <span class="stat-lbl">Folders</span>
+            </div>
+            <span class="stat-bracket">]</span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-bracket">[</span>
+            <div class="stat-body">
+              <span class="stat-val">{{ totalFiles }}</span>
+              <span class="stat-lbl">Files</span>
+            </div>
+            <span class="stat-bracket">]</span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-bracket">[</span>
+            <div class="stat-body">
+              <span class="stat-val highlight">{{ planName }}</span>
+              <span class="stat-lbl">Storage Plan</span>
+            </div>
+            <span class="stat-bracket">]</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="bottom-info">
@@ -76,12 +109,14 @@
 
         <div>
           <strong>Status</strong><br />
-          Verified Account
+          <span class="status-badge" [class.admin]="isAdmin">
+            {{ userStatus }}@if (isAdmin) { / Admin }
+          </span>
         </div>
 
         <div>
           <strong>Joined</strong><br />
-          v1.0 (Early Access)
+          {{ formatDate(createdAt) }}
         </div>
       </div>
 
