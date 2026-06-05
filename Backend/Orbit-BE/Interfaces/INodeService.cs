@@ -1,4 +1,4 @@
-﻿using Orbit_BE.Models.NodeModels;
+using Orbit_BE.Models.NodeModels;
 
 namespace Orbit_BE.Interface
 {
@@ -18,5 +18,6 @@ namespace Orbit_BE.Interface
     string name,
     string userId,
     UpdateNodePositionDto dto);
+        Task<byte[]?> DownloadNodeZipAsync(Guid nodeId, string userId);
     }
 }

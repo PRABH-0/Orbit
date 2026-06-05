@@ -10,6 +10,15 @@ touch-action: none;
 .viewport.dragging {
   cursor: grabbing;
 }
+
+/* Ensure child elements maintain their own cursor behavior */
+.viewport.dragging .folder-directory,
+.viewport.dragging .center-circle,
+.viewport.dragging .data-node,
+.viewport.dragging .header,
+.viewport.dragging .add-folder-modal {
+  cursor: pointer;
+}
 @media (max-width: 768px) {
   .header {
     height: auto;
@@ -234,185 +243,219 @@ img {
   top: 70px;
   right: 20px;
 
-  width: 280px;
-  padding: 14px;
+  width: 340px; /* Slightly wider for better layout */
+  padding: 28px;
 
-  background: rgba(10, 15, 25, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(10, 15, 25, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
 
-  border-radius: 10px;
-  border: 1px solid rgba(120, 140, 170, 0.25);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.7),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 
   color: #e5e7eb;
   z-index: 1200;
 
   font-family: 'IBM Plex Mono', monospace;
-
-  animation: slideInRight 0.25s ease-out;
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---------- TITLE ---------- */
 .add-folder-modal h3 {
-  margin: 0 0 12px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  color: #f9fafb;
+  margin: 0 0 24px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: #ffffff;
+}
+
+.modal-section {
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.modal-section.compact {
+  margin-bottom: 24px;
 }
 
 /* ---------- LABELS ---------- */
 .add-folder-modal label {
   display: block;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin-bottom: 10px;
-  color: #cbd5f5;
+  color: #94a3b8;
+}
+
+.primary-label {
+  font-size: 12px !important;
+  color: #cbd5e1 !important;
 }
 
 .position-row {
   display: flex;
-  gap: 12px;
+  gap: 20px; /* Increased spacing between inputs */
+  width: 100%;
 }
 
 .position-row label {
-  flex: 1;
+  flex: 1; /* Ensures equal width */
+  margin-bottom: 0;
 }
 
 /* ---------- EDIT DETAILS ---------- */
 .edit-details-section {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  padding: 10px;
-  margin: 12px 0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  align-items: center;
+  font-size: 12px;
 }
 
 .detail-label {
-  color: #94a3b8;
-  font-weight: 600;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .detail-value {
   color: #e2e8f0;
-}
-
-.detail-value.technical {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  opacity: 0.8;
+  font-weight: 600;
+  text-align: right;
 }
 
 /* ---------- INPUTS ---------- */
 .add-folder-modal input {
-  width: 94%;
-  margin-top: 4px;
-  padding: 7px 8px;
+  width: 100%;
+  box-sizing: border-box; /* Ensures padding doesn't break alignment */
+  padding: 12px;
 
-  font-size: 13px;
+  font-size: 14px;
   font-family: 'IBM Plex Mono', monospace;
   color: #f8fafc;
 
-  background: rgba(2, 6, 23, 0.85);
-  border: 1px solid rgba(100, 116, 139, 0.45);
-  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
 
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .add-folder-modal input:focus {
-  border-color: rgba(147, 197, 253, 0.8);
-  box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.4);
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 /* ---------- ACTIONS ---------- */
 .add-folder-modal .actions {
   display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 14px;
+  align-items: center;
+  gap: 16px;
 }
 
-/* Cancel button */
-.add-folder-modal .cancel {
-  flex: 1;
-  padding: 6px 0;
+/* Destructive / Secondary Actions */
+.add-folder-modal .actions:not(.main-actions) {
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+}
 
-  font-size: 12px;
-  font-family: 'IBM Plex Mono', monospace;
-  color: #cbd5f5;
+.add-folder-modal .actions.main-actions {
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  justify-content: flex-end;
+}
 
+.add-folder-modal button {
   background: transparent;
-  border: 1px solid rgba(100, 116, 139, 0.6);
-  border-radius: 6px;
-
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.add-folder-modal .cancel:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(148, 163, 184, 0.8);
-}
-
-/* Save button */
-.add-folder-modal .save {
-  flex: 1;
-  padding: 6px 0;
-
-  font-size: 12px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 600;
-  color: #ffffff;
-
-  background: #2563eb;
   border: none;
-  border-radius: 6px;
-
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.add-folder-modal .save:hover {
-  background-color: #1c356b;
-}
-
-.add-folder-modal .delete-btn {
-  padding: 6px 12px;
-  font-size: 11px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 700;
-  color: #f87171;
-  background: rgba(239, 68, 68, 0.05);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.add-folder-modal .delete-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: #ef4444;
+.btn-bracket {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 800;
   color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.btn-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.add-folder-modal button:hover .btn-text {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+.add-folder-modal button:hover .btn-bracket {
+  opacity: 1;
+  font-weight: 900;
+}
+
+/* Delete Button Specifics */
+.delete-btn .btn-bracket {
+  color: #ef4444;
+  font-weight: 800; /* Bold red brackets always */
+  opacity: 1;
+}
+
+.delete-btn .btn-text {
+  color: #ffffff;
+}
+
+.delete-btn:hover .btn-text {
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: #ef4444; /* Bold red underline */
+  text-decoration-thickness: 3px;
+}
+
+.delete-btn:hover .btn-bracket {
+  font-weight: 900;
+}
+
+/* Save / Primary Action */
+.save .btn-text {
+  color: #60a5fa;
+}
+
+.save:hover .btn-text {
+  text-decoration-color: #60a5fa;
 }
 
 .add-folder-modal .spacer {
@@ -690,6 +733,42 @@ img {
   height: 20px;
   background: rgba(255, 255, 255, 0.08);
   margin: 0 6px;
+}
+
+/* --- NAVIGATION CONTROLS --- */
+.viewer-navigation-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 4px;
+  border-radius: 10px;
+  margin: 0 12px;
+}
+
+.nav-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.nav-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
 }
 
 /* --- MODAL BODY --- */

@@ -187,24 +187,26 @@
   display: flex;
   align-items: center;
   padding: 2px 6px;
-  transition: opacity 0.15s ease;
-}
-
-.action-dropdown-trigger:hover {
-  opacity: 0.85;
+  transition: all 0.15s ease;
 }
 
 .action-dropdown-trigger:hover .plus-sign {
   font-weight: 800;
   text-decoration: underline;
+  text-decoration-thickness: 3px;
   text-underline-offset: 3px;
+}
+
+.action-dropdown-trigger:hover .bracket {
+  opacity: 1;
+  font-weight: 900;
 }
 
 /* Hidden by default, shown on hover */
 .action-dropdown-menu {
   position: absolute;
   top: 28px;
-  left: 10px;
+  left: 0;
   display: flex;
   flex-direction: column;
   background: rgba(10, 15, 25, 0.95);
@@ -213,7 +215,7 @@
   border: 1px solid rgba(120, 140, 170, 0.25);
   border-radius: 6px;
   padding: 4px 0;
-  min-width: 130px;
+  min-width: 140px;
   z-index: 1200;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 
@@ -221,12 +223,14 @@
   visibility: hidden;
   transform: translateY(-4px);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  pointer-events: none;
 }
 
 .command-cluster:hover .action-dropdown-menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+  pointer-events: auto;
 }
 
 .dropdown-item {
@@ -234,10 +238,9 @@
   padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 2px;
-  transition: background-color 0.12s ease;
+  gap: 4px;
+  transition: all 0.12s ease;
 }
-
 
 .dropdown-bracket {
   font-family: 'IBM Plex Mono', monospace;
@@ -261,6 +264,11 @@
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
+}
+
+.dropdown-item:hover .dropdown-bracket {
+  opacity: 1;
+  font-weight: 900;
 }
 
 .bracket {

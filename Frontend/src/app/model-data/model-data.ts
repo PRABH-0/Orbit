@@ -6,6 +6,7 @@ import { GoogleDriveService } from '../services/google-drive.service';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { ToastService } from '../services/toast.service';
 import { DialogService } from '../services/dialog.service';
+import { DirectoryService } from '../services/directory.service';
 
 @Component({
   selector: 'app-model-data',
@@ -49,7 +50,8 @@ export class ModelData implements OnChanges {
     private fileService: FileService, 
     private googleDriveService: GoogleDriveService,
     private toastService: ToastService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private directoryService: DirectoryService
   ) { 
     this.adjustInitialSize();
   }
@@ -68,6 +70,30 @@ export class ModelData implements OnChanges {
     this.currentPage = 0;
     console.log("ITEMS RECEIVED:", this.items);
     this.preloadVisibleImages();
+  }
+
+  downloadZip() {
+    if (!this.nodeId) return;
+
+    this.toastService.info('Preparing ZIP download...');
+
+    this.directoryService.downloadZip(this.nodeId).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.title || 'folder'}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this.toastService.success('ZIP downloaded successfully');
+      },
+      error: (err: any) => {
+        console.error('ZIP download failed', err);
+        this.toastService.error('ZIP download failed');
+      }
+    });
   }
 
   // =========================

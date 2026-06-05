@@ -26,6 +26,7 @@ import { UserStateService } from '../services/user-state.service';
 import { AuthService } from '../services/auth.service';
 import { GoogleDriveService } from '../services/google-drive.service';
 import { GooglePhotosService } from '../services/google-photos.service';
+import { environment } from '../../environments/environment';
 
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { LoaderService } from '../services/loader.service';
@@ -44,6 +45,7 @@ export class Canvas implements OnInit, AfterViewInit {
   @ViewChild('canvasContent', { static: true }) canvasContent!: ElementRef<HTMLDivElement>;
   @ViewChild('edgesGroup', { static: true }) edgesGroup!: ElementRef<SVGGElement>;
   @ViewChild('headerFileInput') headerFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('header') headerComponent!: Header;
 
   @ViewChild('centerCircle', { static: true }) centerCircle!: ElementRef<HTMLDivElement>;
   @Output() imageOpen = new EventEmitter<string>();
@@ -91,7 +93,7 @@ deleteTargetFolder: any = null;
   showUserMenu = false;
   rootOpen = false;
   selectedFileId: string | null = null;
-  private isDragging = false;
+  isDragging = false;
   private startX = 0;
   private startY = 0;
   private x = 0;
@@ -142,33 +144,57 @@ deleteTargetFolder: any = null;
   ngAfterViewInit() {
     this.update();
   }
-@HostListener('touchstart', ['$event'])
-onTouchStart(e: TouchEvent) {
-  this.cancelPanningAnimation();
-  this.isDragging = true;
-  const touch = e.touches[0];
 
-  this.startX = touch.clientX - this.x;
-  this.startY = touch.clientY - this.y;
-}
+  private isClickOnUI(target: EventTarget | null): boolean {
+    if (!target || !(target instanceof Element)) return false;
+    
+    // List of selectors for elements that should NOT trigger canvas dragging
+    const uiSelectors = [
+      'app-header',
+      '.header',
+      'app-user-menu',
+      '.user-menu-tree',
+      '.center-circle',
+      '.data-node',
+      '.add-folder-modal',
+      '.file-viewer-overlay',
+      '.canvas-controls',
+      '.folder-directory',
+      'input[type="file"]'
+    ];
 
-@HostListener('touchmove', ['$event'])
-onTouchMove(e: TouchEvent) {
-  if (!this.isDragging) return;
+    return uiSelectors.some(selector => target.closest(selector));
+  }
 
-  const touch = e.touches[0];
+  @HostListener('touchstart', ['$event'])
+  onTouchStart(e: TouchEvent) {
+    if (this.isClickOnUI(e.target)) return;
 
-  this.x = touch.clientX - this.startX;
-  this.y = touch.clientY - this.startY;
+    this.cancelPanningAnimation();
+    this.isDragging = true;
+    const touch = e.touches[0];
 
-  this.update();
-}
+    this.startX = touch.clientX - this.x;
+    this.startY = touch.clientY - this.y;
+  }
 
-@HostListener('touchend')
-onTouchEnd() {
-  this.isDragging = false;
-}
-loadDirectories() {
+  @HostListener('touchmove', ['$event'])
+  onTouchMove(e: TouchEvent) {
+    if (!this.isDragging) return;
+
+    const touch = e.touches[0];
+
+    this.x = touch.clientX - this.startX;
+    this.y = touch.clientY - this.startY;
+
+    this.update();
+  }
+
+  @HostListener('touchend')
+  onTouchEnd() {
+    this.isDragging = false;
+  }
+  loadDirectories() {
   this.directoryService.getDirectories().subscribe({
     next: (data) => {
 
@@ -536,6 +562,30 @@ async logout() {
       error: (err) => {
         console.error('Download failed', err);
       },
+    });
+  }
+
+  downloadZip() {
+    if (!this.selectedFolderId) return;
+
+    this.toastService.info('Preparing ZIP download...');
+
+    this.directoryService.downloadZip(this.selectedFolderId).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.currentFolderName || 'folder'}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this.toastService.success('ZIP downloaded successfully');
+      },
+      error: (err: any) => {
+        console.error('ZIP download failed', err);
+        this.toastService.error('ZIP download failed');
+      }
     });
   }
   getDownloadName(res: any): string | null {
@@ -998,6 +1048,118 @@ async logout() {
     }
   }
 
+  // =========================
+  // FILE VIEWER NAVIGATION
+  // =========================
+  hasNextFile(): boolean {
+    if (!this.selectedFile || !this.selectedFolderItems.length) return false;
+    const currentIndex = this.selectedFolderItems.findIndex(f => f.id === this.selectedFile?.id);
+    return currentIndex < this.selectedFolderItems.length - 1;
+  }
+
+  hasPrevFile(): boolean {
+    if (!this.selectedFile || !this.selectedFolderItems.length) return false;
+    const currentIndex = this.selectedFolderItems.findIndex(f => f.id === this.selectedFile?.id);
+    return currentIndex > 0;
+  }
+
+  nextFile() {
+    if (!this.hasNextFile()) return;
+    const currentIndex = this.selectedFolderItems.findIndex(f => f.id === this.selectedFile?.id);
+    const nextItem = this.selectedFolderItems[currentIndex + 1];
+    this.openItem(nextItem);
+  }
+
+  prevFile() {
+    if (!this.hasPrevFile()) return;
+    const currentIndex = this.selectedFolderItems.findIndex(f => f.id === this.selectedFile?.id);
+    const prevItem = this.selectedFolderItems[currentIndex - 1];
+    this.openItem(prevItem);
+  }
+
+  private detectTypeInternal(file: any): 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'other' {
+    const mime = file.contentType?.toLowerCase() || '';
+    const name = file.fileName?.toLowerCase() || '';
+
+    if (mime.startsWith('application/vnd.google-apps')) return 'pdf';
+    if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name)) return 'image';
+    if (mime === 'application/pdf' || name.endsWith('.pdf')) return 'pdf';
+    if (mime.startsWith('video/') || /\.(mp4|webm|ogg|mov)$/i.test(name)) return 'video';
+    if (mime.startsWith('audio/') || /\.(mp3|wav|aac|flac)$/i.test(name)) return 'audio';
+    if (mime.startsWith('text/') || /\.(txt|js|ts|json|html|css|md)$/i.test(name)) return 'text';
+    return 'other';
+  }
+
+  private openItem(item: any) {
+    this.isLoading = true;
+    const type = this.detectTypeInternal(item);
+
+    // Common base payload
+    const basePayload = {
+      id: item.id,
+      fileName: item.fileName,
+      type: type,
+      size: item.size,
+      lastModified: item.updatedAt || item.createdAt,
+      storageProvider: this.activeFolder?.storageProvider || 'Local'
+    };
+
+    if (item.isGoogle) {
+      const url = `${environment.apiBaseUrl}/google-drive/file/${item.id}`;
+      this.googleDriveService.downloadGoogleFile(url).subscribe({
+        next: (res: any) => {
+          if (!res || !res.body) return;
+          const blob = res.body;
+          const objectUrl = URL.createObjectURL(blob);
+          this.openImage({ ...basePayload, url: objectUrl });
+        },
+        error: (err: any) => {
+          console.error('Google navigation failed', err);
+          this.isLoading = false;
+        }
+      });
+      return;
+    }
+
+    if (type === 'text') {
+      this.fileService.downloadFile(item.id).subscribe({
+        next: (res: any) => {
+          const blob = res.body!;
+          blob.text().then((text: string) => {
+            this.openImage({ ...basePayload, content: text });
+          });
+        },
+        error: (err: any) => {
+          console.error('Text navigation failed', err);
+          this.isLoading = false;
+        }
+      });
+      return;
+    }
+
+    if (type === 'image') {
+      this.fileService.downloadFile(item.id).subscribe({
+        next: (res: any) => {
+          const blob = res.body!;
+          const url = URL.createObjectURL(blob);
+          this.openImage({ ...basePayload, url: url });
+        },
+        error: (err: any) => {
+          console.error('Image navigation failed', err);
+          this.isLoading = false;
+        }
+      });
+      return;
+    }
+
+    // PDFs, Videos, Audio can use the stream URL directly
+    this.openImage({ ...basePayload, url: this.getStreamUrl(item.id) });
+  }
+
+  getStreamUrl(fileId: string): string {
+    return `${environment.apiBaseUrl}/File/${fileId}/view`;
+  }
+
   reloadFiles() {
     if (!this.selectedFolderId) return;
  if (
@@ -1039,9 +1201,8 @@ async logout() {
 
   @HostListener('wheel', ['$event'])
   onCanvasWheel(e: WheelEvent) {
-    if ((e.target as HTMLElement).closest('.model-data, .add-folder-modal, .file-viewer-overlay, .user-menu')) {
-      return;
-    }
+    if (this.isClickOnUI(e.target)) return;
+    
     e.preventDefault();
     this.cancelPanningAnimation();
 
@@ -1117,7 +1278,18 @@ async logout() {
   // =========================
   @HostListener('mousedown', ['$event'])
   onMouseDown(e: MouseEvent) {
-    if ((e.target as HTMLElement).closest('.folder-directory')) return;
+    if (this.isClickOnUI(e.target)) return;
+    
+    // Auto-close everything when clicking the canvas
+    this.closeUserMenu();
+    this.headerComponent.closeAddMenu();
+    this.isAddFolderOpen = false;
+    this.isEditMode = false;
+    this.editingFolder = null;
+    this.showModelData = false;
+    this.dataNodePosition = null;
+    this.selectedFolderId = null;
+
     this.cancelPanningAnimation();
     this.isDragging = true;
     this.startX = e.clientX - this.x;
@@ -1170,6 +1342,11 @@ onMouseUp() {
       this.lastMovedFolder = null;
     }
   });
+}
+
+@HostListener('document:mouseleave')
+onMouseLeave() {
+  this.isDragging = false;
 }
 
 

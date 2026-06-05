@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orbit_BE.Entities;
 using Orbit_BE.Interface;
@@ -108,6 +108,26 @@ namespace Orbit_BE.Controllers
             if (!deleted) return NotFound();
 
             return NoContent();
+        }
+
+        [HttpGet("{nodeId:guid}/download-zip")]
+        public async Task<IActionResult> DownloadZip(Guid nodeId)
+        {
+            var supabaseUserId = GetSupabaseUserId();
+            if (supabaseUserId == null) return Unauthorized();
+
+            var zipBytes = await _nodeService.DownloadNodeZipAsync(nodeId, supabaseUserId);
+            if (zipBytes == null)
+                return NotFound(new { message = "Folder not found or access denied" });
+
+            var folder = await _nodeService.GetNodeByIdAsync(nodeId, supabaseUserId);
+            var folderName = folder?.Name ?? "Folder";
+
+            return File(
+                zipBytes,
+                "application/zip",
+                $"{folderName}.zip"
+            );
         }
 
 private string? GetSupabaseUserId()

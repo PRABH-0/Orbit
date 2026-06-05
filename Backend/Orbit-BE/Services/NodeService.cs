@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Orbit_BE.Entities;
 using Orbit_BE.Interface;
+using Orbit_BE.Interfaces;
 using Orbit_BE.Models.NodeModels;
 using Orbit_BE.Models.Users;
 using Orbit_BE.UnitOfWork;
@@ -12,10 +13,16 @@ namespace Orbit_BE.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IFileStorageService _fileStorageService;
 
-        public NodeService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+        public NodeService(
+            IUnitOfWork unitOfWork,
+            IHttpContextAccessor httpContextAccessor,
+            IFileStorageService fileStorageService)
         {
-            _unitOfWork = unitOfWork; _httpContextAccessor = httpContextAccessor;
+            _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
+            _fileStorageService = fileStorageService;
         }
 
         // =========================
@@ -299,6 +306,85 @@ namespace Orbit_BE.Services
                 ExternalId = node.ExternalId,
                 BasePath = node.BasePath
             };
+        }
+
+        // ===================================
+        // DOWNLOAD NODE AS ZIP (RECURSIVE)
+        // ===================================
+        public async Task<byte[]?> DownloadNodeZipAsync(Guid nodeId, string supabaseUserId)
+        {
+            var user = await GetOrCreateUserAsync(supabaseUserId);
+
+            var startingNode = await _unitOfWork.Nodes.FirstOrDefaultAsync(
+                n => n.Id == nodeId &&
+                     n.UserId == user.Id &&
+                     n.RecordState == "Active");
+
+            if (startingNode == null)
+                return null;
+
+            var allFiles = new List<(NodeFile File, string RelativePath)>();
+            await GetChildFilesAndFoldersRecursiveAsync(nodeId, startingNode.Name, allFiles);
+
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
+                {
+                    foreach (var item in allFiles)
+                    {
+                        try
+                        {
+                            var (bytes, _) = await _fileStorageService.DownloadAsync(item.File.StoragePath);
+                            
+                            var entry = archive.CreateEntry(item.RelativePath);
+                            using (var entryStream = entry.Open())
+                            {
+                                await entryStream.WriteAsync(bytes, 0, bytes.Length);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to add file {item.File.FileName} to zip: {ex.Message}");
+                        }
+                    }
+                }
+
+                return memoryStream.ToArray();
+            }
+        }
+
+        private async Task GetChildFilesAndFoldersRecursiveAsync(
+            Guid parentNodeId,
+            string currentRelativePath,
+            List<(NodeFile File, string RelativePath)> allFiles)
+        {
+            var files = await _unitOfWork.NodeFiles
+                .GetQueryable()
+                .Where(f => f.NodeId == parentNodeId && f.RecordState == "Active")
+                .ToListAsync();
+
+            foreach (var file in files)
+            {
+                var zipPath = string.IsNullOrEmpty(currentRelativePath)
+                    ? file.FileName
+                    : $"{currentRelativePath}/{file.FileName}";
+
+                allFiles.Add((file, zipPath));
+            }
+
+            var childNodes = await _unitOfWork.Nodes
+                .GetQueryable()
+                .Where(n => n.ParentId == parentNodeId && n.RecordState == "Active")
+                .ToListAsync();
+
+            foreach (var childNode in childNodes)
+            {
+                var childPath = string.IsNullOrEmpty(currentRelativePath)
+                    ? childNode.Name
+                    : $"{currentRelativePath}/{childNode.Name}";
+
+                await GetChildFilesAndFoldersRecursiveAsync(childNode.Id, childPath, allFiles);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
-<div class="viewport">
+<div class="viewport" [class.dragging]="isDragging">
   <app-header
+    #header
     [userState]="userState"
     [currentFolder]="currentFolderName"
     [breadcrumbs]="getBreadcrumbs()"
@@ -107,31 +108,31 @@
 <!-- ADD FOLDER MODAL -->
 <div class="add-folder-modal" *ngIf="isAddFolderOpen">
 
- <h3>{{ isEditMode ? 'Edit Folder' : 'Add Folder' }}</h3>
+ <h3>{{ isEditMode ? 'Folder Settings' : 'New Folder' }}</h3>
 
-  <label>
-    Folder Name
-    <input type="text" [(ngModel)]="draftFolder.name" />
-  </label>
+  <div class="modal-section">
+    <label class="primary-label">
+      Name
+      <input type="text" [(ngModel)]="draftFolder.name" placeholder="Enter folder name..." />
+    </label>
+  </div>
 
-  <div class="position-row">
-    <label>
-      X Position
-      <input type="number" [(ngModel)]="draftFolder.x" />
-    </label>
-  
-    <label>
-      Y Position
-      <input type="number" [(ngModel)]="draftFolder.y" />
-    </label>
+  <div class="modal-section compact">
+    <div class="position-row">
+      <label>
+        X Position
+        <input type="number" [(ngModel)]="draftFolder.x" />
+      </label>
+    
+      <label>
+        Y Position
+        <input type="number" [(ngModel)]="draftFolder.y" />
+      </label>
+    </div>
   </div>
 
   <!-- ADDITIONAL DETAILS (EDIT MODE ONLY) -->
   <div class="edit-details-section" *ngIf="isEditMode && activeFolder">
-    <div class="detail-item">
-      <span class="detail-label">ID:</span>
-      <span class="detail-value technical">{{ activeFolder.id }}</span>
-    </div>
     <div class="detail-item">
       <span class="detail-label">Parent:</span>
       <span class="detail-value">{{ getParentName() }}</span>
@@ -151,11 +152,32 @@
       class="delete-btn" 
       *ngIf="isEditMode" 
       (click)="$event.stopPropagation(); onDeleteFolder()">
-      Delete
+      <span class="btn-bracket">[</span>
+      <span class="btn-text">Delete</span>
+      <span class="btn-bracket">]</span>
     </button>
     <div class="spacer" *ngIf="isEditMode"></div>
-    <button class="cancel" (click)="$event.stopPropagation(); cancelAddFolder()">Cancel</button>
-    <button class="save" (click)="$event.stopPropagation(); saveAddFolder()">Save</button>
+    <button 
+      class="download-btn" 
+      *ngIf="isEditMode && activeFolder?.storageProvider !== 'GoogleDrive' && activeFolder?.storageProvider !== 'GooglePhotos'" 
+      (click)="$event.stopPropagation(); downloadZip()">
+      <span class="btn-bracket">[</span>
+      <span class="btn-text">Download ZIP</span>
+      <span class="btn-bracket">]</span>
+    </button>
+  </div>
+  
+  <div class="actions main-actions">
+    <button class="cancel" (click)="$event.stopPropagation(); cancelAddFolder()">
+      <span class="btn-bracket">[</span>
+      <span class="btn-text">Cancel</span>
+      <span class="btn-bracket">]</span>
+    </button>
+    <button class="save" (click)="$event.stopPropagation(); saveAddFolder()">
+      <span class="btn-bracket">[</span>
+      <span class="btn-text">Save Changes</span>
+      <span class="btn-bracket">]</span>
+    </button>
   </div>
 
 </div>
@@ -189,6 +211,16 @@
         </button>
         <button class="zoom-btn reset-btn" (click)="resetZoom()" title="Reset Zoom" *ngIf="zoomLevel !== 1.0 || panX !== 0 || panY !== 0">
           Reset
+        </button>
+      </div>
+
+      <!-- NAVIGATION CONTROLS -->
+      <div class="viewer-navigation-controls" *ngIf="selectedFolderItems.length > 1">
+        <button class="nav-btn prev" (click)="prevFile()" [disabled]="!hasPrevFile()" title="Previous Item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button class="nav-btn next" (click)="nextFile()" [disabled]="!hasNextFile()" title="Next Item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
 

@@ -1,4 +1,4 @@
-<header class="header">
+<header class="header" (mousedown)="$event.stopPropagation()">
   
   <!-- LEFT BRANDING / USER MENU TRIGGER -->
   <div class="left">
@@ -36,13 +36,13 @@
             <span class="bracket">[</span><span class="plus-sign">+</span><span class="bracket">]</span>
           </div>
           <div class="action-dropdown-menu">
-            <div class="dropdown-item" (click)="addFolder.emit()">
+            <div class="dropdown-item" (click)="onAddFolderClick()">
               <span class="dropdown-bracket">[</span>
               <span class="dropdown-item-text">Add Folder</span>
               <span class="dropdown-bracket">]</span>
             </div>
             @if (!crumb.isRoot) {
-              <div class="dropdown-item" (click)="addItem.emit()">
+              <div class="dropdown-item" (click)="onAddItemClick()">
                 <span class="dropdown-bracket">[</span>
                 <span class="dropdown-item-text">Add Item</span>
                 <span class="dropdown-bracket">]</span>
@@ -108,13 +108,13 @@
             <span class="bracket">[</span><span class="plus-sign">+</span><span class="bracket">]</span>
           </div>
           <div class="action-dropdown-menu">
-            <div class="dropdown-item" (click)="addFolder.emit()">
+            <div class="dropdown-item" (click)="onAddFolderClick()">
               <span class="dropdown-bracket">[</span>
               <span class="dropdown-item-text">Add Folder</span>
               <span class="dropdown-bracket">]</span>
             </div>
             @if (!crumb.isRoot) {
-              <div class="dropdown-item" (click)="addItem.emit()">
+              <div class="dropdown-item" (click)="onAddItemClick()">
                 <span class="dropdown-bracket">[</span>
                 <span class="dropdown-item-text">Add Item</span>
                 <span class="dropdown-bracket">]</span>

@@ -1,4 +1,4 @@
-<div class="user-menu-tree">
+<div class="user-menu-tree" (mousedown)="$event.stopPropagation()">
   <div class="tree-root-line">│</div>
   
   <div class="tree-item" (click)="profilePage()">

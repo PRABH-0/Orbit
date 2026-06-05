@@ -72,4 +72,11 @@ export class DirectoryService {
       `${this.baseUrl}/${directoryId}`
     );
   }
+
+  // Download directory as ZIP
+  downloadZip(directoryId: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${directoryId}/download-zip`, {
+      responseType: 'blob'
+    });
+  }
 }

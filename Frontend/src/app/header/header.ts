@@ -1,12 +1,12 @@
-import { NgIf, NgFor } from '@angular/common';
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, HostListener, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [NgIf, NgFor],
+  imports: [NgIf],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -30,12 +30,44 @@ export class Header implements OnChanges {
   @Output() folderSettings = new EventEmitter<void>();
   @Output() breadcrumbClick = new EventEmitter<any>();
 
-  // ===== Breadcrumb Overflow State =====
+  // ===== UI State =====
+  isAddMenuOpen = false;
   visibleStart: any[] = [];
   visibleEnd: any[] = [];
   hiddenBreadcrumbs: any[] = [];
   isOverflowHovered = false;
 
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private elRef: ElementRef
+  ) {}
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    if (!this.elRef.nativeElement.contains(event.target)) {
+      this.isAddMenuOpen = false;
+    }
+  }
+
+  toggleAddMenu(event: Event) {
+    event.stopPropagation();
+    this.isAddMenuOpen = !this.isAddMenuOpen;
+  }
+
+  onAddFolderClick() {
+    this.addFolder.emit();
+    this.isAddMenuOpen = false;
+  }
+
+  onAddItemClick() {
+    this.addItem.emit();
+    this.isAddMenuOpen = false;
+  }
+
+  closeAddMenu() {
+    this.isAddMenuOpen = false;
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['breadcrumbs']) {
@@ -51,20 +83,13 @@ export class Header implements OnChanges {
       return;
     }
 
-    // Threshold for collapsing: 
-    // If we have more than 7 items, we collapse the middle.
-    // Example: 1 > 2 > 3 > 4 > 5 > 6 > 7 (Show all)
-    // 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 (Collapse: 1 > 2 > 3 > [ ... ] > 6 > 7 > 8)
     if (this.breadcrumbs.length <= 7) {
       this.visibleStart = this.breadcrumbs;
       this.visibleEnd = [];
       this.hiddenBreadcrumbs = [];
     } else {
-      // Keep first 3
       this.visibleStart = this.breadcrumbs.slice(0, 3);
-      // Keep last 3 (including current)
       this.visibleEnd = this.breadcrumbs.slice(-3);
-      // Everything else is hidden
       this.hiddenBreadcrumbs = this.breadcrumbs.slice(3, -3);
     }
   }
@@ -96,12 +121,6 @@ export class Header implements OnChanges {
     }
     return isActive;
   }
-
-
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
 
 async onLogout() {
   await this.authService.logout(this.router);
