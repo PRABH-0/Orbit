@@ -99,6 +99,7 @@
       activeFolder?.storageProvider === 'GoogleDrive' ||
       activeFolder?.storageProvider === 'GooglePhotos'"
       [nodeId]="selectedFolderId"
+      (sizeChange)="updateModelDataSize($event)"
       (fileUploaded)="reloadFiles()"
       (imageOpen)="openImage($event)"
       (closeNode)="closeModelData()">

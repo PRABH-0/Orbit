@@ -99,6 +99,7 @@ deleteTargetFolder: any = null;
   private x = 0;
   private y = 0;
   showModelData = false;
+  modelDataDimensions = { width: 800, height: 580 };
   cacheBuster = Date.now();
   isRootOffScreen = false;
   isPanningToHome = false;
@@ -156,6 +157,7 @@ deleteTargetFolder: any = null;
       '.user-menu-tree',
       '.center-circle',
       '.data-node',
+      '.resize-handle',
       '.add-folder-modal',
       '.file-viewer-overlay',
       '.canvas-controls',
@@ -166,34 +168,72 @@ deleteTargetFolder: any = null;
     return uiSelectors.some(selector => target.closest(selector));
   }
 
+  private initialPinchDistance: number | null = null;
+  private initialScale = 1.0;
+
+  private lastCanvasTouchTime = 0;
+
   @HostListener('touchstart', ['$event'])
   onTouchStart(e: TouchEvent) {
+    this.lastCanvasTouchTime = Date.now();
     if (this.isClickOnUI(e.target)) return;
 
     this.cancelPanningAnimation();
-    this.isDragging = true;
-    const touch = e.touches[0];
-
-    this.startX = touch.clientX - this.x;
-    this.startY = touch.clientY - this.y;
+    
+    if (e.touches.length === 2) {
+      // Pinch start
+      this.isDragging = false;
+      this.initialPinchDistance = this.getDistance(e.touches[0], e.touches[1]);
+      this.initialScale = this.canvasScale;
+    } else if (e.touches.length === 1) {
+      // Drag start
+      this.isDragging = true;
+      const touch = e.touches[0];
+      this.startX = touch.clientX - this.x;
+      this.startY = touch.clientY - this.y;
+    }
   }
 
   @HostListener('touchmove', ['$event'])
   onTouchMove(e: TouchEvent) {
-    if (!this.isDragging) return;
-
-    const touch = e.touches[0];
-
-    this.x = touch.clientX - this.startX;
-    this.y = touch.clientY - this.startY;
-
-    this.update();
+    this.lastCanvasTouchTime = Date.now();
+    if (e.touches.length === 2 && this.initialPinchDistance !== null) {
+      // Pinch move
+      e.preventDefault();
+      const currentDistance = this.getDistance(e.touches[0], e.touches[1]);
+      const pinchScale = currentDistance / this.initialPinchDistance;
+      
+      const oldScale = this.canvasScale;
+      this.canvasScale = Math.max(0.2, Math.min(3.0, this.initialScale * pinchScale));
+      
+      // Zoom toward center of two touches
+      const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      
+      this.x = centerX - (centerX - this.x) * (this.canvasScale / oldScale);
+      this.y = centerY - (centerY - this.y) * (this.canvasScale / oldScale);
+      
+      this.update();
+    } else if (e.touches.length === 1 && this.isDragging) {
+      // Drag move
+      const touch = e.touches[0];
+      this.x = touch.clientX - this.startX;
+      this.y = touch.clientY - this.startY;
+      this.update();
+    }
   }
 
   @HostListener('touchend')
   onTouchEnd() {
+    this.lastCanvasTouchTime = Date.now();
     this.isDragging = false;
+    this.initialPinchDistance = null;
   }
+
+  private getDistance(t1: Touch, t2: Touch): number {
+    return Math.sqrt(Math.pow(t2.clientX - t1.clientX, 2) + Math.pow(t2.clientY - t1.clientY, 2));
+  }
+
   loadDirectories() {
   this.directoryService.getDirectories().subscribe({
     next: (data) => {
@@ -615,14 +655,33 @@ async logout() {
     });
   }
 
-  getModelDataAnchor() {
-    if (!this.dataNodePosition) return null;
+  updateModelDataSize(size: { width: number; height: number }) {
+    this.modelDataDimensions = size;
+  }
 
-    const WIDTH = 800; // same as model-data width
-    const HEIGHT = 580; // same as model-data height
+  getModelDataAnchor() {
+    if (!this.dataNodePosition || !this.activeFolder) return null;
+
+    const WIDTH = this.modelDataDimensions.width;
+    const HEIGHT = this.modelDataDimensions.height;
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+      // On mobile, model-data is below folder, connect to top-center
+      return {
+        x: this.dataNodePosition.x + WIDTH / 2,
+        y: this.dataNodePosition.y,
+      };
+    }
+
+    // On desktop, connect to the side facing the folder
+    let anchorX = this.dataNodePosition.x;
+    if (this.dataNodePosition.x < this.activeFolder.x) {
+      anchorX += WIDTH;
+    }
 
     return {
-      x: this.dataNodePosition.x,
+      x: anchorX,
       y: this.dataNodePosition.y + HEIGHT / 2,
     };
   }
@@ -800,9 +859,17 @@ async logout() {
 }
 
   setDataNodePosition(dir: any) {
-    const GAP = 160;
-    const WIDTH = 800;
-    const HEIGHT = 580;
+    const isMobile = window.innerWidth <= 768;
+    
+    let WIDTH = 800;
+    let HEIGHT = 580;
+    let GAP = 160;
+
+    if (isMobile) {
+      WIDTH = Math.min(window.innerWidth * 0.9, 400);
+      HEIGHT = WIDTH * (580 / 800);
+      GAP = 40;
+    }
 
     const CENTER_X = 2500;
     const CENTER_Y = 2500;
@@ -810,16 +877,22 @@ async logout() {
     let x = dir.x;
     let y = dir.y;
 
-    if (dir.x < CENTER_X) {
-      x = dir.x - WIDTH - GAP;
+    if (isMobile) {
+      // On mobile, just position it centered below the folder
+      x = dir.x - WIDTH / 2;
+      y = dir.y + GAP;
     } else {
-      x = dir.x + GAP;
-    }
+      if (dir.x < CENTER_X) {
+        x = dir.x - WIDTH - GAP;
+      } else {
+        x = dir.x + GAP;
+      }
 
-    if (dir.y < CENTER_Y) {
-      y = dir.y - HEIGHT - GAP / 2;
-    } else {
-      y = dir.y - HEIGHT / 2;
+      if (dir.y < CENTER_Y) {
+        y = dir.y - HEIGHT - GAP / 2;
+      } else {
+        y = dir.y - HEIGHT / 2;
+      }
     }
 
     this.dataNodePosition = { x, y };
@@ -1278,6 +1351,7 @@ async logout() {
   // =========================
   @HostListener('mousedown', ['$event'])
   onMouseDown(e: MouseEvent) {
+    if (Date.now() - this.lastCanvasTouchTime < 500) return;
     if (this.isClickOnUI(e.target)) return;
     
     // Auto-close everything when clicking the canvas

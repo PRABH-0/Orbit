@@ -26,6 +26,7 @@ export class ModelData implements OnChanges {
   @Output() imageOpen = new EventEmitter<any>();
   @Input() nodeId!: string | null; // 🔥 important
   @Output() fileUploaded = new EventEmitter<void>();
+  @Output() sizeChange = new EventEmitter<{ width: number; height: number }>();
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -62,14 +63,17 @@ export class ModelData implements OnChanges {
       this.width = Math.min(screenWidth * 0.9, 400);
       this.height = this.width / this.ASPECT_RATIO;
     }
+    this.sizeChange.emit({ width: this.width, height: this.height });
   }
 
   videoThumbnailCache = new Map<string, string>();
 
   ngOnChanges() {
+    this.adjustInitialSize();
     this.currentPage = 0;
     console.log("ITEMS RECEIVED:", this.items);
     this.preloadVisibleImages();
+    this.sizeChange.emit({ width: this.width, height: this.height });
   }
 
   downloadZip() {
@@ -194,6 +198,7 @@ export class ModelData implements OnChanges {
 
       this.width = newWidth;
       this.height = newHeight;
+      this.sizeChange.emit({ width: this.width, height: this.height });
     };
 
     const onMouseUp = () => {

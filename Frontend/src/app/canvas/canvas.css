@@ -20,26 +20,6 @@ touch-action: none;
   cursor: pointer;
 }
 @media (max-width: 768px) {
-  .header {
-    height: auto;
-    padding: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .center-breadcrumbs {
-    position: static;
-    transform: none;
-    max-width: 100%;
-    width: 100%;
-    justify-content: center;
-    order: 3; /* Move breadcrumbs below branding */
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
   .add-folder-modal {
     top: 50% !important;
     left: 50% !important;

@@ -32,10 +32,10 @@
       <!-- ACTIONS ATTACHED TO CURRENT FOLDER (if no hidden/end) -->
       @if ((last && visibleEnd.length === 0) && (crumb.isRoot ? rootOpen : true)) {
         <div class="command-cluster">
-          <div class="action-dropdown-trigger" title="Add content">
+          <div class="action-dropdown-trigger" title="Add content" (click)="toggleAddMenu($event)">
             <span class="bracket">[</span><span class="plus-sign">+</span><span class="bracket">]</span>
           </div>
-          <div class="action-dropdown-menu">
+          <div class="action-dropdown-menu" *ngIf="isAddMenuOpen">
             <div class="dropdown-item" (click)="onAddFolderClick()">
               <span class="dropdown-bracket">[</span>
               <span class="dropdown-item-text">Add Folder</span>
@@ -104,10 +104,10 @@
       <!-- ACTIONS ATTACHED TO CURRENT FOLDER -->
       @if (last && (crumb.isRoot ? rootOpen : true)) {
         <div class="command-cluster">
-          <div class="action-dropdown-trigger" title="Add content">
+          <div class="action-dropdown-trigger" title="Add content" (click)="toggleAddMenu($event)">
             <span class="bracket">[</span><span class="plus-sign">+</span><span class="bracket">]</span>
           </div>
-          <div class="action-dropdown-menu">
+          <div class="action-dropdown-menu" *ngIf="isAddMenuOpen">
             <div class="dropdown-item" (click)="onAddFolderClick()">
               <span class="dropdown-bracket">[</span>
               <span class="dropdown-item-text">Add Folder</span>

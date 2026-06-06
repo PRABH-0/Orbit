@@ -186,7 +186,7 @@
   user-select: none;
   display: flex;
   align-items: center;
-  padding: 2px 6px;
+  padding: 8px 10px; /* Increased for better touch target */
   transition: all 0.15s ease;
 }
 
@@ -202,10 +202,10 @@
   font-weight: 900;
 }
 
-/* Hidden by default, shown on hover */
+/* Shown via *ngIf */
 .action-dropdown-menu {
   position: absolute;
-  top: 28px;
+  top: 36px; /* Adjusted for larger trigger */
   left: 0;
   display: flex;
   flex-direction: column;
@@ -219,18 +219,9 @@
   z-index: 1200;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-4px);
-  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-  pointer-events: none;
-}
-
-.command-cluster:hover .action-dropdown-menu {
-  opacity: 1;
+  opacity: 1; /* Always opaque when rendered */
   visibility: visible;
   transform: translateY(0);
-  pointer-events: auto;
 }
 
 .dropdown-item {
