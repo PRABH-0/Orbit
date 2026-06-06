@@ -22,6 +22,7 @@ export class ModelData implements OnChanges {
   @Input() title: string | null = '';
   @Input() items: any[] = [];
   @Input() isGoogleFolder: boolean = false;
+  @Input() scale: number = 1;
   @Output() closeNode = new EventEmitter<void>();
   @Output() imageOpen = new EventEmitter<any>();
   @Input() nodeId!: string | null; // 🔥 important
@@ -180,8 +181,8 @@ export class ModelData implements OnChanges {
     const onMouseMove = (moveEvent: MouseEvent) => {
       if (!this.isResizing) return;
 
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
+      const deltaX = (moveEvent.clientX - startX) / this.scale;
+      const deltaY = (moveEvent.clientY - startY) / this.scale;
 
       // Use the larger delta to drive the uniform resize
       // This makes the resizing feel responsive to whichever direction the user drags most

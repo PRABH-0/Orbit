@@ -84,6 +84,7 @@
         [name]="dir.name"
         [x]="dir.x"
         [y]="dir.y"
+        [scale]="canvasScale"
         (clicked)="onFolderClick(dir)"
         (moved)="onFolderMoved(dir, $event)">
       </app-directory>
@@ -93,6 +94,7 @@
       *ngIf="showModelData && dataNodePosition"
       [x]="dataNodePosition.x"
       [y]="dataNodePosition.y"
+      [scale]="canvasScale"
       [title]="currentFolderName"
       [items]="selectedFolderItems"
       [isGoogleFolder]="

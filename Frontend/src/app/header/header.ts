@@ -43,6 +43,11 @@ export class Header implements OnChanges {
     private elRef: ElementRef
   ) {}
 
+  @HostListener('window:resize')
+  onResize() {
+    this.updateBreadcrumbs();
+  }
+
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
     if (!this.elRef.nativeElement.contains(event.target)) {
@@ -70,7 +75,7 @@ export class Header implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['breadcrumbs']) {
+    if (changes['breadcrumbs'] || changes['rootOpen']) {
       this.updateBreadcrumbs();
     }
   }
@@ -83,19 +88,39 @@ export class Header implements OnChanges {
       return;
     }
 
-    if (this.breadcrumbs.length <= 7) {
+    const screenWidth = window.innerWidth;
+    
+    let maxVisible = 7;
+    let startCount = 3;
+    let endCount = 3;
+
+    if (screenWidth < 400) {
+      maxVisible = 2;
+      startCount = 1; // Root
+      endCount = 1;   // Current
+    } else if (screenWidth < 600) {
+      maxVisible = 3;
+      startCount = 1;
+      endCount = 2;   // Parent and Current
+    } else if (screenWidth < 900) {
+      maxVisible = 5;
+      startCount = 2;
+      endCount = 3;
+    }
+
+    if (this.breadcrumbs.length <= maxVisible) {
       this.visibleStart = this.breadcrumbs;
       this.visibleEnd = [];
       this.hiddenBreadcrumbs = [];
     } else {
-      this.visibleStart = this.breadcrumbs.slice(0, 3);
-      this.visibleEnd = this.breadcrumbs.slice(-3);
-      this.hiddenBreadcrumbs = this.breadcrumbs.slice(3, -3);
+      this.visibleStart = this.breadcrumbs.slice(0, startCount);
+      this.visibleEnd = this.breadcrumbs.slice(-endCount);
+      this.hiddenBreadcrumbs = this.breadcrumbs.slice(startCount, -endCount);
     }
   }
 
   onBreadcrumbClick(crumb: any, isLast: boolean) {
-    if (isLast && this.currentFolder !== 'Root') {
+    if (isLast && !crumb.isRoot && this.currentFolder !== 'Root') {
       this.folderSettings.emit();
     } else {
       this.breadcrumbClick.emit(crumb);
@@ -103,7 +128,15 @@ export class Header implements OnChanges {
   }
 
   truncateName(name: string, isCurrent: boolean): string {
-    const limit = isCurrent ? 20 : 12;
+    const screenWidth = window.innerWidth;
+    let limit = isCurrent ? 20 : 12;
+
+    if (screenWidth < 400) {
+      limit = isCurrent ? 12 : 6;
+    } else if (screenWidth < 600) {
+      limit = isCurrent ? 15 : 8;
+    }
+
     if (name.length <= limit) return name;
     return name.slice(0, limit - 3) + '...';
   }

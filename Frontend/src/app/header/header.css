@@ -267,44 +267,100 @@
   opacity: 0.7;
 }
 
-/* Mobile Responsive - TIGHT TOP ALIGNMENT */
+/* Mobile Responsive - IMPROVED BREADCRUMB HANDLING */
 @media (max-width: 768px) {
   .header {
-    flex-direction: column !important;
-    height: auto !important;
-    padding: 4px 10px !important;
-    gap: 2px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    height: 40px !important;
+    padding: 0 8px !important;
+    justify-content: flex-start !important;
     align-items: center !important;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
   }
   
   .left {
-    order: 2;
-    margin-top: 4px;
-    opacity: 0.8;
+    flex-shrink: 0;
+    margin: 0;
+    opacity: 1;
+    display: flex;
+    align-items: center;
   }
 
   .username, .bracket {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .center-breadcrumbs {
     position: static !important;
     transform: none !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    justify-content: center !important;
-    order: 1; /* MOVE TO VERY TOP */
-    font-size: 10px; /* SMALLER */
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex !important;
+    justify-content: flex-start !important;
+    max-width: none !important;
+    overflow: hidden;
+    font-size: 11px;
     gap: 2px;
     padding: 0;
+    margin-left: 4px;
+  }
+
+  .breadcrumb-item {
+    flex-shrink: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .crumb-name {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .crumb-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    min-width: 0;
   }
 
   .breadcrumb-separator {
+    flex-shrink: 0;
     padding: 0 1px;
   }
 
+  .breadcrumb-overflow {
+    flex-shrink: 0;
+  }
+
   .command-cluster {
-    margin-left: 8px;
-    padding-left: 8px;
+    flex-shrink: 0;
+    margin-left: 4px;
+    padding-left: 4px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .action-dropdown-trigger {
+    padding: 4px 6px;
+    font-size: 16px;
   }
 }
+
+@media (max-width: 400px) {
+  .username {
+    font-size: 12px;
+  }
+  .left .bracket {
+    font-size: 12px;
+  }
+  .center-breadcrumbs {
+    font-size: 10px;
+    margin-left: 2px;
+  }
+}
+

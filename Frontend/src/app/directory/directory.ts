@@ -11,16 +11,17 @@ export class Directory {
   @Input() name!: string;
   @Input() x!: number;
   @Input() y!: number;
+  @Input() scale: number = 1;
 
   @Output() clicked = new EventEmitter<void>();
   @Output() moved = new EventEmitter<{ x: number; y: number }>();
 
   private dragging = false;
-  private offsetX = 0;
-  private offsetY = 0;
 
   private startX = 0;
   private startY = 0;
+  private initialX = 0;
+  private initialY = 0;
   private hasMoved = false;
 
   private lastTouchTime = 0;
@@ -35,16 +36,13 @@ export class Directory {
 
     this.startX = event.clientX;
     this.startY = event.clientY;
-
-    this.offsetX = event.clientX - this.x;
-    this.offsetY = event.clientY - this.y;
+    this.initialX = this.x;
+    this.initialY = this.y;
   }
 
   onTouchStart(event: TouchEvent) {
     this.lastTouchTime = Date.now();
     event.stopPropagation();
-    // We don't preventDefault here to allow potential browser gestures, 
-    // but we use stopPropagation to avoid canvas dragging.
 
     this.dragging = true;
     this.hasMoved = false;
@@ -52,44 +50,39 @@ export class Directory {
     const touch = event.touches[0];
     this.startX = touch.clientX;
     this.startY = touch.clientY;
-
-    this.offsetX = touch.clientX - this.x;
-    this.offsetY = touch.clientY - this.y;
+    this.initialX = this.x;
+    this.initialY = this.y;
   }
 
   onMouseMove(event: MouseEvent) {
     if (!this.dragging) return;
     if (Date.now() - this.lastTouchTime < 500) return;
 
-    const dx = Math.abs(event.clientX - this.startX);
-    const dy = Math.abs(event.clientY - this.startY);
+    const dx = (event.clientX - this.startX) / this.scale;
+    const dy = (event.clientY - this.startY) / this.scale;
 
-    if (dx > 4 || dy > 4) {
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
       this.hasMoved = true;
     }
 
     if (this.hasMoved) {
-      const newX = event.clientX - this.offsetX;
-      const newY = event.clientY - this.offsetY;
-      this.moved.emit({ x: newX, y: newY });
+      this.moved.emit({ x: this.initialX + dx, y: this.initialY + dy });
     }
   }
 
-  onTouchMove(event: TouchEvent) {
+  onTouchMove(event: TouchEvent | any) {
     if (!this.dragging) return;
 
     const touch = event.touches[0];
-    const dx = Math.abs(touch.clientX - this.startX);
-    const dy = Math.abs(touch.clientY - this.startY);
+    const dx = (touch.clientX - this.startX) / this.scale;
+    const dy = (touch.clientY - this.startY) / this.scale;
 
-    if (dx > 4 || dy > 4) {
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
       this.hasMoved = true;
     }
 
     if (this.hasMoved) {
-      const newX = touch.clientX - this.offsetX;
-      const newY = touch.clientY - this.offsetY;
-      this.moved.emit({ x: newX, y: newY });
+      this.moved.emit({ x: this.initialX + dx, y: this.initialY + dy });
     }
   }
 

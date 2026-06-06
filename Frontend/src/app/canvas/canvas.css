@@ -63,6 +63,7 @@ touch-action: none;
   height: 100%;
   z-index: 10;
   will-change: transform;
+  transform-origin: 0 0;
 }
 
 /* ===== EDGES / CONNECTIONS SVG ===== */
@@ -77,6 +78,7 @@ touch-action: none;
 
 .edges-group {
   will-change: transform;
+  transform-origin: 0 0;
 }
 
 .grid:active {
