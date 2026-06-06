@@ -1360,9 +1360,6 @@ async logout() {
     this.isAddFolderOpen = false;
     this.isEditMode = false;
     this.editingFolder = null;
-    this.showModelData = false;
-    this.dataNodePosition = null;
-    this.selectedFolderId = null;
 
     this.cancelPanningAnimation();
     this.isDragging = true;
